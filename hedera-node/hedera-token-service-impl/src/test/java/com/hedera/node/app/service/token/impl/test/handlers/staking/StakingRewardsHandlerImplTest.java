@@ -741,8 +741,7 @@ class StakingRewardsHandlerImplTest extends CryptoTokenHandlerTestBase {
                 .build();
         addToState(Map.of(payerId, payerAccountBefore, ownerId, ownerAccountBefore));
 
-
-        //transfer from payer to owner
+        // transfer from payer to owner
         // change payer stake from owner account to node 1
         writableAccountStore.put(payerAccountBefore
                 .copyBuilder()
@@ -783,13 +782,10 @@ class StakingRewardsHandlerImplTest extends CryptoTokenHandlerTestBase {
                 .build();
         addToState(Map.of(payerId, payerAccountBefore));
 
-
         // transfer from payer to owner
         // change payer stake from owner account to node 1
-        writableAccountStore.put(payerAccountBefore
-                .copyBuilder()
-                .stakedAccountId(ownerId)
-                .build());
+        writableAccountStore.put(
+                payerAccountBefore.copyBuilder().stakedAccountId(ownerId).build());
 
         // run forward two periods
         Instant nextDayInstant = originalInstant.plus(2, ChronoUnit.DAYS);
@@ -828,7 +824,6 @@ class StakingRewardsHandlerImplTest extends CryptoTokenHandlerTestBase {
                 .withDeleted(false)
                 .build();
         addToState(Map.of(payerId, payerAccountBefore, ownerId, ownerAccountBefore));
-
 
         // transfer from payer to owner
         // change payer stake from owner account to node -1

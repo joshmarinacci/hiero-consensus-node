@@ -105,15 +105,26 @@ class CustomFeeAssessmentStepTest extends StepsBase {
         final var amount = 1000;
         // tests the CustomFeeAssessor.setTransactionFeesAsAssessed() method
         body = CryptoTransferTransactionBody.newBuilder()
-                .transfers(TransferList.newBuilder().accountAmounts(List.of(
-                        AccountAmount.newBuilder().accountID(ownerId).amount(-amount).build(),
-                        AccountAmount.newBuilder().accountID(payerId).amount(amount).build())).build())
+                .transfers(TransferList.newBuilder()
+                        .accountAmounts(List.of(
+                                AccountAmount.newBuilder()
+                                        .accountID(ownerId)
+                                        .amount(-amount)
+                                        .build(),
+                                AccountAmount.newBuilder()
+                                        .accountID(payerId)
+                                        .amount(amount)
+                                        .build()))
+                        .build())
                 .build();
         givenDifferentTxn(body, payerId);
-        given(handleContext.dispatchMetadata()).willReturn(new DispatchMetadata(TRANSACTION_FIXED_FEE,
-                FixedCustomFee.newBuilder()
-                        .fixedFee(FixedFee.newBuilder().amount(amount).build())
-                        .feeCollectorAccountId(ownerId).build()));
+        given(handleContext.dispatchMetadata())
+                .willReturn(new DispatchMetadata(
+                        TRANSACTION_FIXED_FEE,
+                        FixedCustomFee.newBuilder()
+                                .fixedFee(FixedFee.newBuilder().amount(amount).build())
+                                .feeCollectorAccountId(ownerId)
+                                .build()));
 
         final var listOfOps = subject.assessCustomFees(transferContext);
         assertThat(listOfOps).hasSize(1);
