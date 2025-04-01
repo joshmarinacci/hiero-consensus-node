@@ -765,7 +765,6 @@ class StakingRewardsHandlerImplTest extends CryptoTokenHandlerTestBase {
 
     @Test
     void userSwitchesStakingFromNothingToAccount() {
-        // TODO: doesn't work yet
         // payer is staked to owner, has account balance of 55L, and no rewards
         // payer switches stake from owner to node
         // payer should get no reward
@@ -784,8 +783,14 @@ class StakingRewardsHandlerImplTest extends CryptoTokenHandlerTestBase {
 
         // transfer from payer to owner
         // change payer stake from owner account to node 1
-        writableAccountStore.put(
-                payerAccountBefore.copyBuilder().stakedAccountId(ownerId).build());
+        writableAccountStore.put(payerAccountBefore
+                .copyBuilder()
+                .tinybarBalance(accountBalance - HBARS_TO_TINYBARS)
+                .stakedAccountId(ownerId).build());
+        writableAccountStore.put(ownerAccount
+                .copyBuilder()
+                .tinybarBalance(ownerBalance + HBARS_TO_TINYBARS)
+                .build());
 
         // run forward two periods
         Instant nextDayInstant = originalInstant.plus(2, ChronoUnit.DAYS);
@@ -794,6 +799,7 @@ class StakingRewardsHandlerImplTest extends CryptoTokenHandlerTestBase {
 
         mockEntityIdFactory();
         final var rewards = subject.applyStakingRewards(context, Collections.emptySet(), emptyMap());
+        // confirm no rewards
         assertThat(rewards).hasSize(0);
     }
 
