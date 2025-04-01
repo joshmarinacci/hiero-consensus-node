@@ -3,9 +3,13 @@ package com.hedera.node.app.service.token.impl.test.handlers.staking;
 
 import static com.hedera.node.app.service.token.impl.handlers.staking.EndOfStakingPeriodUtils.*;
 import static com.hedera.node.app.service.token.impl.test.handlers.staking.StakeInfoHelperTest.DEFAULT_CONFIG;
+import static com.hedera.node.app.service.token.impl.test.handlers.staking.StakeInfoHelperTest.assertUnsupportedConstructor;
 
 import com.hedera.hapi.node.state.token.StakingNodeInfo;
+import com.hedera.node.app.service.token.impl.handlers.staking.EndOfStakingPeriodUtils;
 import com.hedera.node.config.data.StakingConfig;
+
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +35,11 @@ class EndOfStakingPeriodUtilsTest {
             .weight(5)
             .build();
     private static final StakingConfig STAKING_CONFIG = DEFAULT_CONFIG.getConfigData(StakingConfig.class);
+
+    @Test
+    void throwsInConstructor() {
+        assertUnsupportedConstructor(EndOfStakingPeriodUtils.class);
+    }
 
     @Test
     void readableNonZeroHistoryFromEmptyRewards() {
