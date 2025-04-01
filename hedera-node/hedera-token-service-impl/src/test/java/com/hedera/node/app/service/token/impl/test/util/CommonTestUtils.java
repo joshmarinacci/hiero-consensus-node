@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package com.hedera.node.app.service.token.impl.test.util;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,6 +23,4 @@ public class CommonTestUtils {
         }
         org.junit.jupiter.api.Assertions.fail(String.format(NO_THROW, clazz));
     }
-
-
 }

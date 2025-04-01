@@ -32,8 +32,6 @@ import com.swirlds.config.api.Configuration;
 import com.swirlds.state.spi.WritableSingletonStateBase;
 import com.swirlds.state.test.fixtures.MapWritableKVState;
 import com.swirlds.state.test.fixtures.MapWritableStates;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

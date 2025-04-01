@@ -786,7 +786,8 @@ class StakingRewardsHandlerImplTest extends CryptoTokenHandlerTestBase {
         writableAccountStore.put(payerAccountBefore
                 .copyBuilder()
                 .tinybarBalance(accountBalance - HBARS_TO_TINYBARS)
-                .stakedAccountId(ownerId).build());
+                .stakedAccountId(ownerId)
+                .build());
         writableAccountStore.put(ownerAccount
                 .copyBuilder()
                 .tinybarBalance(ownerBalance + HBARS_TO_TINYBARS)

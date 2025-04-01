@@ -10,7 +10,6 @@ import static com.hedera.node.app.service.token.impl.test.util.CommonTestUtils.a
 import com.hedera.hapi.node.state.token.StakingNodeInfo;
 import com.hedera.node.app.service.token.impl.handlers.staking.EndOfStakingPeriodUtils;
 import com.hedera.node.config.data.StakingConfig;
-
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;

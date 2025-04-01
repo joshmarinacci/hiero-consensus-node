@@ -172,14 +172,12 @@ class TokenComparatorsTest {
         private static final PendingAirdropId airdrop_no_token = PendingAirdropId.newBuilder()
                 .senderId(asAccount(0L, 0L, 1111))
                 .receiverId(asAccount(0L, 0L, 2222))
-//                .fungibleTokenType(asToken(2222))
+                //                .fungibleTokenType(asToken(2222))
                 .build();
         private static final PendingAirdropId airdrop3 = PendingAirdropId.newBuilder()
                 .senderId(asAccount(0L, 0L, 1111))
                 .receiverId(asAccount(0L, 0L, 2222))
-                .nonFungibleToken(NftID.newBuilder()
-                        .tokenId(asToken(1111))
-                        .serialNumber(3333))
+                .nonFungibleToken(NftID.newBuilder().tokenId(asToken(1111)).serialNumber(3333))
                 .build();
 
         @Test
@@ -208,7 +206,6 @@ class TokenComparatorsTest {
                     .isNegative();
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop3, airdrop2))
                     .isPositive();
-
         }
     }
 }
