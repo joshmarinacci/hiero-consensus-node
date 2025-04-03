@@ -398,4 +398,26 @@ class EnsureAliasesStepTest extends StepsBase {
                 .isInstanceOf(HandleException.class)
                 .has(responseCode(NOT_SUPPORTED));
     }
+
+    @Test
+    void failsIfSenderIsAlias() {
+        // do NFT transfer with sender as an alias, which is not allowed.
+        final var evmAddressAlias1 = new ProtoBytes(Bytes.wrap(unhex("0000000000000000000000000000000000000001")));
+        final var evmAddressAlias2 = new ProtoBytes(Bytes.wrap(unhex("0000000000000000000000000000000000000002")));
+        body = CryptoTransferTransactionBody.newBuilder()
+                .tokenTransfers(
+                        TokenTransferList.newBuilder()
+                                .token(nonFungibleTokenId)
+                                .nftTransfers(nftTransferWith(asAccountWithAlias(evmAddressAlias1.value()), asAccountWithAlias(evmAddressAlias2.value()), 1))
+                                .build())
+                .build();
+        givenTxn(body, payerId);
+        given(handleContext.dispatchMetadata()).willReturn(HandleContext.DispatchMetadata.EMPTY_METADATA);
+        given(storeFactory.writableStore(WritableAccountStore.class)).willReturn(writableAccountStore);
+
+        ensureAliasesStep = new EnsureAliasesStep(body);
+        assertThatThrownBy(() -> ensureAliasesStep.doIn(transferContext))
+                .isInstanceOf(HandleException.class)
+                .has(responseCode(ResponseCodeEnum.INVALID_ACCOUNT_ID));
+    }
 }
