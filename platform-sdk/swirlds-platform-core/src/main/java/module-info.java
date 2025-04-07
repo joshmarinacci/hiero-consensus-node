@@ -104,12 +104,10 @@ module com.swirlds.platform.core {
             info.picocli;
 
     exports com.swirlds.platform.components.transaction;
-    exports com.swirlds.platform.components.transaction.system;
     exports com.swirlds.platform.event.preconsensus;
     exports com.swirlds.platform.gossip.sync.protocol;
     exports com.swirlds.platform.gossip;
     exports com.swirlds.platform.reconnect;
-    exports com.swirlds.platform.gossip.modular;
     exports com.swirlds.platform.gossip.shadowgraph;
     exports com.swirlds.platform.recovery.emergencyfile;
     exports com.swirlds.platform.event;
@@ -140,8 +138,10 @@ module com.swirlds.platform.core {
     requires transitive com.swirlds.config.api;
     requires transitive com.swirlds.metrics.api;
     requires transitive com.swirlds.state.api;
+    requires transitive org.hiero.base.utility;
+    requires transitive org.hiero.consensus.event.creator.impl;
     requires transitive org.hiero.consensus.gossip;
-    requires transitive org.hiero.event.creator;
+    requires transitive org.hiero.consensus.model;
     requires transitive com.fasterxml.jackson.annotation;
     requires transitive com.fasterxml.jackson.databind;
     requires transitive info.picocli;
@@ -151,7 +151,6 @@ module com.swirlds.platform.core {
     requires com.swirlds.merkle;
     requires com.swirlds.merkledb;
     requires com.swirlds.virtualmap;
-    requires org.hiero.event.creator.impl;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.dataformat.yaml;
     requires com.github.spotbugs.annotations;
