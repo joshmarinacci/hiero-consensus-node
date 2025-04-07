@@ -192,7 +192,6 @@ class TokenComparatorsTest {
 
         @Test
         void tokenVsUnset() {
-
             // token vs unset
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop1, airdrop_no_token))
                     .isPositive();
@@ -214,7 +213,10 @@ class TokenComparatorsTest {
             // compare NFTs
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop3, airdrop3))
                     .isZero();
-
+            Assertions.assertThatThrownBy(() -> PENDING_AIRDROP_ID_COMPARATOR.compare(null, airdrop3))
+                            .isInstanceOf(NullPointerException.class);
+            Assertions.assertThatThrownBy(() -> PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop3, null))
+                    .isInstanceOf(NullPointerException.class);
         }
 
         @Test
