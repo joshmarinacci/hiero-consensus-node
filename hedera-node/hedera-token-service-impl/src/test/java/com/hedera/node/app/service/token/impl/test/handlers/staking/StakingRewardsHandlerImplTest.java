@@ -754,7 +754,7 @@ class StakingRewardsHandlerImplTest extends CryptoTokenHandlerTestBase {
                 .build());
 
         // run forward two periods
-        Instant nextDayInstant = originalInstant.plus(2, ChronoUnit.DAYS);
+        final Instant nextDayInstant = originalInstant.plus(2, ChronoUnit.DAYS);
         given(context.consensusTime()).willReturn(nextDayInstant);
         stakePeriodManager.setCurrentStakePeriodFor(nextDayInstant);
 
