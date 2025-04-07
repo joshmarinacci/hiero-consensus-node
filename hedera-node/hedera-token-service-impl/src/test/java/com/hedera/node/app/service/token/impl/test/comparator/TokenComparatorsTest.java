@@ -195,8 +195,8 @@ class TokenComparatorsTest {
             // token vs unset
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop1, airdrop_no_token))
                     .isPositive();
-
         }
+
         @Test
         void fungibleTokens() {
             // compare by fungible token id
@@ -206,15 +206,15 @@ class TokenComparatorsTest {
                     .isNegative();
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop2, airdrop1))
                     .isPositive();
-
         }
+
         @Test
         void nonFungibleTokens() {
             // compare NFTs
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop3, airdrop3))
                     .isZero();
             Assertions.assertThatThrownBy(() -> PENDING_AIRDROP_ID_COMPARATOR.compare(null, airdrop3))
-                            .isInstanceOf(NullPointerException.class);
+                    .isInstanceOf(NullPointerException.class);
             Assertions.assertThatThrownBy(() -> PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop3, null))
                     .isInstanceOf(NullPointerException.class);
         }
