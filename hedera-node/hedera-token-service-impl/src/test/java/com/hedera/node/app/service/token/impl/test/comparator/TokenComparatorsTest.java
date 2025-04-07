@@ -172,7 +172,6 @@ class TokenComparatorsTest {
         private static final PendingAirdropId airdrop_no_token = PendingAirdropId.newBuilder()
                 .senderId(asAccount(0L, 0L, 1111))
                 .receiverId(asAccount(0L, 0L, 2222))
-                //                .fungibleTokenType(asToken(2222))
                 .build();
         private static final PendingAirdropId airdrop3 = PendingAirdropId.newBuilder()
                 .senderId(asAccount(0L, 0L, 1111))
@@ -181,14 +180,26 @@ class TokenComparatorsTest {
                 .build();
 
         @Test
-        void checkComparisons() {
+        void nullChecks() {
+            // null checks
             Assertions.assertThatThrownBy(() -> PENDING_AIRDROP_ID_COMPARATOR.compare(null, null))
                     .isInstanceOf(NullPointerException.class);
             Assertions.assertThatThrownBy(() -> PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop1, null))
                     .isInstanceOf(NullPointerException.class);
             Assertions.assertThatThrownBy(() -> PENDING_AIRDROP_ID_COMPARATOR.compare(null, airdrop1))
                     .isInstanceOf(NullPointerException.class);
+        }
 
+        @Test
+        void tokenVsUnset() {
+
+            // token vs unset
+            Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop1, airdrop_no_token))
+                    .isPositive();
+
+        }
+        @Test
+        void fungibleTokens() {
             // compare by fungible token id
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop1, airdrop1))
                     .isZero();
@@ -197,10 +208,17 @@ class TokenComparatorsTest {
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop2, airdrop1))
                     .isPositive();
 
+        }
+        @Test
+        void nonFungibleTokens() {
             // compare NFTs
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop3, airdrop3))
                     .isZero();
 
+        }
+
+        @Test
+        void NFTvsFT() {
             // NFTs rank higher than FTs
             Assertions.assertThat(PENDING_AIRDROP_ID_COMPARATOR.compare(airdrop1, airdrop3))
                     .isNegative();
