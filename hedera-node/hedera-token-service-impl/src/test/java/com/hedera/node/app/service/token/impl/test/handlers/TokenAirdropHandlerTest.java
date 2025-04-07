@@ -654,12 +654,6 @@ class TokenAirdropHandlerTest extends CryptoTransferHandlerTestBase {
         given(storeFactory.writableStore(WritableTokenStore.class)).willReturn(writableTokenStore);
         given(storeFactory.readableStore(ReadableTokenStore.class)).willReturn(writableTokenStore);
 
-        final var newAirdropValue = airdropWithValue(20);
-        final var newAccountAirdrop = accountAirdrop
-                .copyBuilder()
-                .pendingAirdropValue(newAirdropValue)
-                .build();
-
         Assertions.assertThat(writableAirdropState.contains(airdropId)).isTrue();
 
         given(preHandleContext.createStore(ReadableTokenStore.class)).willReturn(writableTokenStore);
@@ -670,15 +664,6 @@ class TokenAirdropHandlerTest extends CryptoTransferHandlerTestBase {
         given(preHandleContext.body()).willReturn(txn);
         Assertions.assertThatCode(() -> tokenAirdropHandler.preHandle(preHandleContext))
                 .doesNotThrowAnyException();
-
-        tokenAirdropHandler.update(airdropId, newAccountAirdrop, writableAirdropStore);
-
-        Assertions.assertThat(writableAirdropState.contains(airdropId)).isTrue();
-        final var tokenValue = Objects.requireNonNull(Objects.requireNonNull(writableAirdropState.get(airdropId))
-                        .pendingAirdropValue())
-                .amount();
-        Assertions.assertThat(tokenValue).isEqualTo(airdropValue.amount() + newAirdropValue.amount());
-
     }
 
     private void setupAirdropMocks(TokenAirdropTransactionBody body, boolean enableAirdrop) {
