@@ -12,12 +12,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
-import com.hedera.hapi.node.base.AccountAmount;
-import com.hedera.hapi.node.base.AccountID;
-import com.hedera.hapi.node.base.Key;
-import com.hedera.hapi.node.base.TokenID;
-import com.hedera.hapi.node.base.TokenTransferList;
-import com.hedera.hapi.node.base.TransferList;
+import com.hedera.hapi.node.base.*;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.token.CryptoTransferTransactionBody;
 import com.hedera.hapi.node.transaction.FixedCustomFee;
@@ -107,35 +102,23 @@ class CustomFeeAssessmentStepTest extends StepsBase {
     @Test
     @DisplayName("Transfer which adds a custom fee to the metadata")
     void hbarFixedCustomFee() {
-        final var amount = 1000;
         // tests the CustomFeeAssessor.setTransactionFeesAsAssessed() method
         body = CryptoTransferTransactionBody.newBuilder()
-                .transfers(TransferList.newBuilder()
-                        .accountAmounts(List.of(
-                                AccountAmount.newBuilder()
-                                        .accountID(ownerId)
-                                        .amount(-amount)
-                                        .build(),
-                                AccountAmount.newBuilder()
-                                        .accountID(payerId)
-                                        .amount(amount)
-                                        .build()))
-                        .build())
+                .transfers(TransferList.newBuilder().accountAmounts(List.of(
+                        AccountAmount.newBuilder().accountID(ownerId).amount(-1000).build(),
+                        AccountAmount.newBuilder().accountID(payerId).amount(1000).build())).build())
                 .build();
         givenDifferentTxn(body, payerId);
-        given(handleContext.dispatchMetadata())
-                .willReturn(new DispatchMetadata(
-                        TRANSACTION_FIXED_FEE,
-                        FixedCustomFee.newBuilder()
-                                .fixedFee(FixedFee.newBuilder().amount(amount).build())
-                                .feeCollectorAccountId(ownerId)
-                                .build()));
+        given(handleContext.dispatchMetadata()).willReturn(new DispatchMetadata(TRANSACTION_FIXED_FEE,
+                FixedCustomFee.newBuilder()
+                        .fixedFee(FixedFee.newBuilder().amount(66).build())
+                        .feeCollectorAccountId(ownerId).build()));
 
         final var listOfOps = subject.assessCustomFees(transferContext);
         assertThat(listOfOps).hasSize(1);
         assertThat(listOfOps.get(0)).isEqualTo(body);
         assertThat(transferContext.getAssessedCustomFees().size()).isEqualTo(1);
-        assertThat(transferContext.getAssessedCustomFees().getFirst().amount()).isEqualTo(amount);
+        assertThat(transferContext.getAssessedCustomFees().getFirst().amount()).isEqualTo(66);
     }
 
     @Test
