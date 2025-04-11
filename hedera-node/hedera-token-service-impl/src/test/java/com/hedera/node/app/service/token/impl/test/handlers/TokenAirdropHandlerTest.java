@@ -358,8 +358,8 @@ class TokenAirdropHandlerTest extends CryptoTransferHandlerTestBase {
         givenAirdropTxn();
 
         given(handleContext.dispatch(
-                argThat(options -> TokenAirdropStreamBuilder.class.equals(options.streamBuilderType())
-                        && payerId.equals(options.payerId()))))
+                        argThat(options -> TokenAirdropStreamBuilder.class.equals(options.streamBuilderType())
+                                && payerId.equals(options.payerId()))))
                 .will(invocation -> {
                     var pendingAirdropId = PendingAirdropId.newBuilder().build();
                     var pendingAirdropValue = PendingAirdropValue.newBuilder().build();
