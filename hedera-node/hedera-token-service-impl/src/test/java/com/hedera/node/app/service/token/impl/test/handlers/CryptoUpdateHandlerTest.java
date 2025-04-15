@@ -790,7 +790,57 @@ class CryptoUpdateHandlerTest extends CryptoHandlerTestBase {
     }
 
     @Test
-    void testNullMemo() {
+    void testNullAccount() {
+        // mock the account memo to return null. calculateFees should not crash
+        FeeContext feeContext = mock(FeeContext.class);
+        FeeCalculatorFactory feeCalculatorFactory = mock(FeeCalculatorFactory.class);
+        FeeCalculator feeCalculator = mock(FeeCalculator.class);
+        final var config = HederaTestConfigBuilder.create()
+                .getOrCreateConfig();
+
+        // put a null account into the readable store
+        final var emptyStateBuilder = emptyReadableAccountStateBuilder();
+        emptyStateBuilder.value(account.accountId(),null);
+        readableAccounts = emptyStateBuilder.build();
+        given(readableStates.<AccountID, Account>get(ACCOUNTS)).willReturn(readableAccounts);
+        readableStore = new ReadableAccountStoreImpl(readableStates, readableEntityCounters);
+
+        TransactionBody cryptoUpdateTransaction = new CryptoUpdateBuilder()
+                .withPayer(id)
+                .withAutoRenewPeriod(account.autoRenewSeconds())
+                .withReceiverSigReq(account.receiverSigRequired())
+                .withDeclineReward(account.declineReward())
+                .withStakedNodeId(account.stakedNodeId())
+                .withStakedAccountId(
+                        account.stakedAccountId() == null
+                                ? 0L
+                                : account.stakedAccountId().accountNum())
+                .withExpiration(account.expirationSecond())
+                .withMaxAutoAssociations(account.maxAutoAssociations())
+                .withKey(account.key())
+                .withTarget(id)
+                .build();
+
+        when(feeContext.readableStore(ReadableAccountStore.class)).thenReturn(readableStore);
+        when(feeContext.body()).thenReturn(cryptoUpdateTransaction);
+        when(feeContext.configuration()).thenReturn(config);
+        when(feeContext.feeCalculatorFactory()).thenReturn(feeCalculatorFactory);
+        when(feeCalculatorFactory.feeCalculator(any())).thenReturn(feeCalculator);
+        when(feeCalculator.addBytesPerTransaction(anyLong())).thenReturn(feeCalculator);
+        when(feeCalculator.addRamByteSeconds(anyLong())).thenReturn(feeCalculator);
+        when(feeCalculator.calculate()).thenReturn(Fees.FREE);
+
+
+        assertThatNoException().isThrownBy(() -> subject.calculateFees(feeContext));
+
+        InOrder inOrder = inOrder(feeCalculator);
+        inOrder.verify(feeCalculator, times(1)).addBytesPerTransaction(212L);
+        inOrder.verify(feeCalculator, times(1)).addRamByteSeconds(0L);
+        inOrder.verify(feeCalculator, times(1)).calculate();
+    }
+
+    @Test
+    void testNullAccountMemo() {
         // mock the account memo to return null. calculateFees should not crash
         FeeContext feeContext = mock(FeeContext.class);
         FeeCalculatorFactory feeCalculatorFactory = mock(FeeCalculatorFactory.class);
