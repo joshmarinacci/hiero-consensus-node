@@ -669,8 +669,8 @@ class CryptoTransferHandlerTest extends CryptoTransferHandlerTestBase {
         CryptoCreateStreamBuilder cryptoCreateRecordBuilder = mock(CryptoCreateStreamBuilder.class);
 
         given(handleContext.dispatch(
-                argThat(options -> CryptoCreateStreamBuilder.class.equals(options.streamBuilderType())
-                        && spenderId.equals(options.payerId()))))
+                        argThat(options -> CryptoCreateStreamBuilder.class.equals(options.streamBuilderType())
+                                && spenderId.equals(options.payerId()))))
                 .will((invocation) -> {
                     final var copy =
                             account.copyBuilder().accountId(hbarReceiverId).build();
@@ -711,7 +711,6 @@ class CryptoTransferHandlerTest extends CryptoTransferHandlerTestBase {
         when(feeCalculator.addBytesPerTransaction(anyLong())).thenReturn(feeCalculator);
         when(feeCalculator.addRamByteSeconds(anyLong())).thenReturn(feeCalculator);
         when(feeCalculator.calculate()).thenReturn(fees);
-
 
         // this confirms that the exception thrown by customFeeAssessor.assessNumberOfCustomFees() is
         // handled properly by calculateFees()
