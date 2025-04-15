@@ -717,7 +717,6 @@ class CryptoTransferHandlerTest extends CryptoTransferHandlerTestBase {
         assertThatNoException().isThrownBy(() -> subject.calculateFees(feeContext));
     }
 
-
     @Mock(strictness = LENIENT)
     protected PreHandleContext preHandleContext;
 
