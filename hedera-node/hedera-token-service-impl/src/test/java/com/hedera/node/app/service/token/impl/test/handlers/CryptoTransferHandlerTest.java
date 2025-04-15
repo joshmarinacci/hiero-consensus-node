@@ -669,8 +669,8 @@ class CryptoTransferHandlerTest extends CryptoTransferHandlerTestBase {
         CryptoCreateStreamBuilder cryptoCreateRecordBuilder = mock(CryptoCreateStreamBuilder.class);
 
         given(handleContext.dispatch(
-                argThat(options -> CryptoCreateStreamBuilder.class.equals(options.streamBuilderType())
-                        && spenderId.equals(options.payerId()))))
+                        argThat(options -> CryptoCreateStreamBuilder.class.equals(options.streamBuilderType())
+                                && spenderId.equals(options.payerId()))))
                 .will((invocation) -> {
                     final var copy =
                             account.copyBuilder().accountId(hbarReceiverId).build();
@@ -736,7 +736,6 @@ class CryptoTransferHandlerTest extends CryptoTransferHandlerTestBase {
         Assertions.assertThatThrownBy(() -> subject.preHandle(preHandleContext))
                 .isInstanceOf(PreCheckException.class)
                 .has(responseCode(INVALID_ACCOUNT_ID));
-
     }
 
     private HandleContext mockContext(final TransactionBody txn) {
