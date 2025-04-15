@@ -795,12 +795,11 @@ class CryptoUpdateHandlerTest extends CryptoHandlerTestBase {
         FeeContext feeContext = mock(FeeContext.class);
         FeeCalculatorFactory feeCalculatorFactory = mock(FeeCalculatorFactory.class);
         FeeCalculator feeCalculator = mock(FeeCalculator.class);
-        final var config = HederaTestConfigBuilder.create()
-                .getOrCreateConfig();
+        final var config = HederaTestConfigBuilder.create().getOrCreateConfig();
 
         // put a null account into the readable store
         final var emptyStateBuilder = emptyReadableAccountStateBuilder();
-        emptyStateBuilder.value(account.accountId(),null);
+        emptyStateBuilder.value(account.accountId(), null);
         readableAccounts = emptyStateBuilder.build();
         given(readableStates.<AccountID, Account>get(ACCOUNTS)).willReturn(readableAccounts);
         readableStore = new ReadableAccountStoreImpl(readableStates, readableEntityCounters);
@@ -830,7 +829,6 @@ class CryptoUpdateHandlerTest extends CryptoHandlerTestBase {
         when(feeCalculator.addRamByteSeconds(anyLong())).thenReturn(feeCalculator);
         when(feeCalculator.calculate()).thenReturn(Fees.FREE);
 
-
         assertThatNoException().isThrownBy(() -> subject.calculateFees(feeContext));
 
         InOrder inOrder = inOrder(feeCalculator);
@@ -845,8 +843,7 @@ class CryptoUpdateHandlerTest extends CryptoHandlerTestBase {
         FeeContext feeContext = mock(FeeContext.class);
         FeeCalculatorFactory feeCalculatorFactory = mock(FeeCalculatorFactory.class);
         FeeCalculator feeCalculator = mock(FeeCalculator.class);
-        final var config = HederaTestConfigBuilder.create()
-                .getOrCreateConfig();
+        final var config = HederaTestConfigBuilder.create().getOrCreateConfig();
 
         account = mock(Account.class);
         given(account.keyOrElse(Key.DEFAULT)).willReturn(Key.DEFAULT);
@@ -877,7 +874,6 @@ class CryptoUpdateHandlerTest extends CryptoHandlerTestBase {
         when(feeCalculator.addBytesPerTransaction(anyLong())).thenReturn(feeCalculator);
         when(feeCalculator.addRamByteSeconds(anyLong())).thenReturn(feeCalculator);
         when(feeCalculator.calculate()).thenReturn(Fees.FREE);
-
 
         assertThatNoException().isThrownBy(() -> subject.calculateFees(feeContext));
     }
@@ -926,7 +922,6 @@ class CryptoUpdateHandlerTest extends CryptoHandlerTestBase {
         // slots increases, so we have a new fee
         inOrder.verify(feeCalculator, times(1)).addRamByteSeconds(3732480000000L);
         inOrder.verify(feeCalculator, times(1)).calculate();
-
     }
 
     /**
