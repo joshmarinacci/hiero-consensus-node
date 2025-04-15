@@ -665,8 +665,8 @@ class CryptoTransferHandlerTest extends CryptoTransferHandlerTestBase {
         CryptoCreateStreamBuilder cryptoCreateRecordBuilder = mock(CryptoCreateStreamBuilder.class);
 
         given(handleContext.dispatch(
-                argThat(options -> CryptoCreateStreamBuilder.class.equals(options.streamBuilderType())
-                        && spenderId.equals(options.payerId()))))
+                        argThat(options -> CryptoCreateStreamBuilder.class.equals(options.streamBuilderType())
+                                && spenderId.equals(options.payerId()))))
                 .will((invocation) -> {
                     final var copy =
                             account.copyBuilder().accountId(hbarReceiverId).build();
@@ -708,12 +708,10 @@ class CryptoTransferHandlerTest extends CryptoTransferHandlerTestBase {
         when(feeCalculator.addRamByteSeconds(anyLong())).thenReturn(feeCalculator);
         when(feeCalculator.calculate()).thenReturn(fees);
 
-
         // this confirms that the exception thrown by customFeeAssessor.assessNumberOfCustomFees() is
         // handled properly by calculateFees()
         assertThatNoException().isThrownBy(() -> subject.calculateFees(feeContext));
     }
-
 
     private HandleContext mockContext(final TransactionBody txn) {
         final var context = mock(HandleContext.class);
