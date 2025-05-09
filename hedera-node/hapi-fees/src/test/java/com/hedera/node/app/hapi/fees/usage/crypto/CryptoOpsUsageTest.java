@@ -492,15 +492,24 @@ class CryptoOpsUsageTest {
 
         assertEquals(expected, actual);
     }
+
     @Test
     void calculateMultipleApprovalsWithTheSameSpender() {
         var approveOp = CryptoApproveAllowanceTransactionBody.newBuilder()
                 // same spender
                 .addAllCryptoAllowances(List.of(
-                        CryptoAllowance.newBuilder().setSpender(proxy).setAmount(10L).build(),
-                        CryptoAllowance.newBuilder().setSpender(proxy).setAmount(20L).build(),
-                        CryptoAllowance.newBuilder().setSpender(proxy).setAmount(30L).build()
-                ))
+                        CryptoAllowance.newBuilder()
+                                .setSpender(proxy)
+                                .setAmount(10L)
+                                .build(),
+                        CryptoAllowance.newBuilder()
+                                .setSpender(proxy)
+                                .setAmount(20L)
+                                .build(),
+                        CryptoAllowance.newBuilder()
+                                .setSpender(proxy)
+                                .setAmount(30L)
+                                .build()))
                 .addAllTokenAllowances(List.of(tokenAllowances))
                 .addAllNftAllowances(List.of(nftAllowances))
                 .build();
@@ -513,10 +522,18 @@ class CryptoOpsUsageTest {
         var approveOp = CryptoApproveAllowanceTransactionBody.newBuilder()
                 // diff spenders
                 .addAllCryptoAllowances(List.of(
-                        CryptoAllowance.newBuilder().setSpender(proxy).setAmount(10L).build(),
-                        CryptoAllowance.newBuilder().setSpender(proxy2).setAmount(20L).build(),
-                        CryptoAllowance.newBuilder().setSpender(proxy3).setAmount(30L).build()
-                        ))
+                        CryptoAllowance.newBuilder()
+                                .setSpender(proxy)
+                                .setAmount(10L)
+                                .build(),
+                        CryptoAllowance.newBuilder()
+                                .setSpender(proxy2)
+                                .setAmount(20L)
+                                .build(),
+                        CryptoAllowance.newBuilder()
+                                .setSpender(proxy3)
+                                .setAmount(30L)
+                                .build()))
                 .addAllTokenAllowances(List.of(tokenAllowances))
                 .addAllNftAllowances(List.of(nftAllowances))
                 .build();
@@ -591,6 +608,7 @@ class CryptoOpsUsageTest {
                 .setCryptoApproveAllowance(approveOp)
                 .build();
     }
+
     private TransactionBody makeApproveTxn(CryptoApproveAllowanceTransactionBody approveOp) {
         return TransactionBody.newBuilder()
                 .setTransactionID(TransactionID.newBuilder()

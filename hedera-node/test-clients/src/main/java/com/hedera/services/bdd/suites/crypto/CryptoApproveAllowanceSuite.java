@@ -1227,7 +1227,6 @@ public class CryptoApproveAllowanceSuite {
                         .blankMemo()
                         .logged(),
                 validateChargedUsdWithin(BASE_APPROVE_TXN, 0.05, 0.01),
-
                 cryptoApproveAllowance()
                         .payingWith(SPENDER)
                         .addCryptoAllowance(SPENDER, ANOTHER_SPENDER, 100L)
@@ -1236,7 +1235,6 @@ public class CryptoApproveAllowanceSuite {
                         .blankMemo()
                         .logged(),
                 validateChargedUsdWithin(BASE_APPROVE_TXN, 0.0505, 0.1),
-
                 cryptoApproveAllowance()
                         .payingWith(SPENDER)
                         .addCryptoAllowance(SPENDER, ANOTHER_SPENDER, 100L)
@@ -1245,9 +1243,9 @@ public class CryptoApproveAllowanceSuite {
                         .via(BASE_APPROVE_TXN)
                         .blankMemo()
                         .logged(),
-                validateChargedUsdWithin(BASE_APPROVE_TXN, 0.0509, 0.1)
-        );
+                validateChargedUsdWithin(BASE_APPROVE_TXN, 0.0509, 0.1));
     }
+
     @HapiTest
     final Stream<DynamicTest> happyPathWorks() {
         return hapiTest(
