@@ -218,9 +218,6 @@ public class CryptoOpsUsage {
 
     private long getNewBytes(final CryptoApproveAllowanceMeta cryptoApproveMeta, final ExtantCryptoContext ctx) {
         long newTotalBytes = 0;
-        final var newCryptoKeys = getChangedCryptoKeys(
-                cryptoApproveMeta.getCryptoAllowances().keySet(),
-                ctx.currentCryptoAllowances().keySet());
         newTotalBytes += cryptoApproveMeta.getCryptoAllowancesCount() * CRYPTO_ALLOWANCE_SIZE;
 
         final var newTokenKeys = getChangedTokenKeys(
