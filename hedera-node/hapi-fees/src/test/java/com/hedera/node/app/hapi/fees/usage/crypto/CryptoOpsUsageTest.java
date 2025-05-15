@@ -75,6 +75,7 @@ class CryptoOpsUsageTest {
     private final AccountID proxy = IdUtils.asAccount("0.0.75231");
     private final AccountID proxy2 = IdUtils.asAccount("0.0.75232");
     private final AccountID proxy3 = IdUtils.asAccount("0.0.75233");
+    private final AccountID proxy4 = IdUtils.asAccount("0.0.75234");
     private final AccountID owner = IdUtils.asAccount("0.0.10000");
     private final int maxAutoAssociations = 123;
     private final int numSigs = 3;
@@ -532,6 +533,10 @@ class CryptoOpsUsageTest {
                                 .build(),
                         CryptoAllowance.newBuilder()
                                 .setSpender(proxy3)
+                                .setAmount(30L)
+                                .build(),
+                        CryptoAllowance.newBuilder()
+                                .setSpender(proxy4)
                                 .setAmount(30L)
                                 .build()))
                 .addAllTokenAllowances(List.of(tokenAllowances))
