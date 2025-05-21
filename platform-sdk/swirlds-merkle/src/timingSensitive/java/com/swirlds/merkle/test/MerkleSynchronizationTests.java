@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import org.hiero.base.constructable.ConstructableRegistry;
 import org.hiero.base.constructable.ConstructableRegistryException;
+import org.hiero.base.crypto.Hash;
 import org.hiero.base.utility.test.fixtures.tags.TestComponentTags;
-import org.hiero.consensus.model.crypto.Hash;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -57,7 +57,7 @@ public class MerkleSynchronizationTests {
         loadLog4jContext();
         final ConstructableRegistry registry = ConstructableRegistry.getInstance();
         registry.registerConstructables("com.swirlds.common");
-        registry.registerConstructables("org.hiero.consensus");
+        registry.registerConstructables("org.hiero");
     }
 
     /**

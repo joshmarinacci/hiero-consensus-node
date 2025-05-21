@@ -28,8 +28,8 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import org.hiero.base.constructable.ConstructableRegistry;
 import org.hiero.base.constructable.ConstructableRegistryException;
+import org.hiero.base.crypto.Hash;
 import org.hiero.base.io.SelfSerializable;
-import org.hiero.consensus.model.crypto.Hash;
 import org.hiero.consensus.model.event.CesEvent;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -42,7 +42,7 @@ class ObjectStreamIteratorTest {
     static void beforeAll() throws ConstructableRegistryException {
         final ConstructableRegistry registry = ConstructableRegistry.getInstance();
         registry.registerConstructables("com.swirlds");
-        registry.registerConstructables("org.hiero.consensus");
+        registry.registerConstructables("org.hiero");
     }
 
     public static void assertEventsAreEqual(final CesEvent expected, final CesEvent actual) {

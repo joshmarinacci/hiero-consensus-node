@@ -13,6 +13,7 @@ import static com.hedera.hapi.util.HapiUtils.functionOf;
 import static com.hedera.node.app.hapi.utils.CommonPbjConverters.fromPbj;
 import static com.hedera.node.app.hapi.utils.ethereum.EthTxData.populateEthTxData;
 import static com.hedera.node.app.hapi.utils.sysfiles.domain.throttling.ScaleFactor.ONE_TO_ONE;
+import static com.hedera.node.app.hapi.utils.throttles.LeakyBucketThrottle.DEFAULT_BURST_SECONDS;
 import static com.hedera.node.app.service.schedule.impl.handlers.HandlerUtility.childAsOrdinary;
 import static com.hedera.node.app.service.token.AliasUtils.isAlias;
 import static com.hedera.node.app.service.token.AliasUtils.isEntityNumAlias;
@@ -100,6 +101,7 @@ public class ThrottleAccumulator {
     private boolean lastTxnWasGasThrottled;
     private LeakyBucketDeterministicThrottle bytesThrottle;
     private LeakyBucketDeterministicThrottle gasThrottle;
+    private LeakyBucketDeterministicThrottle opsDurationThrottle;
     private List<DeterministicThrottle> activeThrottles = emptyList();
 
     @Nullable
@@ -542,15 +544,16 @@ public class ThrottleAccumulator {
             @NonNull final TransactionBody txnBody, @NonNull final HederaFunctionality function) {
         final long nominalGas =
                 switch (function) {
-                    case CONTRACT_CREATE -> txnBody.contractCreateInstanceOrThrow()
-                            .gas();
+                    case CONTRACT_CREATE ->
+                        txnBody.contractCreateInstanceOrThrow().gas();
                     case CONTRACT_CALL -> txnBody.contractCallOrThrow().gas();
-                    case ETHEREUM_TRANSACTION -> Optional.of(txnBody.ethereumTransactionOrThrow()
-                                    .ethereumData()
-                                    .toByteArray())
-                            .map(EthTxData::populateEthTxData)
-                            .map(EthTxData::gasLimit)
-                            .orElse(0L);
+                    case ETHEREUM_TRANSACTION ->
+                        Optional.of(txnBody.ethereumTransactionOrThrow()
+                                        .ethereumData()
+                                        .toByteArray())
+                                .map(EthTxData::populateEthTxData)
+                                .map(EthTxData::gasLimit)
+                                .orElse(0L);
                     default -> 0L;
                 };
         // Interpret negative gas as overflow
@@ -843,10 +846,13 @@ public class ThrottleAccumulator {
     public void applyGasConfig() {
         final var configuration = configSupplier.get();
         final var contractsConfig = configuration.getConfigData(ContractsConfig.class);
-        if (contractsConfig.throttleThrottleByGas() && contractsConfig.maxGasPerSec() == 0) {
+        final var maxGasPerSec = maxGasPerSecOf(contractsConfig);
+        if (contractsConfig.throttleThrottleByGas() && maxGasPerSec == 0) {
             log.warn("{} gas throttling enabled, but limited to 0 gas/sec", throttleType.name());
         }
-        gasThrottle = new LeakyBucketDeterministicThrottle(contractsConfig.maxGasPerSec(), "Gas");
+
+        gasThrottle =
+                new LeakyBucketDeterministicThrottle(maxGasPerSec, "Gas", gasThrottleBurstSecondsOf(contractsConfig));
         if (throttleMetrics != null) {
             throttleMetrics.setupGasThrottleMetric(gasThrottle, configuration);
         }
@@ -859,6 +865,18 @@ public class ThrottleAccumulator {
         }
     }
 
+    private long maxGasPerSecOf(@NonNull final ContractsConfig contractsConfig) {
+        return throttleType.equals(ThrottleType.BACKEND_THROTTLE)
+                ? contractsConfig.maxGasPerSecBackend()
+                : contractsConfig.maxGasPerSec();
+    }
+
+    private int gasThrottleBurstSecondsOf(@NonNull final ContractsConfig contractsConfig) {
+        return throttleType.equals(ThrottleType.BACKEND_THROTTLE)
+                ? contractsConfig.gasThrottleBurstSeconds()
+                : DEFAULT_BURST_SECONDS;
+    }
+
     public void applyBytesConfig() {
         final var configuration = configSupplier.get();
         final var jumboConfig = configuration.getConfigData(JumboTransactionsConfig.class);
@@ -866,7 +884,7 @@ public class ThrottleAccumulator {
         if (jumboConfig.isEnabled() && bytesPerSec == 0) {
             log.warn("{} jumbo transactions are enabled, but limited to 0 bytes/sec", throttleType.name());
         }
-        bytesThrottle = new LeakyBucketDeterministicThrottle(bytesPerSec, "Bytes");
+        bytesThrottle = new LeakyBucketDeterministicThrottle(bytesPerSec, "Bytes", DEFAULT_BURST_SECONDS);
         if (throttleMetrics != null) {
             throttleMetrics.setupBytesThrottleMetric(bytesThrottle, configuration);
         }
@@ -876,6 +894,27 @@ public class ThrottleAccumulator {
                     throttleType.name(),
                     bytesThrottle.capacity(),
                     (jumboConfig.isEnabled() ? "ON" : "OFF"));
+        }
+    }
+
+    public void applyDurationConfig() {
+        final var configuration = configSupplier.get();
+        final var contractConfig = configuration.getConfigData(ContractsConfig.class);
+        final var maxOpsDuration = contractConfig.maxOpsDuration();
+        if (contractConfig.throttleThrottleByOpsDuration() && maxOpsDuration == 0) {
+            log.warn("{} ops duration throttles are enabled, but limited to 0 ops/sec", throttleType.name());
+        }
+        opsDurationThrottle =
+                new LeakyBucketDeterministicThrottle(maxOpsDuration, "OpsDuration", DEFAULT_BURST_SECONDS);
+        if (throttleMetrics != null) {
+            throttleMetrics.setupOpsDurationMetric(opsDurationThrottle, configuration);
+        }
+        if (verbose == Verbose.YES) {
+            log.info(
+                    "Resolved {} ops duration throttle -\n {} ops duration/sec (throttling {})",
+                    throttleType.name(),
+                    opsDurationThrottle.capacity(),
+                    (contractConfig.throttleThrottleByOpsDuration() ? "ON" : "OFF"));
         }
     }
 
@@ -921,6 +960,13 @@ public class ThrottleAccumulator {
      */
     public @NonNull LeakyBucketDeterministicThrottle bytesLimitThrottle() {
         return requireNonNull(bytesThrottle, "");
+    }
+
+    /**
+     * Gets the ops duration throttle.
+     */
+    public @NonNull LeakyBucketDeterministicThrottle opsDurationThrottle() {
+        return requireNonNull(opsDurationThrottle, "");
     }
 
     public enum ThrottleType {

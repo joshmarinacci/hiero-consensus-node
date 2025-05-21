@@ -17,8 +17,8 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hiero.base.crypto.Hash;
 import org.hiero.consensus.config.EventConfig;
-import org.hiero.consensus.model.crypto.Hash;
 import org.hiero.consensus.model.event.AncientMode;
 import org.hiero.consensus.model.event.EventDescriptorWrapper;
 import org.hiero.consensus.model.event.PlatformEvent;
@@ -138,7 +138,7 @@ abstract class AbstractInOrderLinker implements InOrderLinker {
     public void setEventWindow(@NonNull final EventWindow eventWindow) {
         this.eventWindow = Objects.requireNonNull(eventWindow);
 
-        parentDescriptorMap.shiftWindow(eventWindow.getAncientThreshold(), (descriptor, event) -> {
+        parentDescriptorMap.shiftWindow(eventWindow.ancientThreshold(), (descriptor, event) -> {
             parentHashMap.remove(descriptor.hash());
             eventHasBecomeAncient(event);
         });

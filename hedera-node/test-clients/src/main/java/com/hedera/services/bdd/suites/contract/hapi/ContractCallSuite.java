@@ -9,9 +9,7 @@ import static com.hedera.services.bdd.spec.HapiPropertySource.asContractString;
 import static com.hedera.services.bdd.spec.HapiPropertySource.asHexedSolidityAddress;
 import static com.hedera.services.bdd.spec.HapiPropertySource.contractIdFromHexedMirrorAddress;
 import static com.hedera.services.bdd.spec.HapiPropertySource.idAsHeadlongAddress;
-import static com.hedera.services.bdd.spec.HapiPropertySourceStaticInitializer.REALM;
-import static com.hedera.services.bdd.spec.HapiPropertySourceStaticInitializer.SHARD;
-import static com.hedera.services.bdd.spec.HapiPropertySourceStaticInitializer.SHARD_AND_REALM;
+import static com.hedera.services.bdd.spec.HapiPropertySource.numAsHeadlongAddress;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.assertions.AccountInfoAsserts.changeFromSnapshot;
 import static com.hedera.services.bdd.spec.assertions.AssertUtils.inOrder;
@@ -287,18 +285,13 @@ public class ContractCallSuite {
     final Stream<DynamicTest> lowLevelEcrecCallBehavior() {
         final var TEST_CONTRACT = "TestContract";
         final var somebody = "somebody";
-        final var account = SHARD_AND_REALM + "1";
+        final var account = "1";
         return hapiTest(
                 uploadInitCode(TEST_CONTRACT),
-                contractCreate(
-                                TEST_CONTRACT,
-                                idAsHeadlongAddress(AccountID.newBuilder()
-                                        .setShardNum(SHARD)
-                                        .setRealmNum(REALM)
-                                        .setAccountNum(2)
-                                        .build()),
-                                BigInteger.ONE)
-                        .balance(ONE_HBAR),
+                withOpContext((spec, log) -> allRunFor(
+                        spec,
+                        contractCreate(TEST_CONTRACT, numAsHeadlongAddress(spec, 2), BigInteger.ONE)
+                                .balance(ONE_HBAR))),
                 cryptoCreate(somebody),
                 balanceSnapshot("start", account),
                 cryptoUpdate(account).receiverSigRequired(true).signedBy(GENESIS),
@@ -687,7 +680,6 @@ public class ContractCallSuite {
         final AtomicReference<byte[]> defaultPayerMirror = new AtomicReference<>();
         final AtomicReference<String> addressBookMirror = new AtomicReference<>();
         final AtomicReference<String> jurisdictionMirror = new AtomicReference<>();
-
         return hapiTest(
                 getAccountInfo(DEFAULT_CONTRACT_SENDER).savingSnapshot(DEFAULT_CONTRACT_SENDER),
                 withOpContext((spec, opLog) -> defaultPayerMirror.set((unhex(
@@ -698,12 +690,14 @@ public class ContractCallSuite {
                 // support
                 contractCreate(addressBook)
                         .gas(1_000_000L)
-                        .exposingNumTo(num -> addressBookMirror.set(asHexedSolidityAddress(SHARD, REALM, num)))
+                        .exposingContractIdTo(id -> addressBookMirror.set(
+                                asHexedSolidityAddress((int) id.getShardNum(), id.getRealmNum(), id.getContractNum())))
                         .payingWith(DEFAULT_CONTRACT_SENDER)
                         .refusingEthConversion(),
                 contractCreate(jurisdictions)
-                        .gas(1_000_000L)
-                        .exposingNumTo(num -> jurisdictionMirror.set(asHexedSolidityAddress(SHARD, REALM, num)))
+                        .gas(4_000_000L)
+                        .exposingContractIdTo(id -> jurisdictionMirror.set(
+                                asHexedSolidityAddress((int) id.getShardNum(), id.getRealmNum(), id.getContractNum())))
                         .withExplicitParams(() -> EXPLICIT_JURISDICTION_CONS_PARAMS)
                         .payingWith(DEFAULT_CONTRACT_SENDER)
                         .refusingEthConversion(),
@@ -981,7 +975,7 @@ public class ContractCallSuite {
                         .mapToObj(i -> movingUnique(erc721Name, i).between(TOKEN_TREASURY, ercUser))
                         .toArray(TokenMovement[]::new)),
                 uploadInitCode(contract),
-                contractCreate(contract, secret).gas(250_000L),
+                contractCreate(contract, secret).gas(1_250_000L),
                 contractCallLocalWithFunctionAbi(contract, secretAbi)
                         .exposingTypedResultsTo(results -> LOG.info("Secret is {}", results[0]))
                         .exposingRawResultsTo(secretOutput::set),
@@ -1068,7 +1062,7 @@ public class ContractCallSuite {
                 getAccountInfo("Dave").savingSnapshot("DaveAcctInfo"),
                 uploadInitCode(contract),
                 contractCreate(contract, BigInteger.valueOf(1_000_000L), "OpenCrowd Token", "OCT")
-                        .gas(250_000L)
+                        .gas(1_000_000L)
                         .payingWith(TOKEN_ISSUER)
                         .via("tokenCreateTxn")
                         .refusingEthConversion(),
@@ -1465,7 +1459,10 @@ public class ContractCallSuite {
                 cryptoCreate("accountToPay"),
                 uploadInitCode(contract),
                 contractCreate(contract),
-                contractCall(contract, "create").fee(0L).payingWith("accountToPay"));
+                contractCall(contract, "create")
+                        .fee(0L)
+                        .payingWith("accountToPay")
+                        .gas(400_000L));
     }
 
     @HapiTest
@@ -1651,7 +1648,7 @@ public class ContractCallSuite {
                         .receiverSigRequired(true),
                 getAccountInfo(RECEIVABLE_SIG_REQ_ACCOUNT).savingSnapshot(RECEIVABLE_SIG_REQ_ACCOUNT_INFO),
                 uploadInitCode(TRANSFERRING_CONTRACT),
-                contractCreate(TRANSFERRING_CONTRACT).gas(300_000L).balance(5000L),
+                contractCreate(TRANSFERRING_CONTRACT).gas(1_000_000L).balance(5000L),
                 withOpContext((spec, opLog) -> {
                     final var accountAddress = spec.registry()
                             .getAccountInfo(RECEIVABLE_SIG_REQ_ACCOUNT_INFO)
@@ -2115,6 +2112,7 @@ public class ContractCallSuite {
                                 .savingSnapshot(ACCOUNT_INFO_AFTER_CALL)
                                 .payingWith(GENESIS))),
                 assertionsHold((spec, opLog) -> {
+                    final var callRecord = spec.registry().getTransactionRecord("txn");
                     final var fee = spec.registry().getTransactionRecord("txn").getTransactionFee();
                     final var accountBalanceBeforeCall =
                             spec.registry().getAccountInfo(ACCOUNT_INFO).getBalance();
@@ -2365,7 +2363,7 @@ public class ContractCallSuite {
         return hapiTest(
                 recordStreamMustIncludeNoFailuresFrom(sidecarIdValidator()),
                 uploadInitCode(contract),
-                contractCreate(contract),
+                contractCreate(contract).gas(400_000L),
                 contractCall(contract, "callRequested", nonExtantEvmAddress, new byte[0], BigInteger.valueOf(88_888L)));
     }
 
@@ -2404,7 +2402,7 @@ public class ContractCallSuite {
         return hapiTest(
                 cryptoCreate(payer).balance(10 * ONE_HUNDRED_HBARS),
                 uploadInitCode(contract),
-                contractCreate(contract).via(contractCreateTx).gas(500_000L),
+                contractCreate(contract).via(contractCreateTx).gas(1_000_000L),
                 withOpContext((spec, opLog) -> allRunFor(
                         spec,
                         contractCall(contract, deployParentContractFn)
@@ -2492,7 +2490,7 @@ public class ContractCallSuite {
         return hapiTest(
                 cryptoCreate(PAYER).balance(10 * ONE_HUNDRED_HBARS),
                 uploadInitCode(contract),
-                contractCreate(contract).via(contractCreateTxn).gas(500_000L),
+                contractCreate(contract).via(contractCreateTxn).gas(1_000_000L),
                 withOpContext((spec, opLog) -> {
                     final var opContractTxnRecord = getTxnRecord(contractCreateTxn);
 

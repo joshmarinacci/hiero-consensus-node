@@ -85,7 +85,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.hiero.consensus.model.crypto.DigestType;
+import org.hiero.base.crypto.DigestType;
 
 /**
  * A custom builder for create a {@link SingleTransactionRecord}.
@@ -196,6 +196,11 @@ public class RecordStreamBuilder
     private ScheduleID scheduleID;
     private TokenType tokenType;
     private HederaFunctionality function;
+
+    /**
+     * ops duration used by the contract transaction
+     */
+    private long opsDuration;
 
     public RecordStreamBuilder(
             @NonNull final ReversingBehavior reversingBehavior,
@@ -324,7 +329,6 @@ public class RecordStreamBuilder
         transactionReceiptBuilder.topicRunningHashVersion(0L);
         transactionReceiptBuilder.topicSequenceNumber(0L);
         transactionRecordBuilder.alias(Bytes.EMPTY);
-        transactionRecordBuilder.ethereumHash(Bytes.EMPTY);
         transactionRecordBuilder.evmAddress(Bytes.EMPTY);
     }
 
@@ -795,6 +799,11 @@ public class RecordStreamBuilder
         return this.contractFunctionResult.gasUsed();
     }
 
+    @Override
+    public long getOpsDurationForContractTxn() {
+        return opsDuration;
+    }
+
     /**
      * Sets the receipt accountID.
      *
@@ -1055,6 +1064,12 @@ public class RecordStreamBuilder
             @NonNull final ContractStateChanges contractStateChanges, final boolean isMigration) {
         requireNonNull(contractStateChanges, "contractStateChanges must not be null");
         this.contractStateChanges.add(new AbstractMap.SimpleEntry<>(contractStateChanges, isMigration));
+        return this;
+    }
+
+    @Override
+    public ContractOperationStreamBuilder opsDuration(long opsDuration) {
+        this.opsDuration = opsDuration;
         return this;
     }
 

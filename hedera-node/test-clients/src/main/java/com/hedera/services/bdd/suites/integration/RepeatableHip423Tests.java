@@ -86,6 +86,7 @@ import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overridingAllOf;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overridingThrottles;
+import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overridingTwo;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.scheduledExecutionResult;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.sleepFor;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.sleepForSeconds;
@@ -1018,7 +1019,7 @@ public class RepeatableHip423Tests {
                 sleepForSeconds(THIRTY_MINUTES * 2),
 
                 // try to trigger the scheduled transaction with failing throttle
-                submitMessageTo((String) null).hasRetryPrecheckFrom(BUSY).hasKnownStatus(INVALID_TOPIC_ID),
+                submitMessageTo("0.0.0").hasRetryPrecheckFrom(BUSY).hasKnownStatus(INVALID_TOPIC_ID),
 
                 // the balance is changed
                 getAccountBalance(RECEIVER).hasTinyBars(1L));
@@ -1354,7 +1355,7 @@ public class RepeatableHip423Tests {
 
     @LeakyRepeatableHapiTest(
             value = NEEDS_VIRTUAL_TIME_FOR_FAST_EXECUTION,
-            overrides = {"scheduling.whitelist", "contracts.maxGasPerSec"})
+            overrides = {"scheduling.whitelist", "contracts.maxGasPerSec", "contracts.maxGasPerSecBackend"})
     @DisplayName("Gas throttle works as expected")
     final Stream<DynamicTest> gasThrottleWorksAsExpected() {
         final var contract = "TestContract";
@@ -1365,6 +1366,7 @@ public class RepeatableHip423Tests {
         final var gasToOffer = 2_000_000L;
         return hapiTest(flattened(
                 overriding("contracts.maxGasPerSec", "4000000"),
+                overriding("contracts.maxGasPerSecBackend", "4000000"),
                 cryptoCreate("PAYING_ACCOUNT"),
                 uploadTestContracts(contract),
                 contractCreate(contract, addressTwo, BigInteger.ONE)
@@ -1716,7 +1718,9 @@ public class RepeatableHip423Tests {
                         .hasKnownStatus(SCHEDULE_EXPIRY_IS_BUSY));
     }
 
-    @RepeatableHapiTest(NEEDS_VIRTUAL_TIME_FOR_FAST_EXECUTION)
+    @LeakyRepeatableHapiTest(
+            value = NEEDS_VIRTUAL_TIME_FOR_FAST_EXECUTION,
+            overrides = {"atomicBatch.isEnabled", "atomicBatch.maxNumberOfTransactions"})
     @DisplayName("Failing batch will trigger schedule")
     // BATCH_14
     final Stream<DynamicTest> failingBatchWillTriggerSchedule() {
@@ -1725,6 +1729,7 @@ public class RepeatableHip423Tests {
         final var schedule = "scheduledXfer";
         final var batchOperator = "batchOperator";
         return hapiTest(
+                overridingTwo("atomicBatch.isEnabled", "true", "atomicBatch.maxNumberOfTransactions", "50"),
                 cryptoCreate(batchOperator),
                 cryptoCreate(sender).balance(ONE_HBAR).via("createSender"),
                 cryptoCreate(receiver).balance(0L),

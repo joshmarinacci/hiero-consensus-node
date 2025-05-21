@@ -53,7 +53,6 @@ import com.hedera.node.config.data.BlockStreamConfig;
 import com.hedera.node.config.testfixtures.HederaTestConfigBuilder;
 import com.hedera.pbj.runtime.ParseException;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
-import com.swirlds.common.test.fixtures.crypto.CryptoRandomUtils;
 import com.swirlds.platform.state.service.PlatformStateService;
 import com.swirlds.platform.system.state.notifications.StateHashedNotification;
 import com.swirlds.state.State;
@@ -75,7 +74,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import org.hiero.consensus.model.crypto.Hash;
+import org.hiero.base.crypto.Hash;
+import org.hiero.base.crypto.test.fixtures.CryptoRandomUtils;
 import org.hiero.consensus.model.event.ConsensusEvent;
 import org.hiero.consensus.model.hashgraph.Round;
 import org.junit.jupiter.api.BeforeEach;
@@ -272,7 +272,7 @@ class BlockStreamManagerImplTest {
         assertFalse(subject.hasLedgerId());
 
         given(blockHashSigner.isReady()).willReturn(true);
-        given(blockHashSigner.activeSchemeId()).willReturn(1L);
+        given(blockHashSigner.schemeId()).willReturn(1L);
         // Start the round that will be block N
         subject.startRound(round, state);
         assertTrue(subject.hasLedgerId());
@@ -403,7 +403,7 @@ class BlockStreamManagerImplTest {
         assertFalse(subject.hasLedgerId());
 
         given(blockHashSigner.isReady()).willReturn(true);
-        given(blockHashSigner.activeSchemeId()).willReturn(1L);
+        given(blockHashSigner.schemeId()).willReturn(1L);
         // Start the round that will be block N
         subject.startRound(round, state);
         assertTrue(subject.hasLedgerId());
@@ -499,7 +499,7 @@ class BlockStreamManagerImplTest {
         subject.initLastBlockHash(FAKE_RESTART_BLOCK_HASH);
 
         given(blockHashSigner.isReady()).willReturn(true);
-        given(blockHashSigner.activeSchemeId()).willReturn(1L);
+        given(blockHashSigner.schemeId()).willReturn(1L);
         // Start the round that will be block N
         subject.startRound(round, state);
 
@@ -570,7 +570,7 @@ class BlockStreamManagerImplTest {
     @SuppressWarnings("unchecked")
     void supportsMultiplePendingBlocksWithIndirectProofAsExpected() throws ParseException {
         given(blockHashSigner.isReady()).willReturn(true);
-        given(blockHashSigner.activeSchemeId()).willReturn(1L);
+        given(blockHashSigner.schemeId()).willReturn(1L);
         givenSubjectWith(
                 1,
                 0,
@@ -662,7 +662,7 @@ class BlockStreamManagerImplTest {
         given(boundaryStateChangeListener.boundaryTimestampOrThrow()).willReturn(Timestamp.DEFAULT);
         given(round.getRoundNum()).willReturn(ROUND_NO);
         given(blockHashSigner.isReady()).willReturn(true);
-        given(blockHashSigner.activeSchemeId()).willReturn(1L);
+        given(blockHashSigner.schemeId()).willReturn(1L);
 
         // Set up the signature future to complete immediately and run the callback synchronously
         given(blockHashSigner.signFuture(any())).willReturn(mockSigningFuture);
@@ -738,7 +738,7 @@ class BlockStreamManagerImplTest {
         given(boundaryStateChangeListener.boundaryTimestampOrThrow()).willReturn(Timestamp.DEFAULT);
         given(round.getRoundNum()).willReturn(ROUND_NO);
         given(blockHashSigner.isReady()).willReturn(true);
-        given(blockHashSigner.activeSchemeId()).willReturn(1L);
+        given(blockHashSigner.schemeId()).willReturn(1L);
 
         // Set up the signature future to complete immediately and run the callback synchronously
         given(blockHashSigner.signFuture(any())).willReturn(mockSigningFuture);

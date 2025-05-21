@@ -45,8 +45,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import org.hiero.base.constructable.ClassConstructorPair;
 import org.hiero.base.constructable.ConstructableRegistry;
-import org.hiero.consensus.model.crypto.DigestType;
-import org.hiero.consensus.model.crypto.Hash;
+import org.hiero.base.crypto.DigestType;
+import org.hiero.base.crypto.Hash;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -70,7 +70,7 @@ class MerkleDbSnapshotTest {
     static void setup() throws Exception {
         ConstructableRegistry registry = ConstructableRegistry.getInstance();
         registry.registerConstructables("com.swirlds.common");
-        registry.registerConstructables("org.hiero.consensus");
+        registry.registerConstructables("org.hiero");
         registry.registerConstructables("com.swirlds.merkledb");
         registry.registerConstructables("com.swirlds.virtualmap");
         registry.registerConstructable(new ClassConstructorPair(

@@ -6,7 +6,6 @@ import static com.hedera.node.app.hapi.utils.EthSigsUtils.recoverAddressFromPubK
 import static com.hedera.services.bdd.junit.ContextRequirement.FEE_SCHEDULE_OVERRIDES;
 import static com.hedera.services.bdd.junit.RepeatableReason.NEEDS_SYNCHRONOUS_HANDLE_WORKFLOW;
 import static com.hedera.services.bdd.junit.TestTags.CRYPTO;
-import static com.hedera.services.bdd.spec.HapiPropertySource.asEntityString;
 import static com.hedera.services.bdd.spec.HapiSpec.customizedHapiTest;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.assertions.AccountDetailsAsserts.accountDetailsWith;
@@ -213,7 +212,7 @@ public class LeakyCryptoTestsSuite {
                 sourcing(() -> contractCustomCreate(EMPTY_CONSTRUCTOR_CONTRACT, "Clone")
                         .gas(gasToOffer)
                         .payingWith(civilian)
-                        .setNode(asEntityString(4))
+                        .setNode(4)
                         .balance(maxSendable.get())
                         .hasKnownStatus(INSUFFICIENT_PAYER_BALANCE)));
     }
@@ -513,7 +512,10 @@ public class LeakyCryptoTestsSuite {
                         .via(AUTO_ACCOUNT),
                 getTxnRecord(AUTO_ACCOUNT).andAllChildRecords(),
                 uploadInitCode(FACTORY_MIRROR_CONTRACT),
-                contractCreate(FACTORY_MIRROR_CONTRACT).via(CREATE_TX).balance(20),
+                contractCreate(FACTORY_MIRROR_CONTRACT)
+                        .via(CREATE_TX)
+                        .balance(20)
+                        .gas(6_000_000),
                 withOpContext((spec, opLog) -> allRunFor(
                         spec,
                         TxnVerbs.ethereumCryptoTransferToAlias(
@@ -524,13 +526,14 @@ public class LeakyCryptoTestsSuite {
                                 .nonce(0L)
                                 .maxFeePerGas(0L)
                                 .maxGasAllowance(FIVE_HBARS)
-                                .gasLimit(2_000_000L)
+                                .gasLimit(4_000_000L)
                                 .via(lazyCreateTxn)
                                 .hasKnownStatus(SUCCESS),
                         getTxnRecord(lazyCreateTxn).logged())),
                 withOpContext((spec, opLog) -> {
                     final var contractCallTxn = contractCall(FACTORY_MIRROR_CONTRACT, "createChild", BigInteger.TEN)
-                            .via("callTX");
+                            .via("callTX")
+                            .gas(6_000_000L);
 
                     final var expectedContractCallRecord = getTxnRecord("callTX")
                             .hasPriority(recordWith()

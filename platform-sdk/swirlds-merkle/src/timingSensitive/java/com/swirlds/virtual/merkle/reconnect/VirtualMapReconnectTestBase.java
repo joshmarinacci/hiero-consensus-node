@@ -41,7 +41,7 @@ import java.util.function.Function;
 import org.hiero.base.constructable.ClassConstructorPair;
 import org.hiero.base.constructable.ConstructableRegistry;
 import org.hiero.base.constructable.ConstructableRegistryException;
-import org.hiero.consensus.model.crypto.DigestType;
+import org.hiero.base.crypto.DigestType;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -132,7 +132,7 @@ public class VirtualMapReconnectTestBase {
         final ConstructableRegistry registry = ConstructableRegistry.getInstance();
 
         registry.registerConstructables("com.swirlds.common");
-        registry.registerConstructables("org.hiero.consensus");
+        registry.registerConstructables("org.hiero");
         registry.registerConstructables("com.swirlds.virtualmap");
         registry.registerConstructable(new ClassConstructorPair(QueryResponse.class, QueryResponse::new));
         registry.registerConstructable(new ClassConstructorPair(DummyMerkleInternal.class, DummyMerkleInternal::new));
