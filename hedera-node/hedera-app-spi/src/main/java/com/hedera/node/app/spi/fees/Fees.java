@@ -24,7 +24,7 @@ import edu.umd.cs.findbugs.annotations.NonNull;
  *                   This must be non-negative. The sum of node, network, and service fees must be less than
  *                   {@link Long#MAX_VALUE}.
  */
-public record Fees(long nodeFee, long networkFee, long serviceFee, double newFee) {
+public record Fees(long nodeFee, long networkFee, long serviceFee, double usd) {
     /** A constant representing zero fees. */
     public static final Fees FREE = new Fees(0, 0, 0, 0);
     /**
@@ -42,7 +42,7 @@ public record Fees(long nodeFee, long networkFee, long serviceFee, double newFee
         if (nodeFee < 0) throw new IllegalArgumentException("Node fees must be non-negative");
         if (networkFee < 0) throw new IllegalArgumentException("Network fees must be non-negative");
         if (serviceFee < 0) throw new IllegalArgumentException("Service fees must be non-negative");
-        if (newFee < 0) throw new IllegalArgumentException("New fees must be non-negative");
+        if (usd < 0) throw new IllegalArgumentException("New fees must be non-negative");
     }
 
     public Fees(long nodeFee, long networkFee, long serviceFee) {
@@ -55,7 +55,7 @@ public record Fees(long nodeFee, long networkFee, long serviceFee, double newFee
      * @return true if there is nothing to charge for these fees
      */
     public boolean nothingToCharge() {
-        return nodeFee == 0 && networkFee == 0 && serviceFee == 0 && newFee == 0;
+        return nodeFee == 0 && networkFee == 0 && serviceFee == 0 && usd == 0;
     }
 
     /**
@@ -119,10 +119,7 @@ public record Fees(long nodeFee, long networkFee, long serviceFee, double newFee
      * @return a pre-populated builder
      */
     public Builder copyBuilder() {
-        final var bulder = new Builder().nodeFee(nodeFee).networkFee(networkFee).serviceFee(serviceFee);//.newFee(newFee);
-        System.out.println("returning the copy builder " + bulder);
-
-        return bulder;
+        return new Builder().nodeFee(nodeFee).networkFee(networkFee).serviceFee(serviceFee);
     }
 
     /**
@@ -132,7 +129,7 @@ public record Fees(long nodeFee, long networkFee, long serviceFee, double newFee
      */
     public Fees plus(@NonNull final Fees fees) {
         requireNonNull(fees);
-        return new Fees(nodeFee + fees.nodeFee(), networkFee + fees.networkFee(), serviceFee + fees.serviceFee(), newFee + fees.newFee());
+        return new Fees(nodeFee + fees.nodeFee(), networkFee + fees.networkFee(), serviceFee + fees.serviceFee(), usd + fees.usd());
     }
 
     /**
