@@ -449,7 +449,8 @@ class CryptoOpsUsageTest {
         assertEquals(expected, actual);
     }
 
-     private void verifyApprovalCosts(final TransactionBody tBody, final CryptoApproveAllowanceTransactionBody approveBody) {
+    private void verifyApprovalCosts(
+            final TransactionBody tBody, final CryptoApproveAllowanceTransactionBody approveBody) {
         final var expected = new UsageAccumulator();
         final var baseMeta = new BaseTransactionMeta(0, 0);
         final var opMeta = new CryptoApproveAllowanceMeta(
