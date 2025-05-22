@@ -1205,7 +1205,7 @@ public class CryptoApproveAllowanceSuite {
     }
 
     @HapiTest
-    final Stream<DynamicTest> chargedUSDScalesWithAllowances() {
+    final Stream<DynamicTest> chargedUsdScalesWithAllowances() {
         return hapiTest(
                 newKeyNamed(SUPPLY_KEY),
                 cryptoCreate(OWNER).balance(ONE_HUNDRED_HBARS).maxAutomaticTokenAssociations(10),

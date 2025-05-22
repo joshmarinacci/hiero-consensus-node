@@ -496,7 +496,7 @@ class CryptoOpsUsageTest {
 
     @Test
     void calculateMultipleApprovalsWithTheSameSpender() {
-        var approveOp = CryptoApproveAllowanceTransactionBody.newBuilder()
+        final var approveOp = CryptoApproveAllowanceTransactionBody.newBuilder()
                 // same spender
                 .addAllCryptoAllowances(List.of(
                         CryptoAllowance.newBuilder()
@@ -514,13 +514,12 @@ class CryptoOpsUsageTest {
                 .addAllTokenAllowances(List.of(tokenAllowances))
                 .addAllNftAllowances(List.of(nftAllowances))
                 .build();
-        var txn = makeApproveTxn(approveOp);
-        verifyApprovalCosts(txn, approveOp);
+        verifyApprovalCosts(makeApproveTxn(approveOp), approveOp);
     }
 
     @Test
     void calculateMultipleApprovalsWithDifferentSpenders() {
-        var approveOp = CryptoApproveAllowanceTransactionBody.newBuilder()
+        final var approveOp = CryptoApproveAllowanceTransactionBody.newBuilder()
                 // diff spenders
                 .addAllCryptoAllowances(List.of(
                         CryptoAllowance.newBuilder()
@@ -542,8 +541,7 @@ class CryptoOpsUsageTest {
                 .addAllTokenAllowances(List.of(tokenAllowances))
                 .addAllNftAllowances(List.of(nftAllowances))
                 .build();
-        var txn = makeApproveTxn(approveOp);
-        verifyApprovalCosts(txn, approveOp);
+        verifyApprovalCosts(makeApproveTxn(approveOp), approveOp);
     }
 
     @Test
