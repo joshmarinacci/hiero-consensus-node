@@ -449,7 +449,7 @@ class CryptoOpsUsageTest {
         assertEquals(expected, actual);
     }
 
-     private void verifyApprovalCosts(final TransactionBody tBody, final CryptoApproveAllowanceTransactionBody approveOp) {
+     private void verifyApprovalCosts(final TransactionBody tBody, final CryptoApproveAllowanceTransactionBody approveBody) {
         final var expected = new UsageAccumulator();
         final var baseMeta = new BaseTransactionMeta(0, 0);
         final var opMeta = new CryptoApproveAllowanceMeta(
@@ -474,16 +474,16 @@ class CryptoOpsUsageTest {
                 .setCurrentTokenAllowances(Collections.emptyMap())
                 .build();
 
-        final long msgBytesUsed = (approveOp.getCryptoAllowancesCount() * CRYPTO_ALLOWANCE_SIZE)
-                + (approveOp.getTokenAllowancesCount() * TOKEN_ALLOWANCE_SIZE)
-                + (approveOp.getNftAllowancesCount() * NFT_ALLOWANCE_SIZE)
-                + countSerials(approveOp.getNftAllowancesList()) * LONG_SIZE;
+        final long msgBytesUsed = (approveBody.getCryptoAllowancesCount() * CRYPTO_ALLOWANCE_SIZE)
+                + (approveBody.getTokenAllowancesCount() * TOKEN_ALLOWANCE_SIZE)
+                + (approveBody.getNftAllowancesCount() * NFT_ALLOWANCE_SIZE)
+                + countSerials(approveBody.getNftAllowancesList()) * LONG_SIZE;
 
         expected.addBpt(msgBytesUsed);
         final long lifetime = ESTIMATOR_UTILS.relativeLifetime(tBody, oldExpiry);
-        final var expectedBytes = (approveOp.getCryptoAllowancesCount() * CRYPTO_ALLOWANCE_SIZE)
-                + (approveOp.getTokenAllowancesCount() * TOKEN_ALLOWANCE_SIZE)
-                + (approveOp.getNftAllowancesCount() * NFT_ALLOWANCE_SIZE);
+        final var expectedBytes = (approveBody.getCryptoAllowancesCount() * CRYPTO_ALLOWANCE_SIZE)
+                + (approveBody.getTokenAllowancesCount() * TOKEN_ALLOWANCE_SIZE)
+                + (approveBody.getNftAllowancesCount() * NFT_ALLOWANCE_SIZE);
 
         expected.addRbs(expectedBytes * lifetime);
 
