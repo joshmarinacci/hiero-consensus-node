@@ -449,12 +449,12 @@ class CryptoOpsUsageTest {
         assertEquals(expected, actual);
     }
 
-    void verifyApprovalCosts(final TransactionBody transactionBody, final CryptoApproveAllowanceTransactionBody approveOp) {
+    void verifyApprovalCosts(final TransactionBody tBody, final CryptoApproveAllowanceTransactionBody approveOp) {
         final var expected = new UsageAccumulator();
         final var baseMeta = new BaseTransactionMeta(0, 0);
         final var opMeta = new CryptoApproveAllowanceMeta(
-                transactionBody.getCryptoApproveAllowance(),
-                transactionBody.getTransactionID().getTransactionValidStart().getSeconds());
+                tBody.getCryptoApproveAllowance(),
+                tBody.getTransactionID().getTransactionValidStart().getSeconds());
         final SigUsage sigUsage = new SigUsage(1, sigSize, 1);
         expected.resetForTransaction(baseMeta, sigUsage);
 
@@ -480,7 +480,7 @@ class CryptoOpsUsageTest {
                 + countSerials(approveOp.getNftAllowancesList()) * LONG_SIZE;
 
         expected.addBpt(msgBytesUsed);
-        final long lifetime = ESTIMATOR_UTILS.relativeLifetime(transactionBody, oldExpiry);
+        final long lifetime = ESTIMATOR_UTILS.relativeLifetime(tBody, oldExpiry);
         final var expectedBytes = (approveOp.getCryptoAllowancesCount() * CRYPTO_ALLOWANCE_SIZE)
                 + (approveOp.getTokenAllowancesCount() * TOKEN_ALLOWANCE_SIZE)
                 + (approveOp.getNftAllowancesCount() * NFT_ALLOWANCE_SIZE);
@@ -519,7 +519,7 @@ class CryptoOpsUsageTest {
 
     @Test
     void calculateMultipleApprovalsWithDifferentSpenders() {
-        final var approveOp = CryptoApproveAllowanceTransactionBody.newBuilder()
+        final var allowanceTransactionBody = CryptoApproveAllowanceTransactionBody.newBuilder()
                 // diff spenders
                 .addAllCryptoAllowances(List.of(
                         CryptoAllowance.newBuilder()
@@ -541,7 +541,7 @@ class CryptoOpsUsageTest {
                 .addAllTokenAllowances(List.of(tokenAllowances))
                 .addAllNftAllowances(List.of(nftAllowances))
                 .build();
-        verifyApprovalCosts(makeApproveTxn(approveOp), approveOp);
+        verifyApprovalCosts(makeApproveTxn(allowanceTransactionBody), allowanceTransactionBody);
     }
 
     @Test
