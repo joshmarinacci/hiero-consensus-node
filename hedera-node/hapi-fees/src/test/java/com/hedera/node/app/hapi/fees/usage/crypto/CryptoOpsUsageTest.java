@@ -449,12 +449,12 @@ class CryptoOpsUsageTest {
         assertEquals(expected, actual);
     }
 
-    void verifyApprovalCosts(TransactionBody txn, CryptoApproveAllowanceTransactionBody approveOp) {
+    void verifyApprovalCosts(final TransactionBody transactionBody, final CryptoApproveAllowanceTransactionBody approveOp) {
         final var expected = new UsageAccumulator();
         final var baseMeta = new BaseTransactionMeta(0, 0);
         final var opMeta = new CryptoApproveAllowanceMeta(
-                txn.getCryptoApproveAllowance(),
-                txn.getTransactionID().getTransactionValidStart().getSeconds());
+                transactionBody.getCryptoApproveAllowance(),
+                transactionBody.getTransactionID().getTransactionValidStart().getSeconds());
         final SigUsage sigUsage = new SigUsage(1, sigSize, 1);
         expected.resetForTransaction(baseMeta, sigUsage);
 
@@ -480,7 +480,7 @@ class CryptoOpsUsageTest {
                 + countSerials(approveOp.getNftAllowancesList()) * LONG_SIZE;
 
         expected.addBpt(msgBytesUsed);
-        final long lifetime = ESTIMATOR_UTILS.relativeLifetime(txn, oldExpiry);
+        final long lifetime = ESTIMATOR_UTILS.relativeLifetime(transactionBody, oldExpiry);
         final var expectedBytes = (approveOp.getCryptoAllowancesCount() * CRYPTO_ALLOWANCE_SIZE)
                 + (approveOp.getTokenAllowancesCount() * TOKEN_ALLOWANCE_SIZE)
                 + (approveOp.getNftAllowancesCount() * NFT_ALLOWANCE_SIZE);
@@ -496,7 +496,7 @@ class CryptoOpsUsageTest {
 
     @Test
     void calculateMultipleApprovalsWithTheSameSpender() {
-        final var approveOp = CryptoApproveAllowanceTransactionBody.newBuilder()
+        final var allowanceTransactionBody = CryptoApproveAllowanceTransactionBody.newBuilder()
                 // same spender
                 .addAllCryptoAllowances(List.of(
                         CryptoAllowance.newBuilder()
@@ -514,7 +514,7 @@ class CryptoOpsUsageTest {
                 .addAllTokenAllowances(List.of(tokenAllowances))
                 .addAllNftAllowances(List.of(nftAllowances))
                 .build();
-        verifyApprovalCosts(makeApproveTxn(approveOp), approveOp);
+        verifyApprovalCosts(makeApproveTxn(allowanceTransactionBody), allowanceTransactionBody);
     }
 
     @Test
@@ -612,12 +612,12 @@ class CryptoOpsUsageTest {
                 .build();
     }
 
-    private TransactionBody makeApproveTxn(CryptoApproveAllowanceTransactionBody approveOp) {
+    private TransactionBody makeApproveTxn(final CryptoApproveAllowanceTransactionBody approveAllowance) {
         return TransactionBody.newBuilder()
                 .setTransactionID(TransactionID.newBuilder()
                         .setTransactionValidStart(Timestamp.newBuilder().setSeconds(now))
                         .setAccountID(owner))
-                .setCryptoApproveAllowance(approveOp)
+                .setCryptoApproveAllowance(approveAllowance)
                 .build();
     }
 
