@@ -431,7 +431,7 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
                         meta.getNumTokens(), meta.getFungibleNumTransfers(), meta.getNftsTransfers())
                 * USAGE_PROPERTIES.legacyReceiptStorageSecs();
 
-        final var fees = feeContext
+        final var oldFees = feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(tokenSubTypeFrom(
                         type, op.hasFeeScheduleKey() || !op.customFees().isEmpty()))
@@ -446,8 +446,15 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
         params.put("numSignatures", 0);
         params.put("numKeys", 0);
         params.put("hasCustomFee", YesOrNo.NO);
+        params.put("numFTWithCustomFeeEntries",1);
+        if(op.hasFeeScheduleKey()) {
+            params.put("hasCustomFee", YesOrNo.YES);
+            for(final var fee : op.customFees() ) {
+                System.out.println("fee is " + fee.fixedFee());
+            }
+        }
         FeeResult simpleFee = entity.computeFee(params);
-        return new Fees(fees.nodeFee(), 0, fees.serviceFee(), simpleFee.fee);
+        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
     }
 
     /**
