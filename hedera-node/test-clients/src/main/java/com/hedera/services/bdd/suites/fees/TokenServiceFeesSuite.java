@@ -208,8 +208,8 @@ public class TokenServiceFeesSuite {
 
                 // do claim
                 tokenClaimAirdrop(
-                                HapiTokenClaimAirdrop.pendingAirdrop(OWNER, RECEIVER, FUNGIBLE_TOKEN),
-                                HapiTokenClaimAirdrop.pendingNFTAirdrop(OWNER, RECEIVER, NON_FUNGIBLE_TOKEN, 1))
+                        HapiTokenClaimAirdrop.pendingAirdrop(OWNER, RECEIVER, FUNGIBLE_TOKEN),
+                        HapiTokenClaimAirdrop.pendingNFTAirdrop(OWNER, RECEIVER, NON_FUNGIBLE_TOKEN, 1))
                         .payingWith(RECEIVER)
                         .via("claimTxn"), // assert txn record
                 getTxnRecord("claimTxn")
@@ -305,7 +305,7 @@ public class TokenServiceFeesSuite {
 
                 // Cancel the airdrop
                 tokenCancelAirdrop(
-                                pendingNFTAirdrop(account, RECEIVER_WITH_0_AUTO_ASSOCIATIONS, NON_FUNGIBLE_TOKEN, 1L))
+                        pendingNFTAirdrop(account, RECEIVER_WITH_0_AUTO_ASSOCIATIONS, NON_FUNGIBLE_TOKEN, 1L))
                         .payingWith(account)
                         .via("cancelAirdrop"),
 
@@ -385,53 +385,53 @@ public class TokenServiceFeesSuite {
                         .autoRenewPeriod(THREE_MONTHS_IN_SECONDS)
                         .adminKey(ADMIN_KEY)
                         .via(txnFor(commonNoFees)),
-//                tokenCreate(commonWithFees)
-//                        .blankMemo()
-//                        .entityMemo("")
-//                        .name(NAME)
-//                        .symbol("ABCD")
-//                        .payingWith(civilian)
-//                        .treasury(TOKEN_TREASURY)
-//                        .autoRenewAccount(AUTO_RENEW_ACCOUNT)
-//                        .autoRenewPeriod(THREE_MONTHS_IN_SECONDS)
-//                        .adminKey(ADMIN_KEY)
-//                        .withCustom(fixedHbarFee(ONE_HBAR, TOKEN_TREASURY))
-//                        .feeScheduleKey(customFeeKey)
-//                        .via(txnFor(commonWithFees)),
-//                tokenCreate(uniqueNoFees)
-//                        .payingWith(civilian)
-//                        .blankMemo()
-//                        .entityMemo("")
-//                        .name(NAME)
-//                        .symbol("ABCD")
-//                        .initialSupply(0L)
-//                        .tokenType(NON_FUNGIBLE_UNIQUE)
-//                        .treasury(TOKEN_TREASURY)
-//                        .autoRenewAccount(AUTO_RENEW_ACCOUNT)
-//                        .autoRenewPeriod(THREE_MONTHS_IN_SECONDS)
-//                        .adminKey(ADMIN_KEY)
-//                        .supplyKey(SUPPLY_KEY)
-//                        .via(txnFor(uniqueNoFees)),
-//                tokenCreate(uniqueWithFees)
-//                        .payingWith(civilian)
-//                        .blankMemo()
-//                        .entityMemo("")
-//                        .name(NAME)
-//                        .symbol("ABCD")
-//                        .initialSupply(0L)
-//                        .tokenType(NON_FUNGIBLE_UNIQUE)
-//                        .treasury(TOKEN_TREASURY)
-//                        .autoRenewAccount(AUTO_RENEW_ACCOUNT)
-//                        .autoRenewPeriod(THREE_MONTHS_IN_SECONDS)
-//                        .adminKey(ADMIN_KEY)
-//                        .withCustom(fixedHbarFee(ONE_HBAR, TOKEN_TREASURY))
-//                        .supplyKey(SUPPLY_KEY)
-//                        .feeScheduleKey(customFeeKey)
-//                        .via(txnFor(uniqueWithFees)),
-                validateChargedUsdWithin(txnFor(commonNoFees), expectedCommonNoCustomFeesPriceUsd, 0.01));
-//                validateChargedUsdWithin(txnFor(commonWithFees), expectedCommonWithCustomFeesPriceUsd, 0.01),
-//                validateChargedUsdWithin(txnFor(uniqueNoFees), expectedUniqueNoCustomFeesPriceUsd, 0.01),
-//                validateChargedUsdWithin(txnFor(uniqueWithFees), expectedUniqueWithCustomFeesPriceUsd, 0.01));
+                tokenCreate(commonWithFees)
+                        .blankMemo()
+                        .entityMemo("")
+                        .name(NAME)
+                        .symbol("ABCD")
+                        .payingWith(civilian)
+                        .treasury(TOKEN_TREASURY)
+                        .autoRenewAccount(AUTO_RENEW_ACCOUNT)
+                        .autoRenewPeriod(THREE_MONTHS_IN_SECONDS)
+                        .adminKey(ADMIN_KEY)
+                        .withCustom(fixedHbarFee(ONE_HBAR, TOKEN_TREASURY))
+                        .feeScheduleKey(customFeeKey)
+                        .via(txnFor(commonWithFees)),
+                tokenCreate(uniqueNoFees)
+                        .payingWith(civilian)
+                        .blankMemo()
+                        .entityMemo("")
+                        .name(NAME)
+                        .symbol("ABCD")
+                        .initialSupply(0L)
+                        .tokenType(NON_FUNGIBLE_UNIQUE)
+                        .treasury(TOKEN_TREASURY)
+                        .autoRenewAccount(AUTO_RENEW_ACCOUNT)
+                        .autoRenewPeriod(THREE_MONTHS_IN_SECONDS)
+                        .adminKey(ADMIN_KEY)
+                        .supplyKey(SUPPLY_KEY)
+                        .via(txnFor(uniqueNoFees)),
+                tokenCreate(uniqueWithFees)
+                        .payingWith(civilian)
+                        .blankMemo()
+                        .entityMemo("")
+                        .name(NAME)
+                        .symbol("ABCD")
+                        .initialSupply(0L)
+                        .tokenType(NON_FUNGIBLE_UNIQUE)
+                        .treasury(TOKEN_TREASURY)
+                        .autoRenewAccount(AUTO_RENEW_ACCOUNT)
+                        .autoRenewPeriod(THREE_MONTHS_IN_SECONDS)
+                        .adminKey(ADMIN_KEY)
+                        .withCustom(fixedHbarFee(ONE_HBAR, TOKEN_TREASURY))
+                        .supplyKey(SUPPLY_KEY)
+                        .feeScheduleKey(customFeeKey)
+                        .via(txnFor(uniqueWithFees)),
+                validateChargedUsdWithin(txnFor(commonNoFees), expectedCommonNoCustomFeesPriceUsd, 0.01),
+                validateChargedUsdWithin(txnFor(commonWithFees), expectedCommonWithCustomFeesPriceUsd, 0.01),
+                validateChargedUsdWithin(txnFor(uniqueNoFees), expectedUniqueNoCustomFeesPriceUsd, 0.01),
+                validateChargedUsdWithin(txnFor(uniqueWithFees), expectedUniqueWithCustomFeesPriceUsd, 0.01));
     }
 
     @HapiTest
@@ -514,18 +514,18 @@ public class TokenServiceFeesSuite {
                         .supplyKey(SUPPLY_KEY)
                         .tokenType(NON_FUNGIBLE_UNIQUE),
                 mintToken(
-                                UNIQUE_TOKEN,
-                                List.of(
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata,
-                                        standard100ByteMetadata))
+                        UNIQUE_TOKEN,
+                        List.of(
+                                standard100ByteMetadata,
+                                standard100ByteMetadata,
+                                standard100ByteMetadata,
+                                standard100ByteMetadata,
+                                standard100ByteMetadata,
+                                standard100ByteMetadata,
+                                standard100ByteMetadata,
+                                standard100ByteMetadata,
+                                standard100ByteMetadata,
+                                standard100ByteMetadata))
                         .payingWith(CIVILIAN_ACCT)
                         .signedBy(SUPPLY_KEY)
                         .blankMemo()
@@ -960,10 +960,10 @@ public class TokenServiceFeesSuite {
                             .supplyType(TokenSupplyType.INFINITE)
                             .initialSupply(0),
                     mintToken(
-                                    NFT_TOKEN,
-                                    IntStream.range(0, rangeAmount)
-                                            .mapToObj(a -> ByteString.copyFromUtf8(String.valueOf(a)))
-                                            .toList())
+                            NFT_TOKEN,
+                            IntStream.range(0, rangeAmount)
+                                    .mapToObj(a -> ByteString.copyFromUtf8(String.valueOf(a)))
+                                    .toList())
                             .payingWith(OWNER)
                             .signedBy(supplyKey)
                             .blankMemo()
@@ -1000,10 +1000,10 @@ public class TokenServiceFeesSuite {
                             .supplyType(TokenSupplyType.INFINITE)
                             .initialSupply(0),
                     mintToken(
-                                    NFT_TOKEN,
-                                    IntStream.range(0, mintAmount)
-                                            .mapToObj(a -> ByteString.copyFromUtf8(String.valueOf(a)))
-                                            .toList())
+                            NFT_TOKEN,
+                            IntStream.range(0, mintAmount)
+                                    .mapToObj(a -> ByteString.copyFromUtf8(String.valueOf(a)))
+                                    .toList())
                             .payingWith(OWNER)
                             .signedBy(supplyKey)
                             .blankMemo(),
