@@ -37,11 +37,11 @@ public class SimpleFeesSuite {
                 validateChargedUsd("update-topic-txn", 0.000_22)
         );
     }
-    // get topic info
+    //TODO: get topic info
     // submit message
     @HapiTest
     final Stream<DynamicTest> submitMessageFee() {
-        final byte[] messageBytes = new byte[600]; // 4k
+        final byte[] messageBytes = new byte[600]; // up to 1k
         Arrays.fill(messageBytes, (byte) 0b1);
         final var free_bytes = HCS_FREE_BYTES;// 256;
         return hapiTest(
@@ -69,7 +69,19 @@ public class SimpleFeesSuite {
         );
     }
 
-    // TODO: create token
-    // TODO: create token with custom fees
-    // TODO: burn token
+    // TODO: CryptoCreate, create token
+    // TODO: CryptoCreate, create token with custom fees
+    // TODO: CryptoDelete, delete token
+    // TODO: CryptoTransfer, transfer value in a FT
+    // TODO: CryptoGetAccountRecords: ??
+    // TODO: CryptoGetAccountBalance: ??
+    // TODO: CryptoGetInfo: ??
+    // TODO: CryptoApproveAllowance: approve single and multiple allowances
+    // TODO: CryptoDeleteAllowance: approvate
+
+    // TODO: Token services
+    // TODO: scheduled gransactions
+    // TODO: smart contracts
+    // TODO: File service
+    // TODO: random other stuff
 }
