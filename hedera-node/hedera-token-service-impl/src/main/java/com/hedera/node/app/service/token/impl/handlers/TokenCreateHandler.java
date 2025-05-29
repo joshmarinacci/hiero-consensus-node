@@ -24,6 +24,7 @@ import com.hedera.hapi.node.token.TokenCreateTransactionBody;
 import com.hedera.hapi.node.transaction.CustomFee;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.service.token.ReadableAccountStore;
@@ -441,8 +442,7 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
                 .addRamByteSeconds((meta.getBaseSize() + meta.getCustomFeeScheduleSize()) * meta.getLifeTime())
                 .calculate();
 
-//        HederaFunctionality.TOKEN_CREATE
-        EntityCreate entity = new EntityCreate("Token", "TokenCreate", "Create a token type", 7, true);
+        EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.TOKEN_CREATE, "Create a token type", 7, true);
         Map<String, Object> params = new HashMap<>();
         params.put("numSignatures", feeContext.numTxnSignatures());
         params.put("numKeys", 0);

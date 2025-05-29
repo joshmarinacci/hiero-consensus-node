@@ -1,6 +1,7 @@
 package com.hedera.services.bdd.suites.fees;
 
 import com.hedera.services.bdd.junit.HapiTest;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 
 import java.util.Arrays;
@@ -17,6 +18,7 @@ public class SimpleFeesSuite {
 
     // create topic, basic
     @HapiTest
+    @DisplayName("Simple fees for creating a topic")
     final Stream<DynamicTest> createTopicFee() {
         return hapiTest(
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
@@ -28,6 +30,7 @@ public class SimpleFeesSuite {
     // create topic with a custom fee
     // update topic
     @HapiTest
+    @DisplayName("Simple fees for updating a topic")
     final Stream<DynamicTest> updateTopicFee() {
         return hapiTest(
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
@@ -40,6 +43,7 @@ public class SimpleFeesSuite {
     //TODO: get topic info
     // submit message
     @HapiTest
+    @DisplayName("Simple fee for submitting a message")
     final Stream<DynamicTest> submitMessageFee() {
         final byte[] messageBytes = new byte[600]; // up to 1k
         Arrays.fill(messageBytes, (byte) 0b1);
@@ -53,9 +57,9 @@ public class SimpleFeesSuite {
                 validateChargedUsd("submit-message-txn", 0.000_10 + Math.max((messageBytes.length - free_bytes),0) * 0.000_011,1)
         );
     }
-    // submit bigger message
-    // with custom fees
 
+    //TODO: submit bigger message
+    //TODO: with custom fees
 
     // delete topic
     @HapiTest

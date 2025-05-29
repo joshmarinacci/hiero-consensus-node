@@ -15,6 +15,7 @@ import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.TransactionBody;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.ConsensusServiceFeeBuilder;
@@ -121,7 +122,7 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
                 .feeCalculatorFactory()
                 .feeCalculator(SubType.DEFAULT)
                 .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(op), sigValueObj));
-        EntityCreate entity = new EntityCreate("Consensus", "ConsensusDeleteTopic", "delete topic", 0, false);
+        EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_DELETE_TOPIC, "Delete a topic", 0, true);
         Map<String, Object> params = new HashMap<>();
         params.put("numSignatures", feeContext.numTxnSignatures());
         params.put("numKeys", 0);
