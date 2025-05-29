@@ -531,7 +531,7 @@ public class ConsensusSubmitMessageHandler implements TransactionHandler {
                     .calculate();
         }
 
-        return calculatorFactory
+        final var oldFees = calculatorFactory
                 .feeCalculator(SubType.DEFAULT)
                 .addBytesPerTransaction(BASIC_ENTITY_ID_SIZE + msgSize)
                 .addNetworkRamByteSeconds((LONG_SIZE + TX_HASH_SIZE) * RECEIPT_STORAGE_TIME_SEC)

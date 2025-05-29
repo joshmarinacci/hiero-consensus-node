@@ -271,9 +271,9 @@ public class DispatchProcessor {
             final var new_usd = feesToCharge.usd();
             final var new_tbar = usdToTiny(new_usd, exchangeRateManager.exchangeRates().currentRate());
             feesToCharge = new Fees(0,0,new_tbar,0);
-            dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
+            return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
         } else {
-            dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
+            return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
         }
     }
 
