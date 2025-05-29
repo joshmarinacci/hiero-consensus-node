@@ -123,11 +123,10 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
                 .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(op), sigValueObj));
         EntityCreate entity = new EntityCreate("Consensus", "ConsensusDeleteTopic", "delete topic", 0, false);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 0);
+        params.put("numSignatures", feeContext.numTxnSignatures());
         params.put("numKeys", 0);
         params.put("hasCustomFee", YesOrNo.NO);
         FeeResult simpleFee = entity.computeFee(params);
-        System.out.println("simple fee is " + simpleFee);
         return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
     }
 

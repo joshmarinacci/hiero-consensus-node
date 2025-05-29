@@ -210,7 +210,7 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
 
         EntityCreate entity = new EntityCreate("Consensus", "ConsensusUpdateTopic", "Update topic", 0, false);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 0);
+        params.put("numSignatures", feeContext.numTxnSignatures());
         params.put("numKeys", 0);
         params.put("hasCustomFee", YesOrNo.NO);
         FeeResult simpleFee = entity.computeFee(params);
