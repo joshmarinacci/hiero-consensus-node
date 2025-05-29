@@ -441,9 +441,10 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
                 .addRamByteSeconds((meta.getBaseSize() + meta.getCustomFeeScheduleSize()) * meta.getLifeTime())
                 .calculate();
 
+//        HederaFunctionality.TOKEN_CREATE
         EntityCreate entity = new EntityCreate("Token", "TokenCreate", "Create a token type", 7, true);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 0);
+        params.put("numSignatures", feeContext.numTxnSignatures());
         params.put("numKeys", 0);
         params.put("hasCustomFee", YesOrNo.NO);
         params.put("numFTWithCustomFeeEntries",1);
