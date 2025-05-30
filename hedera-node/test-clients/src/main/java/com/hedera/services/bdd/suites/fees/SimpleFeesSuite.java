@@ -1,6 +1,6 @@
 package com.hedera.services.bdd.suites.fees;
 
-import com.hedera.services.bdd.junit.HapiTest;
+import com.hedera.services.bdd.junit.LeakyHapiTest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 
@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.HCS_FREE_BYTES;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.*;
+import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HUNDRED_HBARS;
 
@@ -17,10 +18,11 @@ public class SimpleFeesSuite {
     private static final String PAYER = "payer";
 
     // create topic, basic
-    @HapiTest
+    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
     @DisplayName("Simple fees for creating a topic")
     final Stream<DynamicTest> createTopicFee() {
         return hapiTest(
+                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).via("create-topic-txn"),
                 validateChargedUsd("create-topic-txn", 0.01)
@@ -29,10 +31,11 @@ public class SimpleFeesSuite {
 
     // create topic with a custom fee
     // update topic
-    @HapiTest
+    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
     @DisplayName("Simple fees for updating a topic")
     final Stream<DynamicTest> updateTopicFee() {
         return hapiTest(
+                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
                 updateTopic("testTopic").adminKey(PAYER).payingWith(PAYER).via("update-topic-txn"),
@@ -42,7 +45,7 @@ public class SimpleFeesSuite {
     }
     //TODO: get topic info
     // submit message
-    @HapiTest
+    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
     @DisplayName("Simple fee for submitting a message")
     final Stream<DynamicTest> submitMessageFee() {
         final byte[] messageBytes = new byte[600]; // up to 1k
@@ -62,9 +65,10 @@ public class SimpleFeesSuite {
     //TODO: with custom fees
 
     // delete topic
-    @HapiTest
+    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
     final Stream<DynamicTest> deleteTopicFee() {
         return hapiTest(
+                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
                 deleteTopic("testTopic").payingWith(PAYER).via("delete-topic-txn"),

@@ -45,6 +45,7 @@ import com.hedera.node.app.spi.workflows.PreCheckException;
 import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.TopicsConfig;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import com.hederahashgraph.api.proto.java.FeeData;
@@ -233,20 +234,24 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
                 .feeCalculator(subType)
                 .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(body), sigValueObj));
 
-        EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", feeContext.numTxnSignatures());
-        params.put("numKeys", 0);
-        params.put("hasCustomFee", YesOrNo.NO);
-        if(hasCustomFees) {
-            params.put("hasCustomFee", YesOrNo.YES);
-            final var custom_fees = body.consensusCreateTopicOrThrow().customFees();
-            for(final var fee : custom_fees ) {
-                System.out.println("fee is " + fee);
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numKeys", 0);
+            params.put("hasCustomFee", YesOrNo.NO);
+            if (hasCustomFees) {
+                params.put("hasCustomFee", YesOrNo.YES);
+                final var custom_fees = body.consensusCreateTopicOrThrow().customFees();
+                for (final var fee : custom_fees) {
+                    System.out.println("fee is " + fee);
+                }
             }
+            FeeResult simpleFee = entity.computeFee(params);
+            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+        } else {
+            return oldFees;
         }
-        FeeResult simpleFee = entity.computeFee(params);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
     }
 
     private FeeData usageGiven(

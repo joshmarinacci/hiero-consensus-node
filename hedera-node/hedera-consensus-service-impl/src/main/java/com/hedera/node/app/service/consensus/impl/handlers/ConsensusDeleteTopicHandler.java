@@ -30,6 +30,7 @@ import com.hedera.node.app.spi.workflows.PreCheckException;
 import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
+import com.hedera.node.config.data.FeesConfig;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import javax.inject.Inject;
@@ -122,13 +123,17 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
                 .feeCalculatorFactory()
                 .feeCalculator(SubType.DEFAULT)
                 .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(op), sigValueObj));
-        EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_DELETE_TOPIC, "Delete a topic", 0, true);
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", feeContext.numTxnSignatures());
-        params.put("numKeys", 0);
-        params.put("hasCustomFee", YesOrNo.NO);
-        FeeResult simpleFee = entity.computeFee(params);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_DELETE_TOPIC, "Delete a topic", 0, true);
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numKeys", 0);
+            params.put("hasCustomFee", YesOrNo.NO);
+            FeeResult simpleFee = entity.computeFee(params);
+            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+        } else {
+            return oldFees;
+        }
     }
 
     private FeeData usageGiven(

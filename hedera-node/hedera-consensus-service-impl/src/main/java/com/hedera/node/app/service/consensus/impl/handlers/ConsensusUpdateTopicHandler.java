@@ -58,6 +58,7 @@ import com.hedera.node.app.spi.workflows.PreCheckException;
 import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.TopicsConfig;
 import com.hederahashgraph.api.proto.java.FeeData;
 import com.hederahashgraph.api.proto.java.Timestamp;
@@ -208,14 +209,18 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
                 .feeCalculatorFactory()
                 .feeCalculator(SubType.DEFAULT)
                 .legacyCalculate(sigValueObj -> usageGivenExplicit(op, sigValueObj, topic));
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
 
-        EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_UPDATE_TOPIC, "Update a topic", 0, false);
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", feeContext.numTxnSignatures());
-        params.put("numKeys", 0);
-        params.put("hasCustomFee", YesOrNo.NO);
-        FeeResult simpleFee = entity.computeFee(params);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_UPDATE_TOPIC, "Update a topic", 0, false);
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numKeys", 0);
+            params.put("hasCustomFee", YesOrNo.NO);
+            FeeResult simpleFee = entity.computeFee(params);
+            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+        } else {
+            return oldFees;
+        }
     }
 
     private void resolveMutableBuilderAttributes(
