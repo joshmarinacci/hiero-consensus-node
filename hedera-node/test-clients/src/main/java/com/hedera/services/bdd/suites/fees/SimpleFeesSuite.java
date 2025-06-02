@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.HCS_FREE_BYTES;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
+import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTopicInfo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.*;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
@@ -43,8 +44,22 @@ public class SimpleFeesSuite {
                 validateChargedUsd("update-topic-txn", 0.000_22)
         );
     }
-    //TODO: get topic info
-    // submit message
+
+    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    @DisplayName("Simple fees for updating a topic")
+    final Stream<DynamicTest> testGetTopicInfo() {
+        return hapiTest(
+                overriding("fees.simpleFeesEnabled", "true"),
+                cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
+                getTopicInfo("testTopic").payingWith(PAYER).via("get-topic-txn").logged(),
+                validateChargedUsd("create-topic-txn", 0.01),
+                validateChargedUsd("get-topic-txn", 0.000_1)
+        );
+    }
+
+
+
     @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
     @DisplayName("Simple fee for submitting a message")
     final Stream<DynamicTest> submitMessageFee() {
@@ -52,6 +67,7 @@ public class SimpleFeesSuite {
         Arrays.fill(messageBytes, (byte) 0b1);
         final var free_bytes = HCS_FREE_BYTES;// 256;
         return hapiTest(
+                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
                 submitMessageTo("testTopic").payingWith(PAYER).message(messageBytes).via("submit-message-txn"),
