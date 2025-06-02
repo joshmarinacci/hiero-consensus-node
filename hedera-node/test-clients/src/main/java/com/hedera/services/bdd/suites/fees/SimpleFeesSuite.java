@@ -30,7 +30,9 @@ public class SimpleFeesSuite {
         );
     }
 
-    // create topic with a custom fee
+    //TODO: create topic with a custom fee
+
+
     // update topic
     @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
     @DisplayName("Simple fees for updating a topic")
@@ -47,7 +49,7 @@ public class SimpleFeesSuite {
 
     @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
     @DisplayName("Simple fees for updating a topic")
-    final Stream<DynamicTest> testGetTopicInfo() {
+    final Stream<DynamicTest> getTopicInfoFee() {
         return hapiTest(
                 overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
@@ -77,8 +79,9 @@ public class SimpleFeesSuite {
         );
     }
 
+    //TODO: Submit message with custom fee
+
     //TODO: submit bigger message
-    //TODO: with custom fees
 
     // delete topic
     @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
