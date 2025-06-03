@@ -1,30 +1,47 @@
 package com.hedera.services.bdd.suites.fees;
 
+import com.hedera.services.bdd.junit.HapiTest;
+import com.hedera.services.bdd.junit.HapiTestLifecycle;
 import com.hedera.services.bdd.junit.LeakyHapiTest;
+import com.hedera.services.bdd.junit.support.TestLifecycle;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FILE_FREE_BYTES;
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.HCS_FREE_BYTES;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTopicInfo;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.*;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.createTopic;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoCreate;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.deleteTopic;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileCreate;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileUpdate;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.submitMessageTo;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.updateTopic;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HUNDRED_HBARS;
 
+@HapiTestLifecycle
 public class SimpleFeesSuite {
     private static final String PAYER = "payer";
 
+    @BeforeAll
+    static void beforeAll(@NonNull final TestLifecycle testLifecycle) {
+        testLifecycle.overrideInClass(Map.of("fees.simpleFeesEnabled","true"));
+    }
+
     // create topic, basic
-    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    @HapiTest
     @DisplayName("Simple fees for creating a topic")
     final Stream<DynamicTest> createTopicFee() {
         return hapiTest(
-                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).via("create-topic-txn"),
                 validateChargedUsd("create-topic-txn", 0.01)
@@ -35,11 +52,10 @@ public class SimpleFeesSuite {
 
 
     // update topic
-    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    @HapiTest
     @DisplayName("Simple fees for updating a topic")
     final Stream<DynamicTest> updateTopicFee() {
         return hapiTest(
-                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
                 updateTopic("testTopic").adminKey(PAYER).payingWith(PAYER).via("update-topic-txn"),
@@ -48,11 +64,10 @@ public class SimpleFeesSuite {
         );
     }
 
-    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    @HapiTest
     @DisplayName("Simple fees for updating a topic")
     final Stream<DynamicTest> getTopicInfoFee() {
         return hapiTest(
-                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
                 getTopicInfo("testTopic").payingWith(PAYER).via("get-topic-txn").logged(),
@@ -70,7 +85,6 @@ public class SimpleFeesSuite {
         Arrays.fill(messageBytes, (byte) 0b1);
         final var free_bytes = HCS_FREE_BYTES;// 256;
         return hapiTest(
-                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
                 submitMessageTo("testTopic").payingWith(PAYER).message(messageBytes).via("submit-message-txn"),
