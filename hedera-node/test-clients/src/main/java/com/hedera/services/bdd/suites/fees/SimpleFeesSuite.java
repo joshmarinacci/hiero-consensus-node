@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DynamicTest;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FILE_FREE_BYTES;
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.HCS_FREE_BYTES;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTopicInfo;
@@ -95,6 +96,54 @@ public class SimpleFeesSuite {
                 validateChargedUsd("delete-topic-txn", 0.005_00)
         );
     }
+
+    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    final Stream<DynamicTest> fileCreateFee() {
+        final var byte_count = 1789;
+        var contents = "0".repeat(byte_count).getBytes();
+        final var PerFileByte = 0.000011;
+        final var FileCreate = 0.050_00;
+        return hapiTest(
+                overriding("fees.simpleFeesEnabled", "true"),
+                cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                fileCreate("test")
+                        .memo("memotext")
+                        .contents(contents)
+                        .payingWith(PAYER)
+                        .via("create-file-txn"),
+                validateChargedUsd("create-file-txn", FileCreate + (byte_count-FILE_FREE_BYTES)*PerFileByte)
+        );
+    }
+
+    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    final Stream<DynamicTest> fileUpdateFee() {
+        final var PerFileByte = 0.000011;
+        final var FileUpdate = 0.050_00;
+
+        var contents = "0".repeat(1789).getBytes();
+
+        final var byte_count = 4567;
+        var new_contents = "0".repeat(byte_count).getBytes();
+        return hapiTest(
+                overriding("fees.simpleFeesEnabled", "true"),
+                cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                fileCreate("test")
+                        .memo("memotext")
+                        .contents(contents)
+                        .payingWith(PAYER)
+                        .via("create-file-txn"),
+                fileUpdate("test")
+                        .contents(new_contents)
+                        .payingWith(PAYER)
+                        .via("update-file-txn"),
+                validateChargedUsd("update-file-txn", FileUpdate + (byte_count-FILE_FREE_BYTES)*PerFileByte)
+        );
+    }
+
+    // TODO:       fees.put("FileDelete", 0.00700);
+    // TODO:       fees.put("FileAppend", 0.05000);
+    // TODO:       fees.put("FileGetContents", 0.00010);
+    // TODO:       fees.put("FileGetInfo", 0.00010);
 
     // TODO: CryptoCreate, create token
     // TODO: CryptoCreate, create token with custom fees

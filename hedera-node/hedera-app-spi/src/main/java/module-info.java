@@ -31,4 +31,5 @@ module com.hedera.node.app.spi {
     exports com.hedera.node.app.hapi.fees.apis.common;
     exports com.hedera.node.app.hapi.fees.apis.consensus;
     exports com.hedera.node.app.hapi.fees;
+    exports com.hedera.node.app.hapi.fees.apis.file;
 }
