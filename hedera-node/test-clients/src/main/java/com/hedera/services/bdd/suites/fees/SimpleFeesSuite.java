@@ -20,7 +20,9 @@ import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTopicInfo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.createTopic;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoCreate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.deleteTopic;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileAppend;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileCreate;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileDelete;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileUpdate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.submitMessageTo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.updateTopic;
@@ -129,7 +131,7 @@ public class SimpleFeesSuite {
         );
     }
 
-    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    @HapiTest
     final Stream<DynamicTest> fileUpdateFee() {
         final var PerFileByte = 0.000011;
         final var FileUpdate = 0.050_00;
@@ -139,7 +141,6 @@ public class SimpleFeesSuite {
         final var byte_count = 4567;
         var new_contents = "0".repeat(byte_count).getBytes();
         return hapiTest(
-                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 fileCreate("test")
                         .memo("memotext")
@@ -154,8 +155,44 @@ public class SimpleFeesSuite {
         );
     }
 
-    // TODO:       fees.put("FileDelete", 0.00700);
-    // TODO:       fees.put("FileAppend", 0.05000);
+    @HapiTest
+    final Stream<DynamicTest> fileDeleteFee() {
+        final var PerFileByte = 0.000_011;
+        final var FileDelete = 0.007_00;
+
+        var contents = "0".repeat(1789).getBytes();
+
+        return hapiTest(
+                cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                fileCreate("test").memo("memotext").contents(contents).payingWith(PAYER).via("create-file-txn"),
+                fileDelete("test").payingWith(PAYER).via("delete-file-txn"),
+                validateChargedUsd("delete-file-txn", FileDelete)
+        );
+    }
+
+    @HapiTest
+    final Stream<DynamicTest> fileAppendFee() {
+        final var PerFileByte = 0.000011;
+        final var FileAppend = 0.050_00;
+
+
+        final var byte_count = 4567;
+        var new_contents = "0".repeat(byte_count).getBytes();
+        return hapiTest(
+                cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                fileCreate("test")
+                        .memo("memotext")
+                        .contents("0".repeat(1789).getBytes())
+                        .payingWith(PAYER)
+                        .via("create-file-txn"),
+                fileAppend("test")
+                        .content(new_contents)
+                        .payingWith(PAYER)
+                        .via("append-file-txn"),
+                validateChargedUsd("append-file-txn", FileAppend + (byte_count-FILE_FREE_BYTES)*PerFileByte)
+        );
+    }
+
     // TODO:       fees.put("FileGetContents", 0.00010);
     // TODO:       fees.put("FileGetInfo", 0.00010);
 
