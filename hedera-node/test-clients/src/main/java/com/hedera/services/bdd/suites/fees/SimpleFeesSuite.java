@@ -113,14 +113,13 @@ public class SimpleFeesSuite {
         );
     }
 
-    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    @HapiTest
     final Stream<DynamicTest> fileCreateFee() {
         final var byte_count = 1789;
         var contents = "0".repeat(byte_count).getBytes();
         final var PerFileByte = 0.000011;
         final var FileCreate = 0.050_00;
         return hapiTest(
-                overriding("fees.simpleFeesEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 fileCreate("test")
                         .memo("memotext")
