@@ -26,6 +26,7 @@ import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileDelete;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileUpdate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.submitMessageTo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.updateTopic;
+import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fixedConsensusHbarFee;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HUNDRED_HBARS;
@@ -50,7 +51,20 @@ public class SimpleFeesSuite {
         );
     }
 
-    //TODO: create topic with a custom fee
+    @HapiTest
+    @DisplayName("Simple fees for creating a topic with custom fees")
+    final Stream<DynamicTest> createTopicCustomFee() {
+        return hapiTest(
+                cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                cryptoCreate("collector"),
+                createTopic("testTopic")
+                        .blankMemo()
+                        .withConsensusCustomFee(fixedConsensusHbarFee(88, "collector"))
+//                        .withConsensusCustomFee(royaltyFeeNoFallback(6, 10, "collector"))
+                        .payingWith(PAYER).via("create-topic-txn"),
+                validateChargedUsd("create-topic-txn", 2)
+        );
+    }
 
 
     // update topic

@@ -239,14 +239,7 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);
-            params.put("hasCustomFee", YesOrNo.NO);
-            if (hasCustomFees) {
-                params.put("hasCustomFee", YesOrNo.YES);
-                final var custom_fees = body.consensusCreateTopicOrThrow().customFees();
-                for (final var fee : custom_fees) {
-                    System.out.println("fee is " + fee);
-                }
-            }
+            params.put("hasCustomFee", hasCustomFees?YesOrNo.YES:YesOrNo.NO);
             FeeResult simpleFee = entity.computeFee(params);
             return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
         } else {
