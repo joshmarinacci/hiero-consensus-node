@@ -97,6 +97,22 @@ public class TokenDeleteSpecs {
     }
 
     @HapiTest
+    final Stream<DynamicTest> deletionValidatesWrongAdminKey() {
+        return defaultHapiSpec("DeletionValidatesWrongAdminKey")
+                .given(
+                        newKeyNamed(MULTI_KEY),
+                        cryptoCreate(TOKEN_TREASURY).balance(0L),
+                        cryptoCreate(PAYER),
+                        tokenCreate("tbd")
+                                .adminKey(MULTI_KEY)
+                                .freezeDefault(false)
+                                .treasury(TOKEN_TREASURY)
+                                .payingWith(PAYER))
+                .when()
+                .then(tokenDelete("tbd").payingWith(PAYER).signedBy(PAYER).hasKnownStatus(INVALID_SIGNATURE));
+    }
+
+    @HapiTest
     final Stream<DynamicTest> deletionWorksAsExpected() {
         return hapiTest(
                 newKeyNamed(MULTI_KEY),
