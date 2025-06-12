@@ -134,7 +134,7 @@ public class TokenDeleteHandler implements TransactionHandler {
         params.put("numKeys", 0);
         params.put("hasCustomFee", YesOrNo.NO);
         FeeResult simpleFee = entity.computeFee(params);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
     }
 
     private FeeData usageGiven(final com.hederahashgraph.api.proto.java.TransactionBody txn, final SigValueObj svo) {

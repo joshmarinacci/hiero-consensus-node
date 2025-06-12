@@ -45,6 +45,8 @@ import javax.inject.Singleton;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
+
 /**
  * This class has the common logic that is executed for a user dispatch and a child dispatch transactions.
  * This will charge the fees to the creator if there is a node due diligence failure. Otherwise, charges the fees to the
@@ -270,7 +272,7 @@ public class DispatchProcessor {
         if(feesToCharge.usd() > 0) {
             final var new_usd = feesToCharge.usd();
             final var new_tbar = usdToTiny(new_usd, exchangeRateManager.exchangeRates().currentRate());
-            feesToCharge = new Fees(0,0,new_tbar,0);
+            feesToCharge = new Fees(0,0,new_tbar,0, new HashMap<>());
             return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
         } else {
             return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);

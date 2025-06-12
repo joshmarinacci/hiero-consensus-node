@@ -176,7 +176,7 @@ public class FileCreateHandler implements TransactionHandler {
             params.put("numKeys", 1);
             params.put("numBytes", (int)txnBody.fileCreateOrThrow().contents().length());
             FeeResult simpleFee = transfer.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
         }
 
         return oldFees;

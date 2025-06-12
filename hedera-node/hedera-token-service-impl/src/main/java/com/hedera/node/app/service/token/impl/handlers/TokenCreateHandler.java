@@ -455,7 +455,7 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
             }
         }
         FeeResult simpleFee = entity.computeFee(params);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
     }
 
     /**

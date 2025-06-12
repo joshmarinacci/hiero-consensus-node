@@ -97,9 +97,9 @@ public class SimpleFeesCalculatorImpl implements FeeCalculator {
             params.put("numKeys", 0);
             params.put("hasCustomFee", YesOrNo.NO);
             FeeResult simpleFee = entity.computeFee(params);
-            return new Fees(0,0,0, simpleFee.fee);
+            return new Fees(0,0,0, simpleFee.fee, simpleFee.details);
         }
-        return new Fees(0,0,0, 0);
+        return new Fees(0,0,0, 0, new HashMap<>());
     }
 
     @Override

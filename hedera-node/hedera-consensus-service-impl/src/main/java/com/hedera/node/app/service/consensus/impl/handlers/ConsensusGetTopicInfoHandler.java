@@ -185,7 +185,7 @@ public class ConsensusGetTopicInfoHandler extends PaidQueryHandler {
             params.put("numKeys", 0);
             params.put("hasCustomFee", YesOrNo.NO);
             FeeResult simpleFee = entity.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
         } else {
             return oldFees;
         }

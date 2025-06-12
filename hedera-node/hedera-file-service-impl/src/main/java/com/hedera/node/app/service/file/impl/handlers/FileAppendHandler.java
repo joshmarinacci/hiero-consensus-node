@@ -214,7 +214,7 @@ public class FileAppendHandler implements TransactionHandler {
             params.put("numKeys", 1);
             params.put("numBytes", (int)body.fileAppendOrThrow().contents().length());
             FeeResult simpleFee = transfer.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
         } else {
             return oldFees;
         }

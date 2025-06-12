@@ -194,7 +194,7 @@ public final class TokenBurnHandler extends BaseTokenHandler implements Transact
 
         FeeResult simpleFee = entity.computeFee(params);
         System.out.println("simple fee is " + simpleFee);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
+        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
     }
 
     private ValidationResult validateSemantics(
