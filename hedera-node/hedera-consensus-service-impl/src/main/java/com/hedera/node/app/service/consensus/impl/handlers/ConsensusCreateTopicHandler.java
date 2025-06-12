@@ -229,22 +229,10 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
                 !body.consensusCreateTopicOrThrow().customFees().isEmpty();
         final var subType = hasCustomFees ? SubType.TOPIC_CREATE_WITH_CUSTOM_FEES : SubType.DEFAULT;
 
-        final var oldFees = feeContext
+        return feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(subType)
                 .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(body), sigValueObj));
-
-        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
-            Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 0);
-            params.put("hasCustomFee", hasCustomFees?YesOrNo.YES:YesOrNo.NO);
-            FeeResult simpleFee = entity.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee);
-        } else {
-            return oldFees;
-        }
     }
 
     private FeeData usageGiven(

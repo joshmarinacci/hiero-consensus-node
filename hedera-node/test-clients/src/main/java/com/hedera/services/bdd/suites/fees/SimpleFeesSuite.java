@@ -45,6 +45,7 @@ public class SimpleFeesSuite {
     @DisplayName("Simple fees for creating a topic")
     final Stream<DynamicTest> createTopicFee() {
         return hapiTest(
+                overriding("fees.simpleFeesCalculatorEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).via("create-topic-txn"),
                 validateChargedUsd("create-topic-txn", 0.01)
