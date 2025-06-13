@@ -14,4 +14,5 @@ public record FeesConfig(
         @ConfigProperty(defaultValue = "DEFAULT(0,1:1)") EntityScaleFactors percentUtilizationScaleFactors,
         @ConfigProperty(defaultValue = "false") @NetworkProperty boolean simpleFeesEnabled,
         @ConfigProperty(defaultValue = "false") @NetworkProperty boolean simpleFeesCalculatorEnabled,
+        @ConfigProperty(defaultValue = "true") @NetworkProperty boolean useChargedFeesCalculator,
         @ConfigProperty(defaultValue = "380") @NetworkProperty int tokenTransferUsageMultiplier) {}

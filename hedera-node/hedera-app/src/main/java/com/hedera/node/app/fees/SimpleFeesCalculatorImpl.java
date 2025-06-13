@@ -9,6 +9,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.Key;
+import com.hedera.hapi.node.transaction.ExchangeRate;
 import com.hedera.hapi.node.transaction.TransactionBody;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
@@ -28,27 +29,21 @@ import java.util.function.Function;
 public class SimpleFeesCalculatorImpl implements FeeCalculator {
     private final SigUsage sigUsage;
     private final TransactionBody txBody;
-    private final FeeContextImpl feeContext;
+    private final com.hederahashgraph.api.proto.java.ExchangeRate currentRate;
+    private final int numVerifications;
 
-    SimpleFeesCalculatorImpl(
-            FeeContextImpl feeContext,
+    public SimpleFeesCalculatorImpl(
             @NonNull TransactionBody txBody,
             @NonNull Key payerKey,
             final int numVerifications,
-            final int signatureMapSize
-//            @NonNull final com.hedera.hapi.node.base.FeeData feeData,
-//            @NonNull final ExchangeRate currentRate,
-//            final boolean isInternalDispatch,
-//            final CongestionMultipliers congestionMultipliers,
-//            final ReadableStoreFactory storeFactory
+            final int signatureMapSize,
+            @NonNull final ExchangeRate currentRate
     ) {
         requireNonNull(txBody);
-        this.feeContext = feeContext;
-        System.out.println("creating a simple fees calculator 1");
+        this.numVerifications = numVerifications;
         sigUsage = new SigUsage(numVerifications, signatureMapSize, countOfCryptographicKeys(payerKey));
-        System.out.println("the txn body is " + txBody);
-        System.out.println("kind is " + txBody.data().kind());
         this.txBody = txBody;
+        this.currentRate = fromPbj(currentRate);
     }
     @Override
     public @NonNull FeeCalculator withResourceUsagePercent(double percent) {
@@ -93,13 +88,25 @@ public class SimpleFeesCalculatorImpl implements FeeCalculator {
             System.out.println("consensus create topic");
             EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numSignatures", numVerifications);
             params.put("numKeys", 0);
             params.put("hasCustomFee", YesOrNo.NO);
             FeeResult simpleFee = entity.computeFee(params);
-            return new Fees(0,0,0, simpleFee.fee, simpleFee.details);
+            //TODO: I'm pretty sure these calculations are wrong
+            final var node_tinycents = this.tinyCentsToTinyBar(this.usdToTinycents(simpleFee.fee*0.10));
+            final var network_tinycents = this.tinyCentsToTinyBar(this.usdToTinycents(simpleFee.fee*0.45));
+            final var service_tinycents = this.tinyCentsToTinyBar(this.usdToTinycents(simpleFee.fee*0.45));
+            return new Fees(node_tinycents,network_tinycents,service_tinycents, 0, simpleFee.details);
         }
         return new Fees(0,0,0, 0, new HashMap<>());
+    }
+
+    private long tinyCentsToTinyBar(long tcents) {
+        return tcents* this.currentRate.getHbarEquiv()/this.currentRate.getCentEquiv() * 100;
+    }
+
+    private long usdToTinycents(double v) {
+        return Math.round(v * 100_000_000L);
     }
 
     @Override

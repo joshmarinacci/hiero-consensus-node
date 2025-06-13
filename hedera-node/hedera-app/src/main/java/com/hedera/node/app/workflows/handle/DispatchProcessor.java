@@ -36,6 +36,7 @@ import com.hedera.node.app.workflows.handle.steps.SystemFileUpdates;
 import com.hedera.node.app.workflows.handle.throttle.DispatchUsageManager;
 import com.hedera.node.app.workflows.handle.throttle.ThrottleException;
 import com.hedera.node.config.data.ContractsConfig;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.NetworkAdminConfig;
 import com.swirlds.state.lifecycle.info.NetworkInfo;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -269,6 +270,10 @@ public class DispatchProcessor {
         }
 
         var feesToCharge = waiveServiceFee ? fees.withoutServiceComponent() : fees;
+        final var feesConfig = dispatch.config().getConfigData(FeesConfig.class);
+        if(feesConfig.simpleFeesCalculatorEnabled()) {
+            return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
+        }
         if(feesToCharge.usd() > 0) {
             final var new_usd = feesToCharge.usd();
             final var new_tbar = usdToTiny(new_usd, exchangeRateManager.exchangeRates().currentRate());

@@ -91,7 +91,8 @@ public class FeeContextImpl implements FeeContext {
         final var signatureMapSize = SignatureMap.PROTOBUF.measureRecord(txInfo.signatureMap());
         if(this.configuration().getConfigData(FeesConfig.class).simpleFeesCalculatorEnabled()) {
             if (txInfo.txBody().data().kind() == TransactionBody.DataOneOfType.CONSENSUS_CREATE_TOPIC) {
-                return new SimpleFeesCalculatorImpl(this, txInfo.txBody(), payerKey, numVerifications, signatureMapSize);
+                final var rate = feeManager.exchangeRateManager.activeRate(consensusTime);
+                return new SimpleFeesCalculatorImpl(txInfo.txBody(), payerKey, numVerifications, signatureMapSize, rate);
             }
         }
         return feeManager.createFeeCalculator(
