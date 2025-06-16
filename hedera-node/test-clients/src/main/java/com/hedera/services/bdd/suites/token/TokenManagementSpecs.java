@@ -59,23 +59,7 @@ import static com.hedera.services.bdd.suites.crypto.AutoAccountCreationSuite.TOK
 import static com.hedera.services.bdd.suites.crypto.AutoAccountCreationSuite.VALID_ALIAS;
 import static com.hedera.services.bdd.suites.token.TokenTransactSpecs.CIVILIAN;
 import static com.hedera.services.bdd.suites.token.TokenTransactSpecs.TRANSFER_TXN;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.ACCOUNT_FROZEN_FOR_TOKEN;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.ACCOUNT_KYC_NOT_GRANTED_FOR_TOKEN;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.CANNOT_WIPE_TOKEN_TREASURY_ACCOUNT;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INSUFFICIENT_TOKEN_BALANCE;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_ACCOUNT_ID;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_SIGNATURE;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_TOKEN_BURN_AMOUNT;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_TOKEN_BURN_METADATA;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_TOKEN_MINT_AMOUNT;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_TOKEN_MINT_METADATA;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_WIPING_AMOUNT;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.OK;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TOKEN_HAS_NO_KYC_KEY;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TOKEN_HAS_NO_SUPPLY_KEY;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TOKEN_HAS_NO_WIPE_KEY;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TOKEN_MAX_SUPPLY_REACHED;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TOKEN_NOT_ASSOCIATED_TO_ACCOUNT;
+import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.*;
 import static com.hederahashgraph.api.proto.java.TokenFreezeStatus.Frozen;
 import static com.hederahashgraph.api.proto.java.TokenFreezeStatus.Unfrozen;
 import static com.hederahashgraph.api.proto.java.TokenKycStatus.Granted;
@@ -794,5 +778,21 @@ public class TokenManagementSpecs {
                         burnToken(SUPPLE, 2).hasKnownStatus(INVALID_TOKEN_BURN_AMOUNT),
                         burnToken(SUPPLE, 0).hasPrecheck(OK),
                         burnToken(SUPPLE, -1).hasPrecheck(INVALID_TOKEN_BURN_AMOUNT));
+    }
+    @HapiTest
+    final Stream<DynamicTest> requireCorrectSupplyKeys() {
+        return hapiTest(
+                newKeyNamed(SUPPLY_KEY),
+                newKeyNamed(TOKEN),
+                tokenCreate(TOKEN).supplyKey(SUPPLY_KEY).initialSupply(1),
+                // mint without the supply key
+                mintToken(TOKEN, 1).signedBy(GENESIS).hasKnownStatus(INVALID_SIGNATURE),
+                // mint with the supply key
+                mintToken(TOKEN, 1).signedBy(GENESIS, SUPPLY_KEY).hasKnownStatus(SUCCESS),
+                // burn without the supply key
+                burnToken(TOKEN, 1).signedBy(GENESIS).hasKnownStatus(INVALID_SIGNATURE),
+                // burn with the supply key
+                burnToken(TOKEN, 1).signedBy(GENESIS, SUPPLY_KEY).hasKnownStatus(SUCCESS)
+        );
     }
 }
