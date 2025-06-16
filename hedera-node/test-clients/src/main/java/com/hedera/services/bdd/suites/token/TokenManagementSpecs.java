@@ -522,6 +522,9 @@ public class TokenManagementSpecs {
                 wipeTokenAccount(wipeableToken, TOKEN_TREASURY, 1)
                         .signedBy(GENESIS)
                         .hasKnownStatus(INVALID_SIGNATURE),
+                wipeTokenAccount(wipeableUniqueToken, TOKEN_TREASURY, 1)
+                        .signedBy(GENESIS)
+                        .hasKnownStatus(INVALID_SIGNATURE),
                 wipeTokenAccount(wipeableToken, TOKEN_TREASURY, 1).hasKnownStatus(CANNOT_WIPE_TOKEN_TREASURY_ACCOUNT),
                 wipeTokenAccount(anotherWipeableToken, "misc", 501).hasKnownStatus(INVALID_WIPING_AMOUNT),
                 wipeTokenAccount(anotherWipeableToken, "misc", -1).hasPrecheck(INVALID_WIPING_AMOUNT),

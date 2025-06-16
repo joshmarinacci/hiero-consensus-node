@@ -12,21 +12,7 @@ import static com.hedera.services.bdd.spec.queries.QueryVerbs.getAccountInfo;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getContractInfo;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTxnRecord;
 import static com.hedera.services.bdd.spec.queries.crypto.ExpectedTokenRel.relationshipWith;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.burnToken;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.contractCreate;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.createDefaultContract;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoCreate;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoDelete;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoTransfer;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.mintToken;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenAssociate;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenCreate;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenDelete;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenDissociate;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenFreeze;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenUnfreeze;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenUpdate;
-import static com.hedera.services.bdd.spec.transactions.TxnVerbs.uploadInitCode;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.*;
 import static com.hedera.services.bdd.spec.transactions.token.HapiTokenAssociate.DEFAULT_FEE;
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.moving;
 import static com.hedera.services.bdd.spec.utilops.CustomSpecAssert.allRunFor;
@@ -232,6 +218,26 @@ public class TokenAssociationSpecs {
                 .given(tokenCreate(misc))
                 .when(createDefaultContract(contract).omitAdminKey())
                 .then(tokenAssociate(contract, misc).hasKnownStatus(INVALID_SIGNATURE));
+    }
+
+    @HapiTest
+    final Stream<DynamicTest> associateNeedsAccountSignature() {
+        String token = "someToken";
+        String alice = "alice";
+        String bob = "bob";
+        return hapiTest(
+                // create token with admin = alice
+                newKeyNamed(alice),
+                tokenCreate(token)
+                        .adminKey(alice),
+                // create account bob
+                cryptoCreate(bob).balance(0L).maxAutomaticTokenAssociations(0),
+                // associate token with account
+                //TODO: is this better than changing the tokenAssociate impl to have a flag to remove the default payer
+                // it results in the same INVALID_SIGNATURE even though it's really a "missing" signature.
+                tokenAssociate(bob, token).signedBy(DEFAULT_PAYER)
+                        .hasKnownStatus(INVALID_SIGNATURE)
+        );
     }
 
     @HapiTest
