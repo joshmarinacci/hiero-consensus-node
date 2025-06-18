@@ -62,6 +62,7 @@ import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
 import com.hedera.node.config.data.ConsensusConfig;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -510,6 +511,15 @@ public class ConsensusSubmitMessageHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         final var op = feeContext.body().consensusSubmitMessageOrThrow();
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            HCSSubmit submit = new HCSSubmit();
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numKeys", 0);
+            params.put("hasCustomFee", YesOrNo.NO);
+            params.put("numBytes",(int)op.message().length());
+            return submit.computeFee(params, feeContext.activeRate());
+        }
         final var calculatorFactory = feeContext.feeCalculatorFactory();
         final var msgSize = op.message().length();
 
@@ -531,20 +541,10 @@ public class ConsensusSubmitMessageHandler implements TransactionHandler {
                     .calculate();
         }
 
-        final var oldFees = calculatorFactory
+        return calculatorFactory
                 .feeCalculator(SubType.DEFAULT)
                 .addBytesPerTransaction(BASIC_ENTITY_ID_SIZE + msgSize)
                 .addNetworkRamByteSeconds((LONG_SIZE + TX_HASH_SIZE) * RECEIPT_STORAGE_TIME_SEC)
                 .calculate();
-
-        HCSSubmit submit = new HCSSubmit();
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", feeContext.numTxnSignatures());
-        params.put("numKeys", 0);
-        params.put("hasCustomFee", YesOrNo.NO);
-        params.put("numBytes",(int)op.message().length());
-        FeeResult simpleFee = submit.computeFee(params);
-        System.out.println("simple fee is " + simpleFee);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
     }
 }

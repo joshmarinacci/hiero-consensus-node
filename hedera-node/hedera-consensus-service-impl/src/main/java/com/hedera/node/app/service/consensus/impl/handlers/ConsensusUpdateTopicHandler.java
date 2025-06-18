@@ -200,27 +200,23 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
-        final var op = feeContext.body();
-        final var topicUpdate = op.consensusUpdateTopicOrElse(ConsensusUpdateTopicTransactionBody.DEFAULT);
-        final var topicId = topicUpdate.topicIDOrElse(TopicID.DEFAULT);
-        final var topic = feeContext.readableStore(ReadableTopicStore.class).getTopic(topicId);
-
-        final var oldFees = feeContext
-                .feeCalculatorFactory()
-                .feeCalculator(SubType.DEFAULT)
-                .legacyCalculate(sigValueObj -> usageGivenExplicit(op, sigValueObj, topic));
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-
             EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_UPDATE_TOPIC, "Update a topic", 0, false);
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);
             params.put("hasCustomFee", YesOrNo.NO);
-            FeeResult simpleFee = entity.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
-        } else {
-            return oldFees;
+            return entity.computeFee(params, feeContext.activeRate());
         }
+        final var op = feeContext.body();
+        final var topicUpdate = op.consensusUpdateTopicOrElse(ConsensusUpdateTopicTransactionBody.DEFAULT);
+        final var topicId = topicUpdate.topicIDOrElse(TopicID.DEFAULT);
+        final var topic = feeContext.readableStore(ReadableTopicStore.class).getTopic(topicId);
+
+        return feeContext
+                .feeCalculatorFactory()
+                .feeCalculator(SubType.DEFAULT)
+                .legacyCalculate(sigValueObj -> usageGivenExplicit(op, sigValueObj, topic));
     }
 
     private void resolveMutableBuilderAttributes(

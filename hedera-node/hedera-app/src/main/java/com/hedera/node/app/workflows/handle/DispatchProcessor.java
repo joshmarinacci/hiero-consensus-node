@@ -45,7 +45,6 @@ import javax.inject.Singleton;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 /**
  * This class has the common logic that is executed for a user dispatch and a child dispatch transactions.
  * This will charge the fees to the creator if there is a node due diligence failure. Otherwise, charges the fees to the
@@ -247,7 +246,6 @@ public class DispatchProcessor {
         if (hasWaivedFees) {
             return Fees.FREE;
         }
-
         final var feesToCharge = waiveServiceFee ? fees.withoutServiceComponent() : fees;
         return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
     }

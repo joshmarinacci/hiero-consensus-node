@@ -117,23 +117,20 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
-        final var op = feeContext.body();
-
-        final var oldFees = feeContext
-                .feeCalculatorFactory()
-                .feeCalculator(SubType.DEFAULT)
-                .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(op), sigValueObj));
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_DELETE_TOPIC, "Delete a topic", 0, true);
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);
             params.put("hasCustomFee", YesOrNo.NO);
-            FeeResult simpleFee = entity.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
-        } else {
-            return oldFees;
+            return entity.computeFee(params, feeContext.activeRate());
         }
+        final var op = feeContext.body();
+        final var oldFees = feeContext
+                .feeCalculatorFactory()
+                .feeCalculator(SubType.DEFAULT)
+                .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(op), sigValueObj));
+        return oldFees;
     }
 
     private FeeData usageGiven(
