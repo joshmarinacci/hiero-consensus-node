@@ -204,20 +204,17 @@ public class CryptoDeleteAllowanceHandler implements TransactionHandler {
     @NonNull
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            return new Fees(0,0,0);
+        }
         final var body = feeContext.body();
         final var op = body.cryptoDeleteAllowanceOrThrow();
-        final var feesConfig= feeContext.configuration().getConfigData(FeesConfig.class);
-        final var oldFees = feeContext
+        return feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(SubType.DEFAULT)
                 .addBytesPerTransaction((long) op.nftAllowances().size() * NFT_DELETE_ALLOWANCE_SIZE
                         + (long) countNftDeleteSerials(op.nftAllowances()) * LONG_SIZE)
                 .calculate();
-        if(feesConfig.simpleFeesEnabled()) {
-            return new Fees(0,0,0);
-        } else {
-            return oldFees;
-        }
     }
 
     private int countNftDeleteSerials(final List<NftRemoveAllowance> nftAllowancesList) {
