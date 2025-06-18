@@ -225,25 +225,6 @@ public class DispatchProcessor {
                 .chargeFee(dispatch.creatorInfo().accountId(), dispatch.fees().networkFee(), null);
     }
 
-    private static double tbarToUSD(long tbar, ExchangeRate exchangeRate) {
-        final var tiny_to_hbar = 100_000_000L;
-        var hbar = (1.0*tbar)/tiny_to_hbar;
-        final var hbar_equiv = exchangeRate.hbarEquiv();
-        final var cent_equiv = exchangeRate.centEquiv();
-        final var convert = (1.0*hbar_equiv / cent_equiv) * 100.0;
-        var usd = hbar / convert;
-        return usd;
-    }
-    private static long usdToTiny(double usd, ExchangeRate exchangeRate) {
-        final var tiny_to_hbar = 100_000_000L;
-        final var hbar_equiv = exchangeRate.hbarEquiv();
-        final var cent_equiv = exchangeRate.centEquiv();
-        final var convert = (1.0*hbar_equiv / cent_equiv) * 100.0;
-        final var hbar_new = usd * convert;
-        final var tbar_new = (long)Math.floor(hbar_new * tiny_to_hbar);
-        return tbar_new;
-    }
-
     /**
      * Charges the payer for the fees. If the payer is unable to pay the service fee, the service fee
      * will be charged to the creator. If the transaction is a duplicate, the service fee will be waived.
@@ -270,18 +251,7 @@ public class DispatchProcessor {
         }
 
         var feesToCharge = waiveServiceFee ? fees.withoutServiceComponent() : fees;
-        final var feesConfig = dispatch.config().getConfigData(FeesConfig.class);
-        if(feesConfig.simpleFeesCalculatorEnabled()) {
-            return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
-        }
-        if(feesToCharge.usd() > 0) {
-            final var new_usd = feesToCharge.usd();
-            final var new_tbar = usdToTiny(new_usd, exchangeRateManager.exchangeRates().currentRate());
-            feesToCharge = new Fees(0,0,new_tbar,0, new HashMap<>());
-            return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
-        } else {
-            return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
-        }
+        return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
     }
 
     /**
