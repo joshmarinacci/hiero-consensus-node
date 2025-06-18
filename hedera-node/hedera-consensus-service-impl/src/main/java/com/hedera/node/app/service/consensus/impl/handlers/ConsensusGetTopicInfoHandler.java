@@ -170,6 +170,14 @@ public class ConsensusGetTopicInfoHandler extends PaidQueryHandler {
     @NonNull
     @Override
     public Fees computeFees(@NonNull QueryContext queryContext) {
+        if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_GET_TOPIC_INFO, "Query topic info", 0, false);
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", 0);
+            params.put("numKeys", 0);
+            params.put("hasCustomFee", YesOrNo.NO);
+            return entity.computeFee(params, queryContext.activeRate());
+        }
         final var query = queryContext.query();
         final var topicStore = queryContext.createStore(ReadableTopicStore.class);
         final var op = query.consensusGetTopicInfoOrThrow();
@@ -177,18 +185,7 @@ public class ConsensusGetTopicInfoHandler extends PaidQueryHandler {
         final var responseType = op.headerOrElse(QueryHeader.DEFAULT).responseType();
         final var topic = topicStore.getTopic(topicId);
 
-        final var oldFees = queryContext.feeCalculator().legacyCalculate(ignored -> usageGivenTypeAndTopic(topic, responseType));
-        if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_GET_TOPIC_INFO, "Query topic info", 0, false);
-            Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", 0);
-            params.put("numKeys", 0);
-            params.put("hasCustomFee", YesOrNo.NO);
-            FeeResult simpleFee = entity.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
-        } else {
-            return oldFees;
-        }
+        return queryContext.feeCalculator().legacyCalculate(ignored -> usageGivenTypeAndTopic(topic, responseType));
     }
 
     private FeeData usageGivenTypeAndTopic(@Nullable final Topic topic, @NonNull final ResponseType responseType) {
