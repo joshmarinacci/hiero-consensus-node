@@ -127,21 +127,18 @@ public class FileDeleteHandler implements TransactionHandler {
     @Override
     public Fees calculateFees(@NonNull FeeContext feeContext) {
         final var txnBody = feeContext.body();
-        final var oldFees = feeContext
-                .feeCalculatorFactory()
-                .feeCalculator(SubType.DEFAULT)
-                .legacyCalculate(
-                        svo -> usageEstimator.getFileDeleteTxFeeMatrices(CommonPbjConverters.fromPbj(txnBody), svo));
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             FileOperations transfer = new FileOperations("FileDelete", "dummy description");
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 1);
             params.put("numBytes", 0);//(int)txnBody.fileDeleteOrThrow().contents().length());
-            FeeResult simpleFee = transfer.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
-        } else {
-            return oldFees;
+            return transfer.computeFee(params, feeContext.activeRate());
         }
+        return feeContext
+                .feeCalculatorFactory()
+                .feeCalculator(SubType.DEFAULT)
+                .legacyCalculate(
+                        svo -> usageEstimator.getFileDeleteTxFeeMatrices(CommonPbjConverters.fromPbj(txnBody), svo));
     }
 }

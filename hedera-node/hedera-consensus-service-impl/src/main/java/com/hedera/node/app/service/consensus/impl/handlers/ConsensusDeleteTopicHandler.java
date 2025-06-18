@@ -126,11 +126,10 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
             return entity.computeFee(params, feeContext.activeRate());
         }
         final var op = feeContext.body();
-        final var oldFees = feeContext
+        return feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(SubType.DEFAULT)
                 .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(op), sigValueObj));
-        return oldFees;
     }
 
     private FeeData usageGiven(

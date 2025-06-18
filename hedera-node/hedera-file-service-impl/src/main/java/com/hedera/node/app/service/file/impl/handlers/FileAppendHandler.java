@@ -157,6 +157,14 @@ public class FileAppendHandler implements TransactionHandler {
     @Override
     public Fees calculateFees(@NonNull FeeContext feeContext) {
         final var body = feeContext.body();
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            FileOperations transfer = new FileOperations("FileAppend", "dummy description");
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numKeys", 1);
+            params.put("numBytes", (int) body.fileAppendOrThrow().contents().length());
+            return transfer.computeFee(params, feeContext.activeRate());
+        }
         final var op = body.fileAppendOrThrow();
         final var fileID = op.fileIDOrThrow();
         final var fileStore = feeContext.readableStore(ReadableFileStore.class);
@@ -200,25 +208,12 @@ public class FileAppendHandler implements TransactionHandler {
             effectiveLifeTime = effExpiration - effCreationTime;
         }
 
-        final var oldFees =  feeContext
+        return feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(SubType.DEFAULT)
                 .addBytesPerTransaction(BASIC_ENTITY_ID_SIZE + dataLength)
                 .addStorageBytesSeconds(dataLength * effectiveLifeTime)
                 .calculate();
-
-        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            FileOperations transfer = new FileOperations("FileAppend", "dummy description");
-            Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 1);
-            params.put("numBytes", (int)body.fileAppendOrThrow().contents().length());
-            FeeResult simpleFee = transfer.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
-        } else {
-            return oldFees;
-        }
-
     }
 
     private void handleAppendUpgradeFile(FileAppendTransactionBody fileAppend, HandleContext handleContext) {
