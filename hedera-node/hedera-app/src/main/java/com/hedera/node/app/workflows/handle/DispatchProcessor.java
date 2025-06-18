@@ -36,7 +36,6 @@ import com.hedera.node.app.workflows.handle.steps.SystemFileUpdates;
 import com.hedera.node.app.workflows.handle.throttle.DispatchUsageManager;
 import com.hedera.node.app.workflows.handle.throttle.ThrottleException;
 import com.hedera.node.config.data.ContractsConfig;
-import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.NetworkAdminConfig;
 import com.swirlds.state.lifecycle.info.NetworkInfo;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -46,7 +45,6 @@ import javax.inject.Singleton;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
 
 /**
  * This class has the common logic that is executed for a user dispatch and a child dispatch transactions.
@@ -250,7 +248,7 @@ public class DispatchProcessor {
             return Fees.FREE;
         }
 
-        var feesToCharge = waiveServiceFee ? fees.withoutServiceComponent() : fees;
+        final var feesToCharge = waiveServiceFee ? fees.withoutServiceComponent() : fees;
         return dispatch.feeChargingOrElse(appFeeCharging).charge(dispatch, validation, feesToCharge);
     }
 
