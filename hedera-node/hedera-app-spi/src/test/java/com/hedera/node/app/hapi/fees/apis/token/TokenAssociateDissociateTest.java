@@ -1,7 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
-import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.apis.common.AssociateOrDissociate;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -18,8 +19,8 @@ class TokenAssociateDissociateTest {
         params.put("numSignatures", 1);
         params.put("numTokenTypes", 1);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.05, fee.fee, "Token associate");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.05, fee.usd(), "Token associate");
     }
 
     @Test
@@ -29,8 +30,8 @@ class TokenAssociateDissociateTest {
         params.put("numSignatures", 1);
         params.put("numTokenTypes", 10);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(10 * 0.05, fee.fee, "Token associate - 10");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(10 * 0.05, fee.usd(), "Token associate - 10");
     }
 
     @Test
@@ -40,8 +41,8 @@ class TokenAssociateDissociateTest {
         params.put("numSignatures", 1);
         params.put("numTokenTypes", 1);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.05, fee.fee, "Token dissociate");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.05, fee.usd(), "Token dissociate");
     }
 
     @Test
@@ -51,8 +52,8 @@ class TokenAssociateDissociateTest {
         params.put("numSignatures", 1);
         params.put("numTokenTypes", 10);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(10 * 0.05, fee.fee, "Token dissociate - 10");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(10 * 0.05, fee.usd(), "Token dissociate - 10");
     }
 
 }

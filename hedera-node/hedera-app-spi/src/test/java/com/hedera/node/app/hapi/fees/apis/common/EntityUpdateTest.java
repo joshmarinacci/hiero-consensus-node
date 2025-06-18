@@ -1,6 +1,7 @@
 package com.hedera.node.app.hapi.fees.apis.common;
 
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -17,8 +18,8 @@ class EntityUpdateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 7);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(2 * 0.01, fee.fee, "Entity update");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(2 * 0.01, fee.usd(), "Entity update");
     }
 
     @Test
@@ -28,8 +29,8 @@ class EntityUpdateTest {
         params.put("numSignatures", 10);
         params.put("numKeys", 5);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0.0009 /* 9 * 0.0001 */, fee.fee, "Entity update");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.0009 /* 9 * 0.0001 */, fee.usd(), "Entity update");
     }
 
     @Test
@@ -39,8 +40,8 @@ class EntityUpdateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 10);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0.00022 + 9 * 0.01, fee.fee, "Crypto update");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.00022 + 9 * 0.01, fee.usd(), "Crypto update");
     }
 
     @Test
@@ -50,8 +51,8 @@ class EntityUpdateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 10);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0.001 + 3 * 0.01, fee.fee, "Token update");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.001 + 3 * 0.01, fee.usd(), "Token update");
     }
 
     @Test
@@ -61,8 +62,8 @@ class EntityUpdateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 10);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0.00022 + 9 * 0.01, fee.fee, "Topic update");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.00022 + 9 * 0.01, fee.usd(), "Topic update");
     }
 
     @Test
@@ -72,8 +73,8 @@ class EntityUpdateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 10);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0.116 /* (0.02600 + 9 * 0.01)*/, fee.fee, "Smart contract update");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.116 /* (0.02600 + 9 * 0.01)*/, fee.usd(), "Smart contract update");
     }
 
 }

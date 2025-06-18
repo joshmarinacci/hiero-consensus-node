@@ -1,7 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.common;
 
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -18,8 +19,8 @@ class EntityCreateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 7);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(2 * BaseFeeRegistry.getBaseFee("PerKey"), fee.fee, "Entity create");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(2 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Entity create");
     }
 
     @Test
@@ -29,8 +30,8 @@ class EntityCreateTest {
         params.put("numSignatures", 10);
         params.put("numKeys", 5);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(4 * BaseFeeRegistry.getBaseFee("PerSignature"), fee.fee, "Entity Create - multiple signatures");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(4 * BaseFeeRegistry.getBaseFee("PerSignature"), fee.usd(), "Entity Create - multiple signatures");
     }
 
     @Test
@@ -40,8 +41,8 @@ class EntityCreateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 10);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(BaseFeeRegistry.getBaseFee("CryptoCreate") + 8 * BaseFeeRegistry.getBaseFee("PerKey"), fee.fee, "Crypto Create");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(BaseFeeRegistry.getBaseFee("CryptoCreate") + 8 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Crypto Create");
     }
 
     @Test
@@ -52,8 +53,8 @@ class EntityCreateTest {
         params.put("numKeys", 10);
         params.put("hasCustomFee", YesOrNo.NO);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(BaseFeeRegistry.getBaseFee("TokenCreate") + 3 * BaseFeeRegistry.getBaseFee("PerKey"), fee.fee, "Token Create - no custom fee");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(BaseFeeRegistry.getBaseFee("TokenCreate") + 3 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Token Create - no custom fee");
     }
 
     @Test
@@ -64,8 +65,8 @@ class EntityCreateTest {
         params.put("numKeys", 10);
         params.put("hasCustomFee", YesOrNo.YES);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(BaseFeeRegistry.getBaseFee("TokenCreateWithCustomFee") + 3 * BaseFeeRegistry.getBaseFee("PerKey"), fee.fee, "Token Create - has custom fee");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(BaseFeeRegistry.getBaseFee("TokenCreateWithCustomFee") + 3 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Token Create - has custom fee");
     }
 
     @Test
@@ -76,8 +77,8 @@ class EntityCreateTest {
         params.put("numKeys", 5);
         params.put("hasCustomFee", YesOrNo.NO);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0 + BaseFeeRegistry.getBaseFee("ConsensusCreateTopic") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.fee, "Topic Create - no custom fee");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0 + BaseFeeRegistry.getBaseFee("ConsensusCreateTopic") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Topic Create - no custom fee");
     }
 
     @Test
@@ -88,8 +89,8 @@ class EntityCreateTest {
         params.put("numKeys", 5);
         params.put("hasCustomFee", YesOrNo.YES);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0 + BaseFeeRegistry.getBaseFee("ConsensusCreateTopicWithCustomFee") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.fee, "Topic Create - with custom fee");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0 + BaseFeeRegistry.getBaseFee("ConsensusCreateTopicWithCustomFee") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Topic Create - with custom fee");
     }
 
     @Test
@@ -99,8 +100,8 @@ class EntityCreateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 10);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0 + BaseFeeRegistry.getBaseFee("ContractCreate") + 9 * BaseFeeRegistry.getBaseFee("PerKey"), fee.fee, "Contract Create");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0 + BaseFeeRegistry.getBaseFee("ContractCreate") + 9 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Contract Create");
     }
 
     @Test
@@ -110,8 +111,8 @@ class EntityCreateTest {
         params.put("numSignatures", 1);
         params.put("numKeys", 5);
 
-        FeeResult fee = entity.computeFee(params);
-        assertEquals(0 + BaseFeeRegistry.getBaseFee("ScheduleCreate") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.fee, "Contract Create");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0 + BaseFeeRegistry.getBaseFee("ScheduleCreate") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Contract Create");
     }
 
 

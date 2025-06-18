@@ -1,8 +1,9 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.fees.apis.crypto.CryptoTransfer;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -66,8 +67,8 @@ class CryptoTokenTransferAirdropTest {
             params.put("numAutoAssociationsCreated", scenario.numAutoAssociationsCreated);
             params.put("numAutoAccountsCreated", scenario.numAutoAccountsCreated);
 
-            FeeResult fee = transfer.computeFee(params);
-            assertEquals(scenario.expectedFee, fee.fee, 1e-9, "hbar/token/airdrop test: " + scenario);
+            Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+            assertEquals(scenario.expectedFee, fee.usd(), 1e-9, "hbar/token/airdrop test: " + scenario);
         }
     }
 }

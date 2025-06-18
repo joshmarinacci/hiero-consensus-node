@@ -1,7 +1,7 @@
 package com.hedera.node.app.hapi.fees.apis.file;
 
-import com.hedera.node.app.hapi.fees.FeeResult;
-import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -21,13 +21,13 @@ class FileOperationsTest {
 
         for (int numBytes = 10; numBytes < 100000; numBytes += 100) {
             params.put("numBytes", numBytes);
-            FeeResult fee = transfer.computeFee(params);
+            Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
 
             double overage = (numBytes <= FILE_FREE_BYTES)
                     ? 0.05
                     : ((0.05 + (numBytes - FILE_FREE_BYTES) * 0.000011));
             overage = Math.round(overage * 1000000000) / 1000000000.0;
-            assertEquals(overage, fee.fee, "FILE operation fee - " + numBytes + " bytes");
+            assertEquals(overage, fee.usd(), "FILE operation fee - " + numBytes + " bytes");
         }
     }
 }

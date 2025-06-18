@@ -1,7 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.crypto;
 
 import com.hedera.node.app.hapi.fees.FeeCheckResult;
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -17,8 +18,8 @@ class CryptoTransferTest {
         Map<String, Object> params = new HashMap<>();
         params.put("numSignatures", 1);
         params.put("numAccountsInvolved", 2);
-        FeeResult fee = transfer.computeFee(params);
-        assertEquals(0.0001, fee.fee, "Simple hbar transfer");
+        Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.0001, fee.usd(), "Simple hbar transfer");
     }
 
     @Test
@@ -27,8 +28,8 @@ class CryptoTransferTest {
         Map<String, Object> params = new HashMap<>();
         params.put("numSignatures", 1);
         params.put("numAccountsInvolved", 5);
-        FeeResult fee = transfer.computeFee(params);
-        assertEquals(0.00013 /* 0.0001 + (3 * 0.00001) */, fee.fee, "Multiple hbar transfer");
+        Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.00013 /* 0.0001 + (3 * 0.00001) */, fee.usd(), "Multiple hbar transfer");
     }
 
     @Test
@@ -39,8 +40,8 @@ class CryptoTransferTest {
         params.put("numAccountsInvolved", 5);
         params.put("numFTNoCustomFeeEntries", 1);
 
-        FeeResult fee = transfer.computeFee(params);
-        assertEquals(   (3 * 0.00001) + 0.001, fee.fee, "Simple token transfer");
+        Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(   (3 * 0.00001) + 0.001, fee.usd(), "Simple token transfer");
     }
 
     @Test
@@ -51,8 +52,8 @@ class CryptoTransferTest {
         params.put("numAccountsInvolved", 10);
         params.put("numFTNoCustomFeeEntries", 5);
 
-        FeeResult fee = transfer.computeFee(params);
-        assertEquals( (8 * 0.00001) + (5 * 0.001), fee.fee,"Multiple token transfers");
+        Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals( (8 * 0.00001) + (5 * 0.001), fee.usd(),"Multiple token transfers");
     }
 
     @Test
@@ -63,8 +64,8 @@ class CryptoTransferTest {
         params.put("numAccountsInvolved", 10);
         params.put("numFTNoCustomFeeEntries", 5);
 
-        FeeResult fee = transfer.computeFee(params);
-        assertEquals((8 * 0.00001) + (5 * 0.001), fee.fee,"Multiple hbar and token transfers");
+        Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals((8 * 0.00001) + (5 * 0.001), fee.usd(),"Multiple hbar and token transfers");
     }
 
     @Test

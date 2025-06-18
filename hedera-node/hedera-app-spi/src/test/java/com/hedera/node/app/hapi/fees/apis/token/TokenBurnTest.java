@@ -1,7 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
-import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.apis.common.FTOrNFT;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -19,8 +20,8 @@ class TokenBurnTest {
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 1);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.001, fee.fee, "Token Burn");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.001, fee.usd(), "Token Burn");
     }
 
     @Test
@@ -31,8 +32,8 @@ class TokenBurnTest {
         params.put("fungibleOrNonFungible", FTOrNFT.Fungible);
         params.put("numTokens", 10);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.001, fee.fee, "Token Burn Fungible - 10");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.001, fee.usd(), "Token Burn Fungible - 10");
     }
     @Test
     void testTokenBurnMultipleNonFungible() {
@@ -42,8 +43,8 @@ class TokenBurnTest {
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 10);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.001 * 10, fee.fee, "Token Burn Non Fungible - 10");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.001 * 10, fee.usd(), "Token Burn Non Fungible - 10");
     }
 
     @Test
@@ -54,8 +55,8 @@ class TokenBurnTest {
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 10);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.001 * 10 + 4 * 0.0001, fee.fee, "Token Burn - 10 with multiple signatures");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.001 * 10 + 4 * 0.0001, fee.usd(), "Token Burn - 10 with multiple signatures");
     }
 
 }

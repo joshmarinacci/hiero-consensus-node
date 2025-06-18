@@ -1,6 +1,7 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -16,9 +17,8 @@ class TokenWipeTest {
         Map<String, Object> params = new HashMap<>();
         params.put("numSignatures", 1);
         params.put("numTokens", 1);
-
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.001, fee.fee, "Token Wipe - 1");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.001, fee.usd(), "Token Wipe - 1");
     }
 
     @Test
@@ -28,7 +28,7 @@ class TokenWipeTest {
         params.put("numSignatures", 1);
         params.put("numTokens", 5);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(5 * 0.001, fee.fee, "Token Wipe - multiple");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(5 * 0.001, fee.usd(), "Token Wipe - multiple");
     }
 }

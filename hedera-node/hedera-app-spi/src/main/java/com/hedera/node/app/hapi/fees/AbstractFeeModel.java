@@ -1,13 +1,16 @@
 package com.hedera.node.app.hapi.fees;
 
+import com.hedera.hapi.node.transaction.ExchangeRate;
 import com.hedera.node.app.hapi.fees.apis.common.AssociateOrDissociate;
 import com.hedera.node.app.hapi.fees.apis.common.FTOrNFT;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
+import com.hedera.node.app.spi.fees.Fees;
 
 import java.util.*;
 
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.MAX_SIGNATURES;
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.MIN_SIGNATURES;
+import static com.hedera.node.app.hapi.utils.CommonPbjConverters.fromPbj;
 
 public abstract class AbstractFeeModel {
     int numFreeSignatures = 1;
@@ -57,7 +60,7 @@ public abstract class AbstractFeeModel {
 
 
     // Compute the fee. There are 2 parts to the fee. There's the API specific fee (e.g. cryptoCreate price is based on the number of keys), and there's fee for parameters that are common across all APIs (e.g. number of signatures)
-    public FeeResult computeFee(Map<String, Object> values) {
+    public Fees computeFee(Map<String, Object> values, ExchangeRate exchangeRate) {
         preprocessEnumValues(values);
 
         FeeResult result = computeApiSpecificFee(values);
@@ -71,7 +74,20 @@ public abstract class AbstractFeeModel {
                 result.addDetail("Additional signature verifications", additionalSignatures, fee);
             }
         }
-        return result;
+
+        //TODO: I'm pretty sure these calculations are wrong
+        final var nodeTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.10), exchangeRate);
+        final var networkTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.45), exchangeRate);
+        final var serviceTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.45), exchangeRate);
+        return new Fees(nodeTc,networkTc,serviceTc, result.fee, result.details);
+    }
+    private long tinyCentsToTinyBar(long tcents, ExchangeRate cr) {
+        final var currentRate = fromPbj(cr);
+        return tcents* currentRate.getHbarEquiv()/currentRate.getCentEquiv() * 100;
+    }
+
+    private long usdToTinycents(double v) {
+        return Math.round(v * 100_000_000L);
     }
 
     // Compute API specific fee (e.g. cryptoCreate price is based on the number of keys)

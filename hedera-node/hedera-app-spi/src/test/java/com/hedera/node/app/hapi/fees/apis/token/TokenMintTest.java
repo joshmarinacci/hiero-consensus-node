@@ -1,7 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
-import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.apis.common.FTOrNFT;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -19,8 +20,8 @@ class TokenMintTest {
         params.put("fungibleOrNonFungible", FTOrNFT.Fungible);
         params.put("numTokens", 10);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.001, fee.fee, "Fungible Token Mint");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.001, fee.usd(), "Fungible Token Mint");
     }
 
     @Test
@@ -31,8 +32,8 @@ class TokenMintTest {
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 1);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.02, fee.fee, "Non Fungible Token Mint - 1");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.02, fee.usd(), "Non Fungible Token Mint - 1");
     }
 
     @Test
@@ -43,8 +44,8 @@ class TokenMintTest {
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 10);
 
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.2, fee.fee, "Non Fungible Token Mint - 10");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.2, fee.usd(), "Non Fungible Token Mint - 10");
     }
 
 
@@ -55,7 +56,7 @@ class TokenMintTest {
         params.put("numSignatures", 6);
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 1);
-        FeeResult fee = topic.computeFee(params);
-        assertEquals(0.0205, fee.fee, "NFT mint with multiple signatures");
+        Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate());
+        assertEquals(0.0205, fee.usd(), "NFT mint with multiple signatures");
     }
 }
