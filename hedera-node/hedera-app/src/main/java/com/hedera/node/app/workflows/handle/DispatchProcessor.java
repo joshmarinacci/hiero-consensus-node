@@ -17,7 +17,6 @@ import static com.hedera.node.app.workflows.handle.HandleWorkflow.ALERT_MESSAGE;
 import static java.util.Objects.requireNonNull;
 
 import com.hedera.hapi.node.base.ResponseCodeEnum;
-import com.hedera.hapi.node.transaction.ExchangeRate;
 import com.hedera.node.app.fees.AppFeeCharging;
 import com.hedera.node.app.fees.ExchangeRateManager;
 import com.hedera.node.app.service.contract.impl.handlers.EthereumTransactionHandler;
