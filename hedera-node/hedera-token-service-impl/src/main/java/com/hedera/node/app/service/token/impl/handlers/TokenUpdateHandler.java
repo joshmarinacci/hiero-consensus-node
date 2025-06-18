@@ -55,6 +55,7 @@ import com.hedera.node.app.spi.workflows.PreCheckException;
 import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
+import com.hedera.node.config.data.FeesConfig;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
@@ -597,23 +598,24 @@ public class TokenUpdateHandler extends BaseTokenHandler implements TransactionH
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            EntityCreate entity = new EntityCreate("Token", "TokenUpdate", "Update a token type", 0, false);
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", 0);
+            params.put("numKeys", 0);
+            params.put("hasCustomFee", YesOrNo.NO);
+            return entity.computeFee(params, feeContext.activeRate());
+        }
         final var body = feeContext.body();
         final var op = body.tokenUpdateOrThrow();
         final var readableStore = feeContext.readableStore(ReadableTokenStore.class);
         final var token = readableStore.get(op.tokenOrThrow());
 
-        final var oldFees = feeContext
+        return feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(SubType.DEFAULT)
                 .legacyCalculate(sigValueObj -> usageGiven(CommonPbjConverters.fromPbj(body), sigValueObj, token));
 
-        EntityCreate entity = new EntityCreate("Token", "TokenUpdate", "Update a token type", 0, false);
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 0);
-        params.put("numKeys", 0);
-        params.put("hasCustomFee", YesOrNo.NO);
-        FeeResult simpleFee = entity.computeFee(params);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
     }
 
     private boolean isHapiCallOrNonZeroTreasuryAccount(final boolean isHapiCall, final TokenUpdateTransactionBody op) {

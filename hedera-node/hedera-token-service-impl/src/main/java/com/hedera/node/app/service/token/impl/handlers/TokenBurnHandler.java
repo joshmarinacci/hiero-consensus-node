@@ -43,6 +43,7 @@ import com.hedera.node.app.spi.workflows.PreCheckException;
 import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.TokensConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import java.util.ArrayList;
@@ -175,7 +176,16 @@ public final class TokenBurnHandler extends BaseTokenHandler implements Transact
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         final var op = feeContext.body();
         final var meta = TOKEN_OPS_USAGE_UTILS.tokenBurnUsageFrom(CommonPbjConverters.fromPbj(op));
-        final var oldFees =  feeContext
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            EntityCreate entity = new EntityCreate("Token", "TokenBurn", "Create a token type", 0, false);
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", 0);
+            params.put("numKeys", 0);
+            params.put("hasCustomFee", YesOrNo.NO);
+
+            return entity.computeFee(params, feeContext.activeRate());
+        }
+        return feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(
                         meta.getSerialNumsCount() > 0
@@ -184,17 +194,6 @@ public final class TokenBurnHandler extends BaseTokenHandler implements Transact
                 .addBytesPerTransaction(meta.getBpt())
                 .addNetworkRamByteSeconds(meta.getTransferRecordDb() * USAGE_PROPERTIES.legacyReceiptStorageSecs())
                 .calculate();
-
-
-        EntityCreate entity = new EntityCreate("Token", "TokenBurn", "Create a token type", 0, false);
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 0);
-        params.put("numKeys", 0);
-        params.put("hasCustomFee", YesOrNo.NO);
-
-        FeeResult simpleFee = entity.computeFee(params);
-        System.out.println("simple fee is " + simpleFee);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
     }
 
     private ValidationResult validateSemantics(

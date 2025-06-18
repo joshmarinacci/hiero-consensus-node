@@ -44,6 +44,7 @@ import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
 import com.hedera.node.config.data.EntitiesConfig;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.TokensConfig;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import com.swirlds.state.lifecycle.EntityIdFactory;
@@ -428,11 +429,27 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
         final var op = body.tokenCreationOrThrow();
         final var type = op.tokenType();
 
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.TOKEN_CREATE, "Create a token type", 7, true);
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numKeys", 0);
+            params.put("hasCustomFee", YesOrNo.NO);
+            params.put("numFTWithCustomFeeEntries",1);
+            if(op.hasFeeScheduleKey()) {
+                params.put("hasCustomFee", YesOrNo.YES);
+                for(final var fee : op.customFees() ) {
+                    System.out.println("fee is " + fee.fixedFee());
+                }
+            }
+            return entity.computeFee(params, feeContext.activeRate());
+        }
+
         final long tokenSizes = TOKEN_ENTITY_SIZES.bytesUsedToRecordTokenTransfers(
                         meta.getNumTokens(), meta.getFungibleNumTransfers(), meta.getNftsTransfers())
                 * USAGE_PROPERTIES.legacyReceiptStorageSecs();
 
-        final var oldFees = feeContext
+        return feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(tokenSubTypeFrom(
                         type, op.hasFeeScheduleKey() || !op.customFees().isEmpty()))
@@ -441,21 +458,6 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
                 .addNetworkRamByteSeconds(meta.getNetworkRecordRb() * USAGE_PROPERTIES.legacyReceiptStorageSecs())
                 .addRamByteSeconds((meta.getBaseSize() + meta.getCustomFeeScheduleSize()) * meta.getLifeTime())
                 .calculate();
-
-        EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.TOKEN_CREATE, "Create a token type", 7, true);
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", feeContext.numTxnSignatures());
-        params.put("numKeys", 0);
-        params.put("hasCustomFee", YesOrNo.NO);
-        params.put("numFTWithCustomFeeEntries",1);
-        if(op.hasFeeScheduleKey()) {
-            params.put("hasCustomFee", YesOrNo.YES);
-            for(final var fee : op.customFees() ) {
-                System.out.println("fee is " + fee.fixedFee());
-            }
-        }
-        FeeResult simpleFee = entity.computeFee(params);
-        return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
     }
 
     /**

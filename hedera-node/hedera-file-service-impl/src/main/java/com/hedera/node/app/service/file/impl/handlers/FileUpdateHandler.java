@@ -179,6 +179,14 @@ public class FileUpdateHandler implements TransactionHandler {
     @Override
     public Fees calculateFees(@NonNull FeeContext feeContext) {
         final var op = feeContext.body();
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            FileOperations transfer = new FileOperations("FileUpdate", "dummy description");
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numKeys", 1);
+            params.put("numBytes", (int) op.fileUpdateOrThrow().contents().length());
+            return transfer.computeFee(params, feeContext.activeRate());
+        }
         final var file = feeContext
                 .readableStore(ReadableFileStore.class)
                 .getFileLeaf(op.fileUpdateOrThrow().fileIDOrThrow());
@@ -194,22 +202,11 @@ public class FileUpdateHandler implements TransactionHandler {
             return Fees.FREE;
         }
 
-        final var oldFees = feeContext
+        return feeContext
                 .feeCalculatorFactory()
                 .feeCalculator(SubType.DEFAULT)
                 .legacyCalculate(sigValueObj ->
                         usageGiven(CommonPbjConverters.fromPbj(op), sigValueObj, CommonPbjConverters.fromPbj(file)));
-        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            FileOperations transfer = new FileOperations("FileUpdate", "dummy description");
-            Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 1);
-            params.put("numBytes", (int)op.fileUpdateOrThrow().contents().length());
-            FeeResult simpleFee = transfer.computeFee(params);
-            return new Fees(oldFees.nodeFee(), 0, oldFees.serviceFee(), simpleFee.fee, simpleFee.details);
-        } else {
-            return oldFees;
-        }
     }
 
     private void handleUpdateUpgradeFile(FileUpdateTransactionBody fileUpdate, HandleContext handleContext) {
