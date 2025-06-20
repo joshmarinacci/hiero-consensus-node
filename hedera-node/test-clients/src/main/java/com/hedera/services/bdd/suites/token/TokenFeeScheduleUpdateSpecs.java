@@ -29,17 +29,7 @@ import static com.hedera.services.bdd.spec.utilops.mod.ModificationUtils.withSuc
 import static com.hedera.services.bdd.suites.HapiSuite.APP_PROPERTIES;
 import static com.hedera.services.bdd.suites.HapiSuite.GENESIS;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HBAR;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.CUSTOM_FEES_LIST_TOO_LONG;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.CUSTOM_FEE_MUST_BE_POSITIVE;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.CUSTOM_FEE_NOT_FULLY_SPECIFIED;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.CUSTOM_SCHEDULE_ALREADY_HAS_NO_FEES;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.FRACTION_DIVIDES_BY_ZERO;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_CUSTOM_FEE_COLLECTOR;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_TOKEN_ID;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_TOKEN_ID_IN_CUSTOM_FEES;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.ROYALTY_FRACTION_CANNOT_EXCEED_ONE;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TOKEN_HAS_NO_FEE_SCHEDULE_KEY;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TOKEN_NOT_ASSOCIATED_TO_FEE_COLLECTOR;
+import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.*;
 
 import com.hedera.services.bdd.junit.HapiTest;
 import com.hederahashgraph.api.proto.java.TokenID;
@@ -365,5 +355,30 @@ public class TokenFeeScheduleUpdateSpecs {
                 tokenFeeScheduleUpdate("t")
                         .withCustom(fixedHtsFee(1, "denom", "feeCollector"))
                         .hasKnownStatus(INVALID_TOKEN_ID_IN_CUSTOM_FEES));
+    }
+
+    @HapiTest
+    final Stream<DynamicTest> updatingToEmptyListRequiresSignature() {
+        return hapiTest(
+                newKeyNamed("feeScheduleKey"),
+                newKeyNamed("supplyKey"),
+                cryptoCreate("feeCollector"),
+                // create a new NFT with the right keys
+                tokenCreate("tok")
+                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .initialSupply(0)
+                        .supplyKey("supplyKey")
+                        .feeScheduleKey("feeScheduleKey"),
+                // update the schedule to a valid royalty
+                tokenFeeScheduleUpdate("tok")
+                        .withCustom(royaltyFeeNoFallback(1, 10, "feeCollector"))
+                        .payingWith(GENESIS)
+                        .signedBy(GENESIS,"feeScheduleKey", "supplyKey")
+                        .hasKnownStatus(SUCCESS),
+                // update to an empty fee schedule without the fee schedule key
+                tokenFeeScheduleUpdate("tok").signedBy(GENESIS).hasKnownStatus(INVALID_SIGNATURE),
+                // update to an empty fee schedule *with* the fee schedule key
+                tokenFeeScheduleUpdate("tok").signedBy(GENESIS,"feeScheduleKey").hasKnownStatus(SUCCESS)
+            );
     }
 }
