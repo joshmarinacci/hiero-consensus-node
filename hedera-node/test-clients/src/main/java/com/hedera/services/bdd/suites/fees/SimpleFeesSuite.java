@@ -27,7 +27,9 @@ import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileUpdate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.submitMessageTo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.updateTopic;
 import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fixedConsensusHbarFee;
+import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
+import static com.hedera.services.bdd.spec.utilops.UtilVerbs.sleepFor;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HUNDRED_HBARS;
 
@@ -72,11 +74,13 @@ public class SimpleFeesSuite {
     @HapiTest
     @DisplayName("Simple fees for updating a topic")
     final Stream<DynamicTest> updateTopicFee() {
+        final String ADMIN = "admin";
         return hapiTest(
+                newKeyNamed(ADMIN),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
-                createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
-                updateTopic("testTopic").adminKey(PAYER).payingWith(PAYER).via("update-topic-txn"),
-                validateChargedUsd("create-topic-txn", 0.01),
+                createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(ADMIN).via("create-topic-txn"),
+                updateTopic("testTopic").adminKey(ADMIN).payingWith(PAYER).via("update-topic-txn"),
+                validateChargedUsd("create-topic-txn", 0.010_00),
                 validateChargedUsd("update-topic-txn", 0.000_22)
         );
     }
@@ -85,6 +89,7 @@ public class SimpleFeesSuite {
     @DisplayName("Simple fees for updating a topic")
     final Stream<DynamicTest> getTopicInfoFee() {
         return hapiTest(
+                newKeyNamed(PAYER),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
                 getTopicInfo("testTopic").payingWith(PAYER).via("get-topic-txn").logged(),
@@ -95,18 +100,24 @@ public class SimpleFeesSuite {
 
 
 
-    @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+    @HapiTest
     @DisplayName("Simple fee for submitting a message")
     final Stream<DynamicTest> submitMessageFee() {
+        final String ADMIN = "admin";
         final byte[] messageBytes = new byte[600]; // up to 1k
         Arrays.fill(messageBytes, (byte) 0b1);
         final var free_bytes = HCS_FREE_BYTES;// 256;
         return hapiTest(
-                cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
-                createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER).via("create-topic-txn"),
-                submitMessageTo("testTopic").payingWith(PAYER).message(messageBytes).via("submit-message-txn"),
-
-                validateChargedUsd("create-topic-txn", 0.010_00),
+                newKeyNamed(ADMIN),
+                cryptoCreate(ADMIN),//.balance(ONE_HUNDRED_HBARS*1000*1000),
+                cryptoCreate(PAYER),//.balance(ONE_HUNDRED_HBARS*1000*1000),
+                createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(ADMIN).via("create-topic-txn"),
+                submitMessageTo("testTopic")
+                        .blankMemo()
+                        .payingWith(PAYER)
+                        .message(new String(messageBytes)).via("submit-message-txn"),
+                sleepFor(1000),
+                validateChargedUsd("create-topic-txn",   0.010_00),
                 validateChargedUsd("submit-message-txn", 0.000_10 + Math.max((messageBytes.length - free_bytes),0) * 0.000_011,1)
         );
     }
