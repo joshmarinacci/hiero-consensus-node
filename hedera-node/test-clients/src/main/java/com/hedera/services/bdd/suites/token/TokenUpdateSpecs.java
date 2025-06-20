@@ -398,15 +398,27 @@ public class TokenUpdateSpecs {
                                 .adminKey("adminKey")
                                 .autoRenewAccount("autoRenew")
                                 .autoRenewPeriod(THREE_MONTHS_IN_SECONDS),
+                        // fail without the new autorenew key
                         tokenUpdate("tbu")
+                                .autoRenewAccount("newAutoRenew")
+                                .autoRenewPeriod(secondPeriod)
                                 .signedBy(GENESIS, "adminKey")
-                                .autoRenewAccount("newAutoRenew")
-                                .autoRenewPeriod(secondPeriod)
                                 .hasKnownStatus(INVALID_SIGNATURE),
+
+                        // fail without the admin key
                         tokenUpdate("tbu")
                                 .autoRenewAccount("newAutoRenew")
                                 .autoRenewPeriod(secondPeriod)
-                                .signedByPayerAnd("adminKey", "newAutoRenew"))
+                                .signedBy(GENESIS, "newAutoRenew")
+                                .hasKnownStatus(INVALID_SIGNATURE),
+
+                        // pass with both admin and the new autorenew key
+                        tokenUpdate("tbu")
+                                .autoRenewAccount("newAutoRenew")
+                                .autoRenewPeriod(secondPeriod)
+                                .signedByPayerAnd("adminKey", "newAutoRenew")
+                                .hasKnownStatus(SUCCESS)
+                )
                 .then(getTokenInfo("tbu").logged());
     }
 
