@@ -246,11 +246,14 @@ public class TokenAssociationSpecs {
                         .adminKey(alice),
                 // create account bob
                 cryptoCreate(bob).balance(0L).maxAutomaticTokenAssociations(0),
-                // associate token with account
-                //TODO: is this better than changing the tokenAssociate impl to have a flag to remove the default payer
-                // it results in the same INVALID_SIGNATURE even though it's really a "missing" signature.
-                tokenAssociate(bob, token).signedBy(DEFAULT_PAYER)
-                        .hasKnownStatus(INVALID_SIGNATURE)
+                // associate token *without* the account key
+                tokenAssociate(bob, token).signedBy(DEFAULT_PAYER).hasKnownStatus(INVALID_SIGNATURE),
+                // associate token *with* the account key
+                tokenAssociate(bob, token).signedBy(DEFAULT_PAYER, bob).hasKnownStatus(SUCCESS),
+                // dissociate token *without* the account key
+                tokenDissociate(bob, token).signedBy(DEFAULT_PAYER).hasKnownStatus(INVALID_SIGNATURE),
+                // dissociate token *with* the account key
+                tokenDissociate(bob, token).signedBy(DEFAULT_PAYER, bob).hasKnownStatus(SUCCESS)
         );
     }
 
