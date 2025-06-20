@@ -796,6 +796,7 @@ public class TokenManagementSpecs {
                         burnToken(SUPPLE, 0).hasPrecheck(OK),
                         burnToken(SUPPLE, -1).hasPrecheck(INVALID_TOKEN_BURN_AMOUNT));
     }
+
     @HapiTest
     final Stream<DynamicTest> requireCorrectSupplyKeys() {
         return hapiTest(
@@ -809,7 +810,6 @@ public class TokenManagementSpecs {
                 // burn without the supply key
                 burnToken(TOKEN, 1).signedBy(GENESIS).hasKnownStatus(INVALID_SIGNATURE),
                 // burn with the supply key
-                burnToken(TOKEN, 1).signedBy(GENESIS, SUPPLY_KEY).hasKnownStatus(SUCCESS)
-        );
+                burnToken(TOKEN, 1).signedBy(GENESIS, SUPPLY_KEY).hasKnownStatus(SUCCESS));
     }
 }

@@ -373,13 +373,14 @@ public class TokenFeeScheduleUpdateSpecs {
                 tokenFeeScheduleUpdate("tok")
                         .withCustom(royaltyFeeNoFallback(1, 10, "feeCollector"))
                         .payingWith(GENESIS)
-                        .signedBy(GENESIS,"feeScheduleKey", "supplyKey")
+                        .signedBy(GENESIS, "feeScheduleKey", "supplyKey")
                         .hasKnownStatus(SUCCESS),
                 // update to an empty fee schedule without the fee schedule key
                 tokenFeeScheduleUpdate("tok").signedBy(GENESIS).hasKnownStatus(INVALID_SIGNATURE),
                 // update to an empty fee schedule *with* the fee schedule key
-                tokenFeeScheduleUpdate("tok").signedBy(GENESIS,"feeScheduleKey").hasKnownStatus(SUCCESS)
-            );
+                tokenFeeScheduleUpdate("tok")
+                        .signedBy(GENESIS, "feeScheduleKey")
+                        .hasKnownStatus(SUCCESS));
     }
 
     @HapiTest
@@ -399,18 +400,17 @@ public class TokenFeeScheduleUpdateSpecs {
                 // update schedule with first collector not signing. should succeed
                 tokenFeeScheduleUpdate("tok")
                         .withCustom(royaltyFeeNoFallback(1, 10, "feeCollector1"))
-                            .signedBy(GENESIS,"feeScheduleKey")
+                        .signedBy(GENESIS, "feeScheduleKey")
                         .hasKnownStatus(SUCCESS),
                 // update schedule second collector not signing, should fail because second requires sig
                 tokenFeeScheduleUpdate("tok")
                         .withCustom(royaltyFeeNoFallback(1, 10, "feeCollector2"))
-                        .signedBy(GENESIS,"feeScheduleKey")
+                        .signedBy(GENESIS, "feeScheduleKey")
                         .hasKnownStatus(INVALID_SIGNATURE),
                 // try again *with* the second collector signing, should pass now
                 tokenFeeScheduleUpdate("tok")
                         .withCustom(royaltyFeeNoFallback(1, 10, "feeCollector2"))
-                        .signedBy(GENESIS,"feeScheduleKey","feeCollector2")
-                        .hasKnownStatus(SUCCESS)
-            );
+                        .signedBy(GENESIS, "feeScheduleKey", "feeCollector2")
+                        .hasKnownStatus(SUCCESS));
     }
 }

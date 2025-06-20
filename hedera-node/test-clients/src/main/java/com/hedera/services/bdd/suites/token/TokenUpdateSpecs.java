@@ -309,8 +309,7 @@ public class TokenUpdateSpecs {
                         .supplyKey("wipeThenSupplyKey")
                         .feeScheduleKey("newFeeScheduleKey")
                         .signedByPayerAnd("newAdminKey")
-                        .hasKnownStatus(SUCCESS)
-        );
+                        .hasKnownStatus(SUCCESS));
     }
 
     @HapiTest
@@ -417,8 +416,7 @@ public class TokenUpdateSpecs {
                                 .autoRenewAccount("newAutoRenew")
                                 .autoRenewPeriod(secondPeriod)
                                 .signedByPayerAnd("adminKey", "newAutoRenew")
-                                .hasKnownStatus(SUCCESS)
-                )
+                                .hasKnownStatus(SUCCESS))
                 .then(getTokenInfo("tbu").logged());
     }
 

@@ -242,8 +242,7 @@ public class TokenAssociationSpecs {
         return hapiTest(
                 // create token with admin = alice
                 newKeyNamed(alice),
-                tokenCreate(token)
-                        .adminKey(alice),
+                tokenCreate(token).adminKey(alice),
                 // create account bob
                 cryptoCreate(bob).balance(0L).maxAutomaticTokenAssociations(0),
                 // associate token *without* the account key
@@ -253,8 +252,7 @@ public class TokenAssociationSpecs {
                 // dissociate token *without* the account key
                 tokenDissociate(bob, token).signedBy(DEFAULT_PAYER).hasKnownStatus(INVALID_SIGNATURE),
                 // dissociate token *with* the account key
-                tokenDissociate(bob, token).signedBy(DEFAULT_PAYER, bob).hasKnownStatus(SUCCESS)
-        );
+                tokenDissociate(bob, token).signedBy(DEFAULT_PAYER, bob).hasKnownStatus(SUCCESS));
     }
 
     @HapiTest

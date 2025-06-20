@@ -301,6 +301,7 @@ public class UniqueTokenManagementSpecs {
                                 .hasToken(relationshipWith(NFT))
                                 .hasOwnedNfts(0));
     }
+
     @HapiTest
     final Stream<DynamicTest> mintFailsOnInvalidSupplyKey() {
         return hapiTest(
@@ -314,13 +315,15 @@ public class UniqueTokenManagementSpecs {
                         .supplyKey(SUPPLY_KEY)
                         .treasury(TOKEN_TREASURY)
                 // mint with the wrong supply key
-                ,mintToken(NFT, List.of(metadata("1"), metadata("2")))
-                        .signedBy(GENESIS, GENESIS).hasKnownStatus(INVALID_SIGNATURE)
+                ,
+                mintToken(NFT, List.of(metadata("1"), metadata("2")))
+                        .signedBy(GENESIS, GENESIS)
+                        .hasKnownStatus(INVALID_SIGNATURE)
                 // mint with the right supply key
-                ,mintToken(NFT, List.of(metadata("1"), metadata("2")))
+                ,
+                mintToken(NFT, List.of(metadata("1"), metadata("2")))
                         .signedBy(GENESIS, SUPPLY_KEY)
-                        .hasKnownStatus(SUCCESS)
-        );
+                        .hasKnownStatus(SUCCESS));
     }
 
     @HapiTest
@@ -334,15 +337,14 @@ public class UniqueTokenManagementSpecs {
                         .supplyType(TokenSupplyType.INFINITE)
                         .initialSupply(0)
                         .supplyKey(SUPPLY_KEY)
-                        .treasury(TOKEN_TREASURY)
-                ,mintToken(NFT, List.of(metadata("1"), metadata("2")))
+                        .treasury(TOKEN_TREASURY),
+                mintToken(NFT, List.of(metadata("1"), metadata("2")))
                 // burn with the wrong supply key
-                ,burnToken(NFT, List.of(1L,2L))
-                        .signedBy(GENESIS,GENESIS).hasKnownStatus(INVALID_SIGNATURE)
+                ,
+                burnToken(NFT, List.of(1L, 2L)).signedBy(GENESIS, GENESIS).hasKnownStatus(INVALID_SIGNATURE)
                 // burn with the right supply key
-                ,burnToken(NFT, List.of(1L,2L))
-                        .signedBy(GENESIS, SUPPLY_KEY).hasKnownStatus(SUCCESS)
-        );
+                ,
+                burnToken(NFT, List.of(1L, 2L)).signedBy(GENESIS, SUPPLY_KEY).hasKnownStatus(SUCCESS));
     }
 
     @HapiTest
