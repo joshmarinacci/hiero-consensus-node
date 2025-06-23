@@ -4,9 +4,9 @@ package com.hedera.services.bdd.suites.crypto;
 import static com.google.protobuf.ByteString.copyFromUtf8;
 import static com.hedera.node.app.hapi.utils.EthSigsUtils.recoverAddressFromPubKey;
 import static com.hedera.services.bdd.junit.TestTags.CRYPTO;
+import static com.hedera.services.bdd.spec.HapiPropertySource.asAccount;
+import static com.hedera.services.bdd.spec.HapiPropertySource.asAccountString;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
-import static com.hedera.services.bdd.spec.PropertySource.asAccount;
-import static com.hedera.services.bdd.spec.PropertySource.asAccountString;
 import static com.hedera.services.bdd.spec.assertions.AccountInfoAsserts.accountWith;
 import static com.hedera.services.bdd.spec.assertions.ContractInfoAsserts.contractWith;
 import static com.hedera.services.bdd.spec.assertions.TransactionRecordAsserts.includingFungibleMovement;
@@ -1262,7 +1262,7 @@ public class AutoAccountCreationSuite {
                     allRunFor(spec, op1, op2, txnRequiringHollowAccountSignature);
                 }),
                 getTxnRecord(HBAR_XFER)
-                        .hasChildRecordCount(1)
+                        .hasNonStakingChildRecordCount(1)
                         .hasChildRecords(recordWith().status(SUCCESS).memo(LAZY_MEMO)),
                 // and transfers to the 0.0.ECDSA_BYTES alias should succeed.
                 cryptoTransfer(tinyBarsFromToWithAlias(PARTY, SECP_256K1_SOURCE_KEY, ONE_HBAR))
@@ -1545,7 +1545,7 @@ public class AutoAccountCreationSuite {
                     final var evmAddressStr = ByteString.copyFrom(evmAddress.get());
                     getTxnRecord("failedTxn").logged();
                     getTxnRecord("passedTxn")
-                            .hasChildRecordCount(1)
+                            .hasNonStakingChildRecordCount(1)
                             .hasChildRecords(
                                     recordWith().status(SUCCESS).memo(LAZY_MEMO).alias(evmAddressStr));
                 }));
