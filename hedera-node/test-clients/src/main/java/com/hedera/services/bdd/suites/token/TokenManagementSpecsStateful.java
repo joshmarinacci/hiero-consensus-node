@@ -112,7 +112,7 @@ public class TokenManagementSpecsStateful {
                 tokenFreeze(TOKEN, TOKEN_TREASURY).signedBy(GENESIS, FREEZE_KEY).hasKnownStatus(SUCCESS),
                 // unfreeze the token without the freeze key
                 tokenUnfreeze(TOKEN, TOKEN_TREASURY).signedBy(GENESIS).hasKnownStatus(INVALID_SIGNATURE),
-                // unfreeze the token without the freeze key
+                // unfreeze the token with the freeze key
                 tokenUnfreeze(TOKEN, TOKEN_TREASURY)
                         .signedBy(GENESIS, FREEZE_KEY)
                         .hasKnownStatus(SUCCESS));
