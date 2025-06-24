@@ -349,12 +349,10 @@ public class UniqueTokenManagementSpecs {
                         .initialSupply(0)
                         .supplyKey(SUPPLY_KEY)
                         .treasury(TOKEN_TREASURY),
-                mintToken(NFT, List.of(metadata("1"), metadata("2")))
+                mintToken(NFT, List.of(metadata("1"), metadata("2"))),
                 // burn with the wrong supply key
-                ,
-                burnToken(NFT, List.of(1L, 2L)).signedBy(GENESIS, GENESIS).hasKnownStatus(INVALID_SIGNATURE)
+                burnToken(NFT, List.of(1L, 2L)).signedBy(GENESIS, GENESIS).hasKnownStatus(INVALID_SIGNATURE),
                 // burn with the right supply key
-                ,
                 burnToken(NFT, List.of(1L, 2L)).signedBy(GENESIS, SUPPLY_KEY).hasKnownStatus(SUCCESS));
     }
 
