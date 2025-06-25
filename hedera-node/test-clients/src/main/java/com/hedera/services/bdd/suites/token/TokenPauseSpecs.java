@@ -101,7 +101,8 @@ public class TokenPauseSpecs {
     @HapiTest
     final Stream<DynamicTest> cannotUnpauseWithInvalidPauseKey() {
         return hapiTest(
-                newKeyNamed(PAUSE_KEY), newKeyNamed(OTHER_KEY),
+                newKeyNamed(PAUSE_KEY),
+                newKeyNamed(OTHER_KEY),
                 tokenCreate(PRIMARY).pauseKey(PAUSE_KEY),
                 tokenPause(PRIMARY).signedBy(DEFAULT_PAYER, PAUSE_KEY),
                 tokenUnpause(PRIMARY).signedBy(DEFAULT_PAYER, OTHER_KEY).hasKnownStatus(INVALID_SIGNATURE));
