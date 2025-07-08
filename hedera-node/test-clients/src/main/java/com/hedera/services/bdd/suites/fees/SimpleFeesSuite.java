@@ -47,7 +47,6 @@ public class SimpleFeesSuite {
     @DisplayName("Simple fees for creating a topic")
     final Stream<DynamicTest> createTopicFee() {
         return hapiTest(
-                overriding("fees.simpleFeesCalculatorEnabled", "true"),
                 cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                 createTopic("testTopic").blankMemo().payingWith(PAYER).via("create-topic-txn"),
                 validateChargedUsd("create-topic-txn", 0.01)
@@ -70,7 +69,6 @@ public class SimpleFeesSuite {
     }
 
 
-    // update topic
     @HapiTest
     @DisplayName("Simple fees for updating a topic")
     final Stream<DynamicTest> updateTopicFee() {
@@ -86,7 +84,7 @@ public class SimpleFeesSuite {
     }
 
     @HapiTest
-    @DisplayName("Simple fees for updating a topic")
+    @DisplayName("Simple fees for getting a topic transaction info")
     final Stream<DynamicTest> getTopicInfoFee() {
         return hapiTest(
                 newKeyNamed(PAYER),
