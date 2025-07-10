@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.fees;
 
+import java.text.DecimalFormat;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -19,6 +20,10 @@ public class FeeResult {
         public FeeDetail(int value, double fee) {
             this.value = value;
             this.fee = fee;
+        }
+        @Override
+        public String toString() {
+            return "FeeDetail{" + this.value + ", " + new DecimalFormat("#.000 000").format(this.fee) + "}";
         }
     }
 

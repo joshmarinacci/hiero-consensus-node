@@ -79,7 +79,9 @@ public abstract class AbstractFeeModel {
         final var nodeTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.10), exchangeRate);
         final var networkTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.45), exchangeRate);
         final var serviceTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.45), exchangeRate);
-        return new Fees(nodeTc,networkTc,serviceTc, result.fee, result.details);
+        final var fees =  new Fees(nodeTc,networkTc,serviceTc, result.fee, result.details);
+        System.out.println("Fees: " + this.getService() + ":" + this.getDescription()+":\n  " + fees);
+        return fees;
     }
     private long tinyCentsToTinyBar(long tcents, ExchangeRate cr) {
         final var currentRate = fromPbj(cr);

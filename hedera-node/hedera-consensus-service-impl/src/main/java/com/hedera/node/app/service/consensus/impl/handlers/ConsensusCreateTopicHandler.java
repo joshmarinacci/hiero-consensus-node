@@ -223,17 +223,20 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
+        final var body = feeContext.body();
+        final var hasCustomFees =
+                !body.consensusCreateTopicOrThrow().customFees().isEmpty();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);
             params.put("hasCustomFee", YesOrNo.NO);
+            if(hasCustomFees){
+                params.put("hasCustomFee", YesOrNo.YES);
+            }
             return entity.computeFee(params, feeContext.activeRate());
         }
-        final var body = feeContext.body();
-        final var hasCustomFees =
-                !body.consensusCreateTopicOrThrow().customFees().isEmpty();
         final var subType = hasCustomFees ? SubType.TOPIC_CREATE_WITH_CUSTOM_FEES : SubType.DEFAULT;
 
         return feeContext
