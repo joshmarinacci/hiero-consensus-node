@@ -65,7 +65,6 @@ public class SimpleFeesSuite {
                     createTopic("testTopic")
                         .blankMemo()
                             .withConsensusCustomFee(fixedConsensusHbarFee(88, "collector"))
-//                        .withConsensusCustomFee(royaltyFeeNoFallback(6, 10, "collector"))
                         .payingWith(PAYER).via("create-topic-txn"),
                 validateChargedUsd("create-topic-txn", 2)
             );
@@ -100,34 +99,32 @@ public class SimpleFeesSuite {
         }
 
 
-        @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+        @HapiTest
         @DisplayName("Simple fee for submitting a message")
         final Stream<DynamicTest> submitMessageFee() {
-            final String ADMIN = "admin";
             final byte[] messageBytes = new byte[600]; // up to 1k
             Arrays.fill(messageBytes, (byte) 0b1);
-            final var free_bytes = HCS_FREE_BYTES;// 256;
             final var excess_bytes = 600-HCS_FREE_BYTES;
             final var base = BaseFeeRegistry.getBaseFee("ConsensusSubmitMessage");
             final var per_byte = BaseFeeRegistry.getBaseFee("PerHCSByte");
+            System.out.println("COST: " + base + " "  + excess_bytes + " "  + per_byte);
+            System.out.println("COST: " + (base + excess_bytes * per_byte));
             return hapiTest(
-//                    newKeyNamed(ADMIN),
-//                    cryptoCreate(ADMIN).balance(ONE_HUNDRED_HBARS*20),
-//                    newKeyNamed(PAYER),
-                    newKeyNamed("foo"),
-                    cryptoCreate("foo").key("foo").balance(ONE_HUNDRED_HBARS),
+                    newKeyNamed(PAYER),
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     createTopic("testTopic")
                             .blankMemo()
-                            .payingWith("foo")
-//                            .adminKeyName(ADMIN)
+                            .payingWith(PAYER)
                             .via("create-topic-txn"),
+                    validateChargedUsd("create-topic-txn", 0.010_00),
                     submitMessageTo("testTopic")
                             .blankMemo()
-                            .payingWith("foo")
+                            .payingWith(PAYER)
                             .message(new String(messageBytes))
                             .via("submit-message-txn"),
-                    validateChargedUsd("create-topic-txn", 0.010_00),
-                    validateChargedUsd("submit-message-txn", base+excess_bytes*per_byte, 1)
+                    // this is the correct amount,
+                    // but it fails with insufficent tx fee for some reason
+                    validateChargedUsd("submit-message-txn", base + excess_bytes * per_byte, 1)
             );
         }
 

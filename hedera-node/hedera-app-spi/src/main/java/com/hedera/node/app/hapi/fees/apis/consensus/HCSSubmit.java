@@ -46,8 +46,7 @@ public class HCSSubmit extends AbstractFeeModel {
         int numBytes = (int) values.get("numBytes");
         int excessBytes = numBytes - HCS_FREE_BYTES;
         if (excessBytes > 0) {
-//            fee.addDetail("Additional message size",  excessBytes, excessBytes* BaseFeeRegistry.getBaseFee("PerHCSByte"));
-            fee.addDetail("Additional message size",  1, 2* BaseFeeRegistry.getBaseFee("PerHCSByte"));
+            fee.addDetail("Additional message size",  excessBytes, excessBytes * BaseFeeRegistry.getBaseFee("PerHCSByte"));
         }
         return fee;
     }
