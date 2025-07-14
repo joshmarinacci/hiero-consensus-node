@@ -19,6 +19,7 @@ import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FILE_FREE_B
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.HCS_FREE_BYTES;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getFileContents;
+import static com.hedera.services.bdd.spec.queries.QueryVerbs.getFileInfo;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTopicInfo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.createTopic;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoCreate;
@@ -255,7 +256,26 @@ public class SimpleFeesSuite {
                     validateChargedUsd("get-file-contents-txn", correct)
             );
         }
-        // TODO:       fees.put("FileGetInfo", 0.00010);
+
+        @HapiTest
+        final Stream<DynamicTest> fileGetInfo() {
+            final var PerFileByte = 0.000_011;
+            final var FileGetContents = 0.000_10;
+            final var byte_count = 3764;
+            final var correct= Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
+            return hapiTest(
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                    fileCreate("test")
+                            .memo("memotext")
+                            .contents("0".repeat(byte_count).getBytes())
+                            .payingWith(PAYER)
+                            .via("create-file-txn"),
+                    getFileInfo("test")
+                            .payingWith(PAYER)
+                            .via("get-file-info-txn"),
+                    validateChargedUsd("get-file-info-txn", correct)
+            );
+        }
     }
 
 
