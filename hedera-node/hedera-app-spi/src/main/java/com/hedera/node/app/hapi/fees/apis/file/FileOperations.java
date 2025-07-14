@@ -54,6 +54,7 @@ public class FileOperations extends AbstractFeeModel {
         if (numBytes > FILE_FREE_BYTES) {
             fee.addDetail("Additional file size", (numBytes - FILE_FREE_BYTES), (numBytes - FILE_FREE_BYTES) * BaseFeeRegistry.getBaseFee("PerFileByte"));
         }
+        System.out.println("total fee is " + fee.toString());
         return fee;
     }
 }

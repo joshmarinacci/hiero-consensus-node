@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FILE_FREE_BYTES;
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.HCS_FREE_BYTES;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
+import static com.hedera.services.bdd.spec.queries.QueryVerbs.getFileContents;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTopicInfo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.createTopic;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoCreate;
@@ -69,7 +70,6 @@ public class SimpleFeesSuite {
                 validateChargedUsd("create-topic-txn", 2)
             );
         }
-
 
         @HapiTest
         @DisplayName("Simple fees for updating a topic")
@@ -235,10 +235,29 @@ public class SimpleFeesSuite {
                     validateChargedUsd("append-file-txn", FileAppend + (byte_count - FILE_FREE_BYTES) * PerFileByte)
             );
         }
+
+        @HapiTest
+        final Stream<DynamicTest> fileGetContents() {
+            final var PerFileByte = 0.000_011;
+            final var FileGetContents = 0.000_10;
+            final var byte_count = 3764;
+            final var correct= Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
+            return hapiTest(
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                    fileCreate("test")
+                            .memo("memotext")
+                            .contents("0".repeat(byte_count).getBytes())
+                            .payingWith(PAYER)
+                            .via("create-file-txn"),
+                    getFileContents("test")
+                            .payingWith(PAYER)
+                            .via("get-file-contents-txn"),
+                    validateChargedUsd("get-file-contents-txn", correct)
+            );
+        }
+        // TODO:       fees.put("FileGetInfo", 0.00010);
     }
 
-    // TODO:       fees.put("FileGetContents", 0.00010);
-    // TODO:       fees.put("FileGetInfo", 0.00010);
 
     // TODO: CryptoCreate, create token
     // TODO: CryptoCreate, create token with custom fees
