@@ -189,20 +189,29 @@ public class SimpleFeesSuite {
             );
         }
 
+        // TODO: FileDelete transaction body doesn't expose the file contents so we can't
+        //  calculate how many bytes are being deleted
         @HapiTest
         final Stream<DynamicTest> fileDeleteFee() {
             final var PerFileByte = 0.000_011;
             final var FileDelete = 0.007_00;
+            final var byte_count = 1789;
 
-            var contents = "0".repeat(1789).getBytes();
+            var contents = "0".repeat(byte_count).getBytes();
 
-        return hapiTest(
-                cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
-                fileCreate("test").memo("memotext").contents(contents).payingWith(PAYER).via("create-file-txn"),
-                fileDelete("test").payingWith(PAYER).via("delete-file-txn"),
-                validateChargedUsd("delete-file-txn", FileDelete)
-        );
-    }
+            return hapiTest(
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                    fileCreate("test")
+                            .memo("memotext")
+                            .contents(contents)
+                            .payingWith(PAYER)
+                            .via("create-file-txn"),
+                    fileDelete("test")
+                            .payingWith(PAYER)
+                            .via("delete-file-txn"),
+                    validateChargedUsd("delete-file-txn", FileDelete)// + (byte_count - FILE_FREE_BYTES) * PerFileByte)
+            );
+        }
 
         @HapiTest
         final Stream<DynamicTest> fileAppendFee() {

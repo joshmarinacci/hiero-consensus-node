@@ -130,8 +130,8 @@ public class FileDeleteHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             FileOperations transfer = new FileOperations("FileDelete", "dummy description");
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 1);
+            params.put("numSignatures", 0);//feeContext.numTxnSignatures());
+            params.put("numKeys", 0);
             params.put("numBytes", 0);//(int)txnBody.fileDeleteOrThrow().contents().length());
             return transfer.computeFee(params, feeContext.activeRate());
         }
