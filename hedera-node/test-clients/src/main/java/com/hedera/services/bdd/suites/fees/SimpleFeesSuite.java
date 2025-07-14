@@ -241,6 +241,7 @@ public class SimpleFeesSuite {
         final Stream<DynamicTest> fileGetContents() {
             final var PerFileByte = 0.000_011;
             final var FileGetContents = 0.000_10;
+            final var FileCreate = 0.050_00;
             final var byte_count = 3764;
             final var correct= Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
             return hapiTest(
@@ -250,6 +251,7 @@ public class SimpleFeesSuite {
                             .contents("0".repeat(byte_count).getBytes())
                             .payingWith(PAYER)
                             .via("create-file-txn"),
+                    validateChargedUsd("create-file-txn", FileCreate + (byte_count - FILE_FREE_BYTES) * PerFileByte),
                     getFileContents("test")
                             .payingWith(PAYER)
                             .via("get-file-contents-txn"),
