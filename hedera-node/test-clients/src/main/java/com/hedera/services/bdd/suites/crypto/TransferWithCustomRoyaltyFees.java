@@ -54,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.protobuf.ByteString;
 import com.hedera.node.app.hapi.utils.ByteStringUtils;
 import com.hedera.services.bdd.junit.HapiTest;
+import com.hedera.services.bdd.spec.transactions.token.TokenMovement;
 import com.hederahashgraph.api.proto.java.AccountAmount;
 import com.hederahashgraph.api.proto.java.AccountID;
 import com.hederahashgraph.api.proto.java.NftTransfer;
@@ -287,7 +288,11 @@ public class TransferWithCustomRoyaltyFees {
                 getAccountBalance(tokenReceiver)
                         .hasTokenBalance(nonFungibleToken, 1)
                         .hasTinyBars(ONE_MILLION_HBARS - 100),
-                getAccountBalance(hbarCollector).hasTinyBars(100));
+                getAccountBalance(hbarCollector).hasTinyBars(100),
+                cryptoTransfer(movingUnique(nonFungibleToken,1L).between(tokenReceiver,tokenTreasury))
+                        .signedByPayerAnd(tokenReceiver)
+                );
+
     }
 
     @HapiTest
@@ -1634,5 +1639,64 @@ public class TransferWithCustomRoyaltyFees {
                 tokenAirdrop(movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver))
                         .signedByPayerAnd(tokenOwner),
                 getAccountBalance(htsCollector).hasTokenBalance(feeDenom, 0));
+    }
+
+    /**
+     * Verifies that transferring an NFT with a fallback royalty doesn't require the
+     * sender sig if the sender is the treasury, and doesn't require the recipient
+     * signature if the recipient is the treasury.
+     */
+    @HapiTest
+    final Stream<DynamicTest> transferWithNoTreasurySigs() {
+        return hapiTest(
+                newKeyNamed(NFT_KEY),
+                cryptoCreate(hbarCollector).balance(0L),
+                cryptoCreate(tokenTreasury),
+                cryptoCreate(tokenOwner),
+                tokenCreate(nonFungibleToken)
+                        .treasury(tokenTreasury)
+                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .initialSupply(0)
+                        .supplyKey(NFT_KEY)
+                        .supplyType(TokenSupplyType.INFINITE)
+                        .withCustom(royaltyFeeWithFallback(
+                                1, 2, fixedHbarFeeInheritingRoyaltyCollector(100), hbarCollector)),
+                tokenAssociate(tokenOwner, nonFungibleToken),
+                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
+                // send w/o sender sig because sender is treasury
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenOwner)),
+                // send w/o receiver sig because receiver is treasury
+                cryptoTransfer(movingUnique(nonFungibleToken,1L).between(tokenOwner,tokenTreasury))
+                        .signedByPayerAnd(tokenOwner)
+        );
+    }
+
+    @HapiTest
+    final Stream<DynamicTest> transferWithReceiverSigRequiredFalse() {
+        return hapiTest(
+                newKeyNamed(NFT_KEY),
+                cryptoCreate(hbarCollector).balance(0L),
+                cryptoCreate(tokenTreasury),
+                cryptoCreate(tokenOwner),
+                cryptoCreate(tokenReceiver)
+                        .receiverSigRequired(false)
+                        .balance(ONE_MILLION_HBARS),
+                tokenCreate(nonFungibleToken)
+                        .treasury(tokenTreasury)
+                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .initialSupply(0)
+                        .supplyKey(NFT_KEY)
+                        .supplyType(TokenSupplyType.INFINITE)
+                        .withCustom(royaltyFeeWithFallback(
+                                1, 2, fixedHbarFeeInheritingRoyaltyCollector(100), hbarCollector)),
+                tokenAssociate(tokenOwner, nonFungibleToken),
+                tokenAssociate(tokenReceiver, nonFungibleToken),
+                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
+                // owner gets the NFT
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenOwner)),
+                // send to recipient w/o sig
+                cryptoTransfer(movingUnique(nonFungibleToken,1L).between(tokenOwner,tokenReceiver))
+                        .signedByPayerAnd(tokenOwner)
+        );
     }
 }
