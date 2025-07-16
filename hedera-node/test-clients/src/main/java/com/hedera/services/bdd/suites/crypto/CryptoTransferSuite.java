@@ -97,24 +97,7 @@ import static com.hedera.services.bdd.suites.contract.evm.Evm46ValidationSuite.e
 import static com.hedera.services.bdd.suites.contract.evm.Evm46ValidationSuite.nonExistingSystemAccounts;
 import static com.hedera.services.bdd.suites.crypto.AutoAccountCreationSuite.A_TOKEN;
 import static com.hedera.services.bdd.suites.file.FileUpdateSuite.CIVILIAN;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.ACCOUNT_AMOUNT_TRANSFERS_ONLY_ALLOWED_FOR_FUNGIBLE_COMMON;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.ACCOUNT_REPEATED_IN_ACCOUNT_AMOUNTS;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INSUFFICIENT_SENDER_ACCOUNT_BALANCE_FOR_CUSTOM_FEE;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_ACCOUNT_AMOUNTS;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_ACCOUNT_ID;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_ALIAS_KEY;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_ALLOWANCE_OWNER_ID;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_AUTORENEW_ACCOUNT;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_CONTRACT_ID;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_CUSTOM_FEE_COLLECTOR;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_MAX_AUTO_ASSOCIATIONS;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_SIGNATURE;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.INVALID_TOKEN_ID;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.NO_REMAINING_AUTOMATIC_ASSOCIATIONS;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.SUCCESS;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TOKEN_NOT_ASSOCIATED_TO_FEE_COLLECTOR;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.TRANSFERS_NOT_ZERO_SUM_FOR_TOKEN;
-import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.UNEXPECTED_TOKEN_DECIMALS;
+import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.*;
 import static com.hederahashgraph.api.proto.java.TokenType.FUNGIBLE_COMMON;
 import static com.hederahashgraph.api.proto.java.TokenType.NON_FUNGIBLE_UNIQUE;
 import static org.hiero.base.utility.CommonUtils.hex;
@@ -1828,4 +1811,43 @@ public class CryptoTransferSuite {
                 cryptoTransfer(movingUnique(nft, 1L).between(party, counterparty))
                         .hasKnownStatus(TOKEN_NOT_ASSOCIATED_TO_FEE_COLLECTOR));
     }
+
+    // Debiting an account's fungible token balance without approval requires its signature.
+    @HapiTest
+    final Stream<DynamicTest> debitingFTBalanceWithoutApprovalRequiresSig() {
+        final String feeDenom = "denom";
+        final String tokenTreasury = "tokenTreasury";
+        final var tokenOwner = "tokenOwner";
+        return hapiTest(
+                // create accounts
+                cryptoCreate(tokenTreasury),
+                cryptoCreate(tokenOwner).receiverSigRequired(true),
+                // create FT
+                tokenCreate(feeDenom).treasury(tokenTreasury).initialSupply(10),
+                // associate
+                tokenAssociate(tokenOwner, feeDenom),
+                // transfer FT to owner w/o owner's sig should fail
+                cryptoTransfer(moving(10,feeDenom).between(tokenTreasury,tokenOwner))
+                        .signedBy(tokenTreasury)
+                        .payingWithNoSig(tokenOwner)
+                        .hasPrecheck(INVALID_SIGNATURE),
+                // transfer FT to owner with owner's sig should pass
+                cryptoTransfer(moving(10,feeDenom).between(tokenTreasury,tokenOwner))
+                        .signedBy(tokenTreasury,tokenOwner)
+                        .payingWithNoSig(tokenOwner)
+                        .hasPrecheck(OK),
+                // remove from owner w/o owner's sig should fail
+                cryptoTransfer(moving(10,feeDenom).between(tokenOwner,tokenTreasury))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury)
+                        .hasKnownStatus(INVALID_SIGNATURE),
+                // remove from owner with owner's sig
+                cryptoTransfer(moving(10,feeDenom).between(tokenOwner,tokenTreasury))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury, tokenOwner)
+                        .hasKnownStatus(SUCCESS)
+
+        );
+    }
+
 }
