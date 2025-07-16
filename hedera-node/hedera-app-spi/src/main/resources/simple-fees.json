@@ -9,6 +9,10 @@
       "fee": 0.0000000852
     },
     {
+      "name": "Keys",
+      "fee": 0.01
+    },
+    {
       "name": "Bytes",
       "fee": 0.000011
     }
@@ -34,6 +38,29 @@
             {
               "name": "SignatureVerifications",
               "includedCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "File",
+      "transactions": [
+        {
+          "name": "FileCreate",
+          "baseFee": 0.05000,
+          "extras": [
+            {
+              "name": "SignatureVerifications",
+              "includedCount": 1
+            },
+            {
+              "name": "Keys",
+              "includedCount": 1
+            },
+            {
+              "name": "Bytes",
+              "includedCount": 1000
             }
           ]
         }
