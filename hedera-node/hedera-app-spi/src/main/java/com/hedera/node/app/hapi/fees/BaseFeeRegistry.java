@@ -1,11 +1,17 @@
 package com.hedera.node.app.hapi.fees;
+import com.hedera.hapi.node.consensus.SimpleFeesSchedule;
+import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Objects.requireNonNull;
+
 public final class BaseFeeRegistry {
 
     private static final Map<String, Double> BASE_FEES;
+    private static final SimpleFeesSchedule SIMPLE_FEES_SCHEDULE;
 
     static {
         Map<String, Double> fees = new HashMap<>();
@@ -108,6 +114,17 @@ public final class BaseFeeRegistry {
         fees.put("BatchTransaction", 0.00100);
 
         BASE_FEES = Collections.unmodifiableMap(fees);
+
+        var temp = SimpleFeesSchedule.newBuilder().build();
+        try (final var fin = BaseFeeRegistry.class.getClassLoader().getResourceAsStream("simple-fees.json")) {
+            temp = SimpleFeesSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
+            System.out.println("parsed simple fees schedule: " + temp);
+        } catch (Exception ex) {
+            System.out.println("exception loading fees schedule " + ex.getMessage());
+            temp = SimpleFeesSchedule.newBuilder().build();
+        }
+        SIMPLE_FEES_SCHEDULE = temp;
+
     }
 
     private BaseFeeRegistry() {
