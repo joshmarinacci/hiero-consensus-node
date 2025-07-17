@@ -1826,25 +1826,41 @@ public class CryptoTransferSuite {
                 tokenCreate(feeDenom).treasury(tokenTreasury).initialSupply(10),
                 // associate
                 tokenAssociate(tokenOwner, feeDenom),
-                // transfer FT to owner w/o owner's sig should fail
-                cryptoTransfer(moving(10,feeDenom).between(tokenTreasury,tokenOwner))
+                // transfer to owner w/o owner's sig should fail
+                cryptoTransfer(moving(10,feeDenom)
+                        .between(tokenTreasury,tokenOwner))
                         .signedBy(tokenTreasury)
                         .payingWithNoSig(tokenOwner)
                         .hasPrecheck(INVALID_SIGNATURE),
-                // transfer FT to owner with owner's sig should pass
-                cryptoTransfer(moving(10,feeDenom).between(tokenTreasury,tokenOwner))
+                // transfer to owner with owner's sig should pass
+                cryptoTransfer(moving(10,feeDenom)
+                        .between(tokenTreasury,tokenOwner))
                         .signedBy(tokenTreasury,tokenOwner)
                         .payingWithNoSig(tokenOwner)
                         .hasPrecheck(OK),
                 // remove from owner w/o owner's sig should fail
-                cryptoTransfer(moving(10,feeDenom).between(tokenOwner,tokenTreasury))
+                cryptoTransfer(moving(5,feeDenom)
+                        .between(tokenOwner,tokenTreasury))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
                         .hasKnownStatus(INVALID_SIGNATURE),
-                // remove from owner with owner's sig
-                cryptoTransfer(moving(10,feeDenom).between(tokenOwner,tokenTreasury))
+                // remove from owner with owner's sig should pass
+                cryptoTransfer(moving(5,feeDenom)
+                        .between(tokenOwner,tokenTreasury))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury, tokenOwner)
+                        .hasKnownStatus(SUCCESS),
+                // now add allowance
+                // owner allows treasury an allowance of 5
+                cryptoApproveAllowance()
+                        .payingWith(tokenTreasury)
+                        .addTokenAllowance(tokenOwner, feeDenom, tokenTreasury, 5L)
+                        .signedBy(tokenTreasury, tokenOwner),
+                // remove from owner w/o sig but with allowance should pass
+                cryptoTransfer(movingWithAllowance(5,feeDenom)
+                        .between(tokenOwner,tokenTreasury))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury)
                         .hasKnownStatus(SUCCESS)
 
         );
