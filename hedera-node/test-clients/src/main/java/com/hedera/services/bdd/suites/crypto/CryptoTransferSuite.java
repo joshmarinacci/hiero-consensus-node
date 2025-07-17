@@ -111,6 +111,7 @@ import com.hedera.services.bdd.spec.HapiSpecOperation;
 import com.hedera.services.bdd.spec.HapiSpecSetup;
 import com.hedera.services.bdd.spec.assertions.AccountDetailsAsserts;
 import com.hedera.services.bdd.spec.keys.SigControl;
+import com.hedera.services.bdd.spec.transactions.token.TokenMovement;
 import com.hedera.services.bdd.suites.contract.Utils;
 import com.hederahashgraph.api.proto.java.AccountAmount;
 import com.hederahashgraph.api.proto.java.AccountID;
@@ -1812,7 +1813,9 @@ public class CryptoTransferSuite {
                         .hasKnownStatus(TOKEN_NOT_ASSOCIATED_TO_FEE_COLLECTOR));
     }
 
-    // Debiting an account's fungible token balance without approval requires its signature.
+    /**
+     * Debiting an account's fungible token balance without an allowance approval requires its signature.
+     */
     @HapiTest
     final Stream<DynamicTest> debitingFTBalanceWithoutApprovalRequiresSig() {
         final String feeDenom = "denom";
@@ -1863,6 +1866,59 @@ public class CryptoTransferSuite {
                         .signedBy(tokenTreasury)
                         .hasKnownStatus(SUCCESS)
 
+        );
+    }
+
+    /**
+    * Transferring an account's NFT without approval requires its signature.
+     */
+    @HapiTest
+    final Stream<DynamicTest> transferringNFTWithoutApprovalRequiresSig() {
+        final var NFT_KEY = "NFT_KEY";
+        final String tokenTreasury = "tokenTreasury";
+        final var tokenOwner = "tokenOwner";
+        final var nonFungibleToken = "nonFungibleToken";
+        return hapiTest(
+                newKeyNamed(NFT_KEY),
+                // create accounts
+                cryptoCreate(tokenTreasury),
+                cryptoCreate(tokenOwner),
+                // create NFT
+                tokenCreate(nonFungibleToken)
+                        .treasury(tokenTreasury)
+                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .initialSupply(0)
+                        .supplyKey(NFT_KEY)
+                        .supplyType(TokenSupplyType.INFINITE),
+                tokenAssociate(tokenOwner, nonFungibleToken),
+                // mint an NFT
+                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
+
+                // transfer NFT from treasury to owner
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L)
+                        .between(tokenTreasury, tokenOwner))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury,tokenOwner)
+                ,
+                // transfer NFT from owner to treasury w/o owner sig will fail
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L)
+                        .between(tokenOwner, tokenTreasury))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury)
+                        .hasKnownStatus(INVALID_SIGNATURE),
+                // now add allowance, owner allows treasury an allowance of 5
+                cryptoApproveAllowance()
+                        .payingWith(tokenTreasury)
+                        .addNftAllowance(tokenOwner, nonFungibleToken, tokenTreasury, true, List.of(1L))
+                        .signedBy(tokenTreasury, tokenOwner)
+                        .fee(ONE_HBAR)
+                ,
+                // transfer NFT from owner to treasury w/o sig now passes using allowance
+                cryptoTransfer(TokenMovement.movingUniqueWithAllowance(nonFungibleToken, 1L)
+                        .between(tokenOwner, tokenTreasury))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury)
+                        .hasKnownStatus(SUCCESS)
         );
     }
 
