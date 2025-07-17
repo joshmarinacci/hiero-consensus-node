@@ -1922,4 +1922,37 @@ public class CryptoTransferSuite {
         );
     }
 
+    /**
+     * Debiting an account's HBAR without approval requires its signature.
+     */
+    @HapiTest
+    final Stream<DynamicTest> debitingHBarBalanceWithoutApprovalRequiresSig() {
+        final String tokenTreasury = "tokenTreasury";
+        final var tokenOwner = "tokenOwner";
+        return hapiTest(
+                // create accounts
+                cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
+                cryptoCreate(tokenOwner).balance(ONE_MILLION_HBARS),
+                // transfer hbar from owner to treasury without owner's sig should fail
+                cryptoTransfer(movingHbar(10)
+                        .between(tokenOwner,tokenTreasury))
+                        .signedBy(tokenTreasury)
+                        .payingWithNoSig(tokenTreasury)
+                        .hasKnownStatus(INVALID_SIGNATURE),
+                // now add allowance
+                // owner allows treasury an allowance of 5
+                cryptoApproveAllowance()
+                        .payingWith(tokenTreasury)
+                        .addCryptoAllowance(tokenOwner, tokenTreasury, 5L)
+                        .signedBy(tokenTreasury, tokenOwner),
+                // transfer hbar from owner to treasury without owner's sig should pass now
+                cryptoTransfer(TokenMovement.movingHbarWithAllowance(5)
+                        .between(tokenOwner,tokenTreasury))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury)
+                        .hasKnownStatus(SUCCESS)
+        );
+    }
+
+
 }
