@@ -1945,7 +1945,7 @@ public class CryptoTransferSuite {
      */
     @HapiTest
     final Stream<DynamicTest> debitingHBarBalanceWithoutApprovalRequiresSig() {
-        final String tokenTreasury = "tokenTreasury";
+        final var tokenTreasury = "tokenTreasury";
         final var tokenOwner = "tokenOwner";
         return hapiTest(
                 // create accounts
@@ -1972,5 +1972,30 @@ public class CryptoTransferSuite {
         );
     }
 
-
+    /**
+     * Crediting HBAR to an account with receiverSigRequired=true requires its signature.
+     */
+    @HapiTest
+    final Stream<DynamicTest> debitingHBarBalanceWithApprovalRequiresSig() {
+        final var tokenTreasury = "tokenTreasury";
+        final var receiver = "receiver";
+        return hapiTest(
+                cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
+                // receiver require sig to receive
+                cryptoCreate(receiver).receiverSigRequired(true),
+                // 10hbar from treasury to receiver *without* receiver sig
+                // requires receiver sig, so this will fail
+                cryptoTransfer(movingHbar(10)
+                        .between(tokenTreasury,receiver))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury)
+                        .hasKnownStatus(INVALID_SIGNATURE),
+                // try again *with* the receiver sig.
+                cryptoTransfer(movingHbar(10)
+                        .between(tokenTreasury,receiver))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury,receiver)
+                        .hasKnownStatus(SUCCESS)
+        );
+    }
 }
