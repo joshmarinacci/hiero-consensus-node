@@ -1841,26 +1841,22 @@ public class CryptoTransferSuite {
                 // associate
                 tokenAssociate(tokenOwner, feeDenom),
                 // transfer to owner w/o owner's sig should fail
-                cryptoTransfer(moving(10,feeDenom)
-                        .between(tokenTreasury,tokenOwner))
+                cryptoTransfer(moving(10, feeDenom).between(tokenTreasury, tokenOwner))
                         .signedBy(tokenTreasury)
                         .payingWithNoSig(tokenOwner)
                         .hasPrecheck(INVALID_SIGNATURE),
                 // transfer to owner with owner's sig should pass
-                cryptoTransfer(moving(10,feeDenom)
-                        .between(tokenTreasury,tokenOwner))
-                        .signedBy(tokenTreasury,tokenOwner)
+                cryptoTransfer(moving(10, feeDenom).between(tokenTreasury, tokenOwner))
+                        .signedBy(tokenTreasury, tokenOwner)
                         .payingWithNoSig(tokenOwner)
                         .hasPrecheck(OK),
                 // remove from owner w/o owner's sig should fail
-                cryptoTransfer(moving(5,feeDenom)
-                        .between(tokenOwner,tokenTreasury))
+                cryptoTransfer(moving(5, feeDenom).between(tokenOwner, tokenTreasury))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
                         .hasKnownStatus(INVALID_SIGNATURE),
                 // remove from owner with owner's sig should pass
-                cryptoTransfer(moving(5,feeDenom)
-                        .between(tokenOwner,tokenTreasury))
+                cryptoTransfer(moving(5, feeDenom).between(tokenOwner, tokenTreasury))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury, tokenOwner)
                         .hasKnownStatus(SUCCESS),
@@ -1871,13 +1867,10 @@ public class CryptoTransferSuite {
                         .addTokenAllowance(tokenOwner, feeDenom, tokenTreasury, 5L)
                         .signedBy(tokenTreasury, tokenOwner),
                 // remove from owner w/o sig but with allowance should pass
-                cryptoTransfer(movingWithAllowance(5,feeDenom)
-                        .between(tokenOwner,tokenTreasury))
+                cryptoTransfer(movingWithAllowance(5, feeDenom).between(tokenOwner, tokenTreasury))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
-                        .hasKnownStatus(SUCCESS)
-
-        );
+                        .hasKnownStatus(SUCCESS));
     }
 
     /**
@@ -1907,14 +1900,11 @@ public class CryptoTransferSuite {
                 mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
 
                 // transfer NFT from treasury to owner
-                cryptoTransfer(movingUnique(nonFungibleToken, 1L)
-                        .between(tokenTreasury, tokenOwner))
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenOwner))
                         .payingWithNoSig(tokenTreasury)
-                        .signedBy(tokenTreasury,tokenOwner)
-                ,
+                        .signedBy(tokenTreasury, tokenOwner),
                 // transfer NFT from owner to treasury w/o owner sig will fail
-                cryptoTransfer(movingUnique(nonFungibleToken, 1L)
-                        .between(tokenOwner, tokenTreasury))
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenTreasury))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
                         .hasKnownStatus(INVALID_SIGNATURE),
@@ -1923,15 +1913,13 @@ public class CryptoTransferSuite {
                         .payingWith(tokenTreasury)
                         .addNftAllowance(tokenOwner, nonFungibleToken, tokenTreasury, true, List.of(1L))
                         .signedBy(tokenTreasury, tokenOwner)
-                        .fee(ONE_HBAR)
-                ,
+                        .fee(ONE_HBAR),
                 // transfer NFT from owner to treasury w/o sig now passes using allowance
                 cryptoTransfer(TokenMovement.movingUniqueWithAllowance(nonFungibleToken, 1L)
-                        .between(tokenOwner, tokenTreasury))
+                                .between(tokenOwner, tokenTreasury))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
-                        .hasKnownStatus(SUCCESS)
-        );
+                        .hasKnownStatus(SUCCESS));
     }
 
     /**
@@ -1947,8 +1935,7 @@ public class CryptoTransferSuite {
                 cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
                 cryptoCreate(tokenOwner).balance(ONE_MILLION_HBARS),
                 // transfer hbar from owner to treasury without owner's sig should fail
-                cryptoTransfer(movingHbar(10)
-                        .between(tokenOwner,tokenTreasury))
+                cryptoTransfer(movingHbar(10).between(tokenOwner, tokenTreasury))
                         .signedBy(tokenTreasury)
                         .payingWithNoSig(tokenTreasury)
                         .hasKnownStatus(INVALID_SIGNATURE),
@@ -1959,12 +1946,10 @@ public class CryptoTransferSuite {
                         .addCryptoAllowance(tokenOwner, tokenTreasury, 5L)
                         .signedBy(tokenTreasury, tokenOwner),
                 // transfer hbar from owner to treasury without owner's sig should pass now
-                cryptoTransfer(TokenMovement.movingHbarWithAllowance(5)
-                        .between(tokenOwner,tokenTreasury))
+                cryptoTransfer(TokenMovement.movingHbarWithAllowance(5).between(tokenOwner, tokenTreasury))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
-                        .hasKnownStatus(SUCCESS)
-        );
+                        .hasKnownStatus(SUCCESS));
     }
 
     /**
@@ -1980,18 +1965,15 @@ public class CryptoTransferSuite {
                 cryptoCreate(receiver).receiverSigRequired(true),
                 // 10hbar from treasury to receiver *without* receiver sig
                 // requires receiver sig, so this will fail
-                cryptoTransfer(movingHbar(10)
-                        .between(tokenTreasury,receiver))
+                cryptoTransfer(movingHbar(10).between(tokenTreasury, receiver))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
                         .hasKnownStatus(INVALID_SIGNATURE),
                 // try again *with* the receiver sig.
-                cryptoTransfer(movingHbar(10)
-                        .between(tokenTreasury,receiver))
+                cryptoTransfer(movingHbar(10).between(tokenTreasury, receiver))
                         .payingWithNoSig(tokenTreasury)
-                        .signedBy(tokenTreasury,receiver)
-                        .hasKnownStatus(SUCCESS)
-        );
+                        .signedBy(tokenTreasury, receiver)
+                        .hasKnownStatus(SUCCESS));
     }
 
     /**
@@ -2014,18 +1996,15 @@ public class CryptoTransferSuite {
 
                 // 5 FT from treasury to receiver *without* receiver sig
                 // requires receiver sig, so this will fail
-                cryptoTransfer(moving(5,feeDenom)
-                        .between(treasury,receiver))
+                cryptoTransfer(moving(5, feeDenom).between(treasury, receiver))
                         .payingWithNoSig(treasury)
                         .signedBy(treasury)
                         .hasKnownStatus(INVALID_SIGNATURE),
                 // try again *with* the receiver sig.
-                cryptoTransfer(moving(5,feeDenom)
-                        .between(treasury,receiver))
+                cryptoTransfer(moving(5, feeDenom).between(treasury, receiver))
                         .payingWithNoSig(treasury)
-                        .signedBy(treasury,receiver)
-                        .hasKnownStatus(SUCCESS)
-        );
+                        .signedBy(treasury, receiver)
+                        .hasKnownStatus(SUCCESS));
     }
 
     /**
@@ -2056,17 +2035,14 @@ public class CryptoTransferSuite {
 
                 // NFT from treasury to receiver *without* receiver sig
                 // requires receiver sig, so this will fail
-                cryptoTransfer(movingUnique(nonFungibleToken,1L)
-                        .between(tokenTreasury,tokenReceiver))
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenReceiver))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
                         .hasKnownStatus(INVALID_SIGNATURE),
                 // try again *with* the receiver sig.
-                cryptoTransfer(movingUnique(nonFungibleToken,1L)
-                        .between(tokenTreasury,tokenReceiver))
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenReceiver))
                         .payingWithNoSig(tokenTreasury)
-                        .signedBy(tokenTreasury,tokenReceiver)
-                        .hasKnownStatus(SUCCESS)
-        );
+                        .signedBy(tokenTreasury, tokenReceiver)
+                        .hasKnownStatus(SUCCESS));
     }
 }

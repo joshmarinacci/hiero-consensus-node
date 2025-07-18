@@ -56,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.google.protobuf.ByteString;
 import com.hedera.node.app.hapi.utils.ByteStringUtils;
 import com.hedera.services.bdd.junit.HapiTest;
-import com.hedera.services.bdd.spec.transactions.token.TokenMovement;
 import com.hederahashgraph.api.proto.java.AccountAmount;
 import com.hederahashgraph.api.proto.java.AccountID;
 import com.hederahashgraph.api.proto.java.NftTransfer;
@@ -1664,9 +1663,8 @@ public class TransferWithCustomRoyaltyFees {
                 // send w/o sender sig because sender is treasury
                 cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenOwner)),
                 // send w/o receiver sig because receiver is treasury
-                cryptoTransfer(movingUnique(nonFungibleToken,1L).between(tokenOwner,tokenTreasury))
-                        .signedByPayerAnd(tokenOwner)
-        );
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenTreasury))
+                        .signedByPayerAnd(tokenOwner));
     }
 
     /**
@@ -1698,8 +1696,7 @@ public class TransferWithCustomRoyaltyFees {
                 mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
 
                 // move NFT to the owner
-                cryptoTransfer(
-                        movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenOwner))
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenOwner))
                         .fee(ONE_HBAR)
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
@@ -1708,13 +1705,13 @@ public class TransferWithCustomRoyaltyFees {
                 // transfer NFT from owner to receiver w/o sig
                 // and move hbar from treasury to owner, so collector gets royalty from that and the
                 // receiver pays nothing.
-                cryptoTransfer(movingUnique(nonFungibleToken,1L).between(tokenOwner, tokenReceiver),
-                        movingHbar(100).between(tokenTreasury,tokenOwner))
+                cryptoTransfer(
+                                movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver),
+                                movingHbar(100).between(tokenTreasury, tokenOwner))
                         .fee(ONE_HBAR)
                         .payingWithNoSig(tokenOwner)
                         .signedBy(tokenOwner, tokenTreasury)
-                        .hasKnownStatus(SUCCESS)
-        );
+                        .hasKnownStatus(SUCCESS));
     }
 
     /**
@@ -1747,9 +1744,7 @@ public class TransferWithCustomRoyaltyFees {
                         .supplyType(TokenSupplyType.INFINITE)
                         // royalty is 1/2 with fallback of 4 in units of feeDenom
                         .withCustom(royaltyFeeWithFallback(
-                                1, 2,
-                                fixedHtsFeeInheritingRoyaltyCollector(4, feeDenom), hbarCollector)
-                        ),
+                                1, 2, fixedHtsFeeInheritingRoyaltyCollector(4, feeDenom), hbarCollector)),
                 // associate everyone
                 tokenAssociate(tokenOwner, nonFungibleToken),
                 tokenAssociate(tokenReceiver, nonFungibleToken),
@@ -1757,22 +1752,18 @@ public class TransferWithCustomRoyaltyFees {
                 // mint a token
                 mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
                 // move NFT from treasury to owner
-                cryptoTransfer(movingUnique(nonFungibleToken, 1L)
-                        .between(tokenTreasury, tokenOwner)),
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenOwner)),
                 // move FT from treasury to receiver
-                cryptoTransfer(moving(50,feeDenom).between(tokenTreasury, tokenReceiver))
+                cryptoTransfer(moving(50, feeDenom).between(tokenTreasury, tokenReceiver))
                         .hasKnownStatus(SUCCESS),
                 // owner sells NFT to receiver
                 // treasury pays owner
                 // so receiver doesn't need to sign
                 cryptoTransfer(
-                        movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver),
-                        moving(10,feeDenom).between(tokenTreasury, tokenOwner)
-                )
+                                movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver),
+                                moving(10, feeDenom).between(tokenTreasury, tokenOwner))
                         .fee(ONE_HBAR)
                         .payingWithNoSig(tokenTreasury)
-                        .signedBy(tokenOwner, tokenTreasury)
-
-        );
+                        .signedBy(tokenOwner, tokenTreasury));
     }
 }
