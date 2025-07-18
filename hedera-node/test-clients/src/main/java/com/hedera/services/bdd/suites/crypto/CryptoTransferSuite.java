@@ -1976,7 +1976,7 @@ public class CryptoTransferSuite {
      * Crediting HBAR to an account with receiverSigRequired=true requires its signature.
      */
     @HapiTest
-    final Stream<DynamicTest> debitingHBarBalanceWithApprovalRequiresSig() {
+    final Stream<DynamicTest> creditingHBarBalanceRequiresSig() {
         final var tokenTreasury = "tokenTreasury";
         final var receiver = "receiver";
         return hapiTest(
@@ -1995,6 +1995,40 @@ public class CryptoTransferSuite {
                         .between(tokenTreasury,receiver))
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury,receiver)
+                        .hasKnownStatus(SUCCESS)
+        );
+    }
+
+    /**
+     * Crediting fungible token units to an account with receiverSigRequired=true requires its signature.
+     */
+    @HapiTest
+    final Stream<DynamicTest> creditingFTRequiresSig() {
+        final String feeDenom = "denom";
+        final var treasury = "tokenTreasury";
+        final var receiver = "receiver";
+        return hapiTest(
+                cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
+                // receiver require sig to receive
+                cryptoCreate(receiver).receiverSigRequired(true),
+
+                // create FT
+                tokenCreate(feeDenom).treasury(treasury).initialSupply(10),
+                // associate
+                tokenAssociate(receiver, feeDenom),
+
+                // 5 FT from treasury to receiver *without* receiver sig
+                // requires receiver sig, so this will fail
+                cryptoTransfer(moving(5,feeDenom)
+                        .between(treasury,receiver))
+                        .payingWithNoSig(treasury)
+                        .signedBy(treasury)
+                        .hasKnownStatus(INVALID_SIGNATURE),
+                // try again *with* the receiver sig.
+                cryptoTransfer(moving(5,feeDenom)
+                        .between(treasury,receiver))
+                        .payingWithNoSig(treasury)
+                        .signedBy(treasury,receiver)
                         .hasKnownStatus(SUCCESS)
         );
     }
