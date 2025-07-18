@@ -291,7 +291,6 @@ public class TransferWithCustomRoyaltyFees {
                         .hasTokenBalance(nonFungibleToken, 1)
                         .hasTinyBars(ONE_MILLION_HBARS - 100),
                 getAccountBalance(hbarCollector).hasTinyBars(100));
-
     }
 
     @HapiTest
