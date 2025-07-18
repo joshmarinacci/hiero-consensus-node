@@ -1832,7 +1832,8 @@ public class CryptoTransferSuite {
     }
 
     /**
-     * Debiting an account's fungible token balance without an allowance approval requires its signature.
+     * Debiting an account's fungible token balance *without* an allowance approval requires its signature.
+     * Debiting an account's fungible token balance *with* an approval waives its signature.
      */
     @HapiTest
     final Stream<DynamicTest> debitingFTBalanceWithoutApprovalRequiresSig() {
@@ -1888,7 +1889,8 @@ public class CryptoTransferSuite {
     }
 
     /**
-    * Transferring an account's NFT without approval requires its signature.
+     * Transferring an account's NFT *without* approval requires its signature.
+     * Transferring an account's NFT *with* approval waives its signature.
      */
     @HapiTest
     final Stream<DynamicTest> transferringNFTWithoutApprovalRequiresSig() {
@@ -1941,7 +1943,8 @@ public class CryptoTransferSuite {
     }
 
     /**
-     * Debiting an account's HBAR without approval requires its signature.
+     * Debiting an account's HBAR *without* approval requires its signature.
+     * Debiting an account's HBAR *with* approval waives its signature.
      */
     @HapiTest
     final Stream<DynamicTest> debitingHBarBalanceWithoutApprovalRequiresSig() {
