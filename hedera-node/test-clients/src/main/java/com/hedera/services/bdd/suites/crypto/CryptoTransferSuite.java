@@ -2032,4 +2032,46 @@ public class CryptoTransferSuite {
                         .hasKnownStatus(SUCCESS)
         );
     }
+
+    /**
+     * Transferring an NFT to an account with receiverSigRequired=true requires its signature.
+     */
+    @HapiTest
+    final Stream<DynamicTest> transferNFTRequiresSig() {
+        final var tokenTreasury = "tokenTreasury";
+        final var tokenReceiver = "receiver";
+        final var NFT_KEY = "NFT_KEY";
+        final var nonFungibleToken = "nonFungibleToken";
+        return hapiTest(
+                newKeyNamed(NFT_KEY),
+                cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
+                // receiver require sig to receive
+                cryptoCreate(tokenReceiver).receiverSigRequired(true),
+
+                // create nft
+                tokenCreate(nonFungibleToken)
+                        .treasury(tokenTreasury)
+                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .initialSupply(0)
+                        .supplyKey(NFT_KEY)
+                        .supplyType(TokenSupplyType.INFINITE),
+                tokenAssociate(tokenReceiver, nonFungibleToken),
+                // mint nft
+                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
+
+                // NFT from treasury to receiver *without* receiver sig
+                // requires receiver sig, so this will fail
+                cryptoTransfer(movingUnique(nonFungibleToken,1L)
+                        .between(tokenTreasury,tokenReceiver))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury)
+                        .hasKnownStatus(INVALID_SIGNATURE),
+                // try again *with* the receiver sig.
+                cryptoTransfer(movingUnique(nonFungibleToken,1L)
+                        .between(tokenTreasury,tokenReceiver))
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenTreasury,tokenReceiver)
+                        .hasKnownStatus(SUCCESS)
+        );
+    }
 }
