@@ -35,11 +35,7 @@ import static com.hedera.services.bdd.spec.utilops.CustomSpecAssert.allRunFor;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.createHip32Auto;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.withOpContext;
-import static com.hedera.services.bdd.suites.HapiSuite.ONE_HUNDRED_HBARS;
-import static com.hedera.services.bdd.suites.HapiSuite.ONE_MILLION_HBARS;
-import static com.hedera.services.bdd.suites.HapiSuite.SECP_256K1_SHAPE;
-import static com.hedera.services.bdd.suites.HapiSuite.SECP_256K1_SOURCE_KEY;
-import static com.hedera.services.bdd.suites.HapiSuite.flattened;
+import static com.hedera.services.bdd.suites.HapiSuite.*;
 import static com.hedera.services.bdd.suites.crypto.AutoAccountUpdateSuite.TRANSFER_TXN_2;
 import static com.hedera.services.bdd.suites.crypto.AutoCreateUtils.createHollowAccountFrom;
 import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.ACCOUNT_REPEATED_IN_ACCOUNT_AMOUNTS;
@@ -1675,15 +1671,17 @@ public class TransferWithCustomRoyaltyFees {
     /**
      * Transferring NFTs with HBAR exchanged for a token with fallback fees
      * does not require signature when recipient has receiverSigRequired=false.
+     * If the fallback fee is used, then the receiver still needs to sign for the fee transfer.
+     * Only when the fee is paid by a third party does the receiver not need to sign.
      */
     @HapiTest
     final Stream<DynamicTest> transferNFTWithReceiverSigRequiredFalse() {
         return hapiTest(
                 newKeyNamed(NFT_KEY),
-                cryptoCreate(hbarCollector).balance(ONE_MILLION_HBARS),
+                cryptoCreate(hbarCollector).balance(0L),
+                cryptoCreate(tokenReceiver).balance(ONE_MILLION_HBARS).receiverSigRequired(false),
                 cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
-                cryptoCreate(tokenOwner).balance(ONE_MILLION_HBARS),
-                cryptoCreate(tokenReceiver).balance(ONE_MILLION_HBARS),
+                cryptoCreate(tokenOwner),
                 // create NFT w/ hbar fallback fee
                 tokenCreate(nonFungibleToken)
                         .treasury(tokenTreasury)
@@ -1692,23 +1690,28 @@ public class TransferWithCustomRoyaltyFees {
                         .supplyKey(NFT_KEY)
                         .supplyType(TokenSupplyType.INFINITE)
                         .withCustom(royaltyFeeWithFallback(
-                                1, 2, fixedHbarFeeInheritingRoyaltyCollector(10), hbarCollector)),
+                                1, 2, fixedHbarFeeInheritingRoyaltyCollector(100), hbarCollector)),
                 // associate everyone
-                tokenAssociate(tokenOwner, nonFungibleToken),
                 tokenAssociate(tokenReceiver, nonFungibleToken),
+                tokenAssociate(tokenOwner, nonFungibleToken),
                 mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
 
-                // owner gets the NFT
+                // move NFT to the owner
                 cryptoTransfer(
                         movingUnique(nonFungibleToken, 1L).between(tokenTreasury, tokenOwner))
+                        .fee(ONE_HBAR)
                         .payingWithNoSig(tokenTreasury)
                         .signedBy(tokenTreasury)
                         .hasKnownStatus(SUCCESS),
+
                 // transfer NFT from owner to receiver w/o sig
-                cryptoTransfer(
-                        movingUnique(nonFungibleToken,1L).between(tokenOwner, tokenReceiver))
+                // and move hbar from treasury to owner, so collector gets royalty from that and the
+                // receiver pays nothing.
+                cryptoTransfer(movingUnique(nonFungibleToken,1L).between(tokenOwner, tokenReceiver),
+                        movingHbar(100).between(tokenTreasury,tokenOwner))
+                        .fee(ONE_HBAR)
                         .payingWithNoSig(tokenOwner)
-                        .signedBy(tokenOwner)
+                        .signedBy(tokenOwner, tokenTreasury)
                         .hasKnownStatus(SUCCESS)
         );
     }
@@ -1716,6 +1719,8 @@ public class TransferWithCustomRoyaltyFees {
     /**
      * Transferring NFTs with fungible token units exchanged for a token with fallback fees
      * does not require signature when recipient has receiverSigRequired=false.
+     * If the fallback fee is used, then the receiver still needs to sign for the fee transfer.
+     * Only when the fee is paid by a third party does the receiver not need to sign.
      */
     @HapiTest
     final Stream<DynamicTest> transferWithFungibleWithFallbackSigRequiredFalse() {
@@ -1754,14 +1759,18 @@ public class TransferWithCustomRoyaltyFees {
                 cryptoTransfer(movingUnique(nonFungibleToken, 1L)
                         .between(tokenTreasury, tokenOwner)),
                 // move FT from treasury to receiver
-                cryptoTransfer(moving(50,feeDenom).between(tokenTreasury, tokenReceiver)),
+                cryptoTransfer(moving(50,feeDenom).between(tokenTreasury, tokenReceiver))
+                        .hasKnownStatus(SUCCESS),
                 // owner sells NFT to receiver
+                // treasury pays owner
+                // so receiver doesn't need to sign
                 cryptoTransfer(
                         movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver),
-                        moving(10,feeDenom).between(tokenReceiver, tokenOwner)
+                        moving(10,feeDenom).between(tokenTreasury, tokenOwner)
                 )
-                        .payingWith(tokenTreasury)
-                        .signedBy(tokenOwner,tokenReceiver, tokenTreasury)
+                        .fee(ONE_HBAR)
+                        .payingWithNoSig(tokenTreasury)
+                        .signedBy(tokenOwner, tokenTreasury)
 
         );
     }
