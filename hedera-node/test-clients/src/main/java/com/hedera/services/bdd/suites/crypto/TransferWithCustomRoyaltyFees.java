@@ -289,7 +289,8 @@ public class TransferWithCustomRoyaltyFees {
                 getAccountBalance(tokenOwner).hasTokenBalance(nonFungibleToken, 0),
                 getAccountBalance(tokenReceiver)
                         .hasTokenBalance(nonFungibleToken, 1)
-                        .hasTinyBars(ONE_MILLION_HBARS - 100));
+                        .hasTinyBars(ONE_MILLION_HBARS - 100),
+                getAccountBalance(hbarCollector).hasTinyBars(100));
 
     }
 
