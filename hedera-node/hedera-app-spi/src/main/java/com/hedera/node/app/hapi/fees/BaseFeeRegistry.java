@@ -18,8 +18,8 @@ public final class BaseFeeRegistry {
         // Addons
         fees.put("PerSignature", 0.0001);
         fees.put("PerKey", 0.01);
-        fees.put("PerHCSByte", 0.000011);
-        fees.put("PerFileByte", 0.000011);
+        fees.put("PerHCSByte",  0.000_011);
+        fees.put("PerFileByte", 0.000_011);
         fees.put("PerCryptoTransferAccount", 0.00001);
         fees.put("PerGas", 0.0000000852);
 
@@ -36,13 +36,13 @@ public final class BaseFeeRegistry {
         fees.put("CryptoDeleteAllowance", 0.05000);
 
         // HCS
-        fees.put("ConsensusCreateTopic", 0.01000);
-        fees.put("ConsensusCreateTopicWithCustomFee", 2.0);
-        fees.put("ConsensusUpdateTopic", 0.00022);
-        fees.put("ConsensusDeleteTopic", 0.00500);
-        fees.put("ConsensusSubmitMessage", 0.00010);
-        fees.put("ConsensusSubmitMessageWithCustomFee", 0.05000);
-        fees.put("ConsensusGetTopicInfo", 0.00010);
+        fees.put("ConsensusCreateTopic",                0.020_00);
+        fees.put("ConsensusCreateTopicWithCustomFee",   2.000_00);
+        fees.put("ConsensusUpdateTopic",                0.000_22);
+        fees.put("ConsensusDeleteTopic",                0.005_00);
+        fees.put("ConsensusSubmitMessage",              0.000_10);
+        fees.put("ConsensusSubmitMessageWithCustomFee", 0.050_00);
+        fees.put("ConsensusGetTopicInfo",               0.000_20);
 
         // HTS
         fees.put("TokenCreate", 1.00000);
@@ -94,12 +94,12 @@ public final class BaseFeeRegistry {
         fees.put("EthereumTransactionSuccess", 0.00000);
         fees.put("EthereumTransactionFail", 0.00010);
         // Files
-        fees.put("FileCreate", 0.05000);
-        fees.put("FileUpdate", 0.05000);
-        fees.put("FileDelete", 0.00700);
-        fees.put("FileAppend", 0.05000);
-        fees.put("FileGetContents", 0.00010);
-        fees.put("FileGetInfo", 0.00010);
+        fees.put("FileCreate",      0.050_00);
+        fees.put("FileUpdate",      0.050_00);
+        fees.put("FileDelete",      0.007_00);
+        fees.put("FileAppend",      0.050_00);
+        fees.put("FileGetContents", 0.000_66);
+        fees.put("FileGetInfo",     0.000_66);
 
         // Misc
         fees.put("GetVersionInfo", 0.00010);
