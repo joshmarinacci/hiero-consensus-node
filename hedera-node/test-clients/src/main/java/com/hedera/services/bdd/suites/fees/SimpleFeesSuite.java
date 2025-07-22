@@ -1,10 +1,13 @@
 package com.hedera.services.bdd.suites.fees;
 
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.utils.ByteStringUtils;
 import com.hedera.services.bdd.junit.HapiTest;
 import com.hedera.services.bdd.junit.HapiTestLifecycle;
 import com.hedera.services.bdd.junit.LeakyHapiTest;
 import com.hedera.services.bdd.junit.support.TestLifecycle;
+import com.hederahashgraph.api.proto.java.TokenSupplyType;
+import com.hederahashgraph.api.proto.java.TokenType;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -24,20 +28,29 @@ import static com.hedera.services.bdd.spec.queries.QueryVerbs.getFileInfo;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTopicInfo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.createTopic;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoCreate;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoTransfer;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.deleteTopic;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileAppend;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileCreate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileDelete;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileUpdate;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.mintToken;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.submitMessageTo;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenAssociate;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenCreate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.updateTopic;
 import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fixedConsensusHbarFee;
+import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fixedHbarFeeInheritingRoyaltyCollector;
+import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.royaltyFeeWithFallback;
+import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.moving;
+import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.movingUnique;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsdWithin;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HBAR;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HUNDRED_HBARS;
+import static com.hedera.services.bdd.suites.HapiSuite.ONE_MILLION_HBARS;
 
 @HapiTestLifecycle
 public class SimpleFeesSuite {
@@ -69,12 +82,12 @@ public class SimpleFeesSuite {
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     cryptoCreate("collector"),
                     createTopic("testTopic")
-                        .blankMemo()
+                            .blankMemo()
                             .withConsensusCustomFee(fixedConsensusHbarFee(88, "collector"))
-                        .payingWith(PAYER)
+                            .payingWith(PAYER)
                             .fee(ONE_HUNDRED_HBARS)
                             .via("create-topic-txn"),
-                validateChargedUsd("create-topic-txn", 2)
+                    validateChargedUsd("create-topic-txn", 2)
             );
         }
 
@@ -120,10 +133,10 @@ public class SimpleFeesSuite {
         final Stream<DynamicTest> submitMessageFee() {
             final byte[] messageBytes = new byte[600]; // up to 1k
             Arrays.fill(messageBytes, (byte) 0b1);
-            final var excess_bytes = 600-HCS_FREE_BYTES;
+            final var excess_bytes = 600 - HCS_FREE_BYTES;
             final var base = BaseFeeRegistry.getBaseFee("ConsensusSubmitMessage");
             final var per_byte = BaseFeeRegistry.getBaseFee("PerHCSByte");
-            System.out.println("COST: " + base + " "  + excess_bytes + " "  + per_byte);
+            System.out.println("COST: " + base + " " + excess_bytes + " " + per_byte);
             System.out.println("COST: " + (base + excess_bytes * per_byte));
             return hapiTest(
                     newKeyNamed(PAYER),
@@ -164,6 +177,7 @@ public class SimpleFeesSuite {
     class FileFees {
         final double FileCreate = 0.050_00;
         final double PerFileByte = 0.000_011;
+
         @HapiTest
         final Stream<DynamicTest> fileCreateFee() {
             final var byte_count = 1789;
@@ -269,10 +283,10 @@ public class SimpleFeesSuite {
 //            final var create_price_hbar2 = 67253300;
 //            System.out.println("create price hbar is "+create_price_hbar);
 //            System.out.println("create price hbar is "+create_price_hbar2);
-            final var correct= Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
+            final var correct = Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
             return hapiTest(
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
-                    getAccountBalance(PAYER).hasTinyBars(100*ONE_HBAR),
+                    getAccountBalance(PAYER).hasTinyBars(100 * ONE_HBAR),
                     fileCreate("test")
                             .memo("memotext")
                             .contents("0".repeat(byte_count).getBytes())
@@ -305,7 +319,7 @@ public class SimpleFeesSuite {
         final Stream<DynamicTest> fileGetInfo() {
             final var FileGetContents = 0.000_66;
             final var byte_count = 3764;
-            final var correct= Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
+            final var correct = Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
             return hapiTest(
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     fileCreate("test")
@@ -340,4 +354,156 @@ public class SimpleFeesSuite {
     // TODO: smart contracts
     // TODO: File service
     // TODO: random other stuff
+
+    // TODO: delete this
+    @HapiTest
+    final Stream<DynamicTest> diogoTest() {
+        final var NFT_KEY = "NFT_KEY";
+        final var hbarCollector = "hbarCollector";
+        final var tokenReceiver = "tokenReceiver";
+        final var tokenTreasury = "tokenTreasury";
+        final var tokenOwner = "tokenOwner";
+        final var alice = "alice";
+        final var feeDenom = "feeDenom";
+        final var nonFungibleToken = "nonFungibleToken";
+        return hapiTest(
+                newKeyNamed(NFT_KEY),
+                cryptoCreate(hbarCollector).balance(0L),
+                cryptoCreate(tokenReceiver).balance(ONE_MILLION_HBARS),
+                cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
+                cryptoCreate(tokenOwner),
+                cryptoCreate(alice).balance(ONE_MILLION_HBARS),
+                tokenCreate(feeDenom).treasury(tokenReceiver).initialSupply(4),
+                tokenAssociate(tokenOwner, feeDenom),
+                tokenAssociate(hbarCollector, feeDenom),
+                tokenCreate(nonFungibleToken)
+                        .treasury(tokenTreasury)
+                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .initialSupply(0)
+                        .supplyKey(NFT_KEY)
+                        .supplyType(TokenSupplyType.INFINITE)
+                        .withCustom(royaltyFeeWithFallback(
+                                1, 4, fixedHbarFeeInheritingRoyaltyCollector(100), hbarCollector)),
+                tokenAssociate(tokenReceiver, nonFungibleToken),
+                tokenAssociate(alice, nonFungibleToken),
+                tokenAssociate(tokenOwner, nonFungibleToken),
+                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
+                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta2".getBytes()))),
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L, 2L).between(tokenTreasury, tokenOwner)),
+                cryptoTransfer(
+                        movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver),
+                        movingUnique(nonFungibleToken, 2L).between(tokenOwner, alice),
+                        moving(1, feeDenom).between(tokenReceiver, tokenOwner)
+                )
+                        .signedByPayerAnd(tokenOwner, tokenReceiver, alice),
+                getAccountBalance(tokenOwner)
+                        .hasTokenBalance(nonFungibleToken, 0)
+                        .hasTokenBalance(feeDenom, 1),
+                getAccountBalance(tokenReceiver)
+                        .hasTokenBalance(nonFungibleToken, 1)
+                        .hasTokenBalance(feeDenom, 3)
+                        .hasTinyBars(ONE_MILLION_HBARS),
+                getAccountBalance(alice)
+                        .hasTokenBalance(nonFungibleToken, 1)
+                        .hasTinyBars(ONE_MILLION_HBARS),
+                getAccountBalance(hbarCollector)
+                        .hasTinyBars(0)
+                        .hasTokenBalance(feeDenom, 0)
+        );
+    }
+
+    // TODO: delete this
+    /*
+    Hi Diogo. I can recreate your scenario.
+
+    To restate: The hbar collector gets nothing because the royalty is 1/4, and 1/4 of 1 is a 0.25FT which rounds down to zero.
+    Suppose we increase the FT transfer from 1 to 10 (and increase the supply from 4 to 40)
+    then the owner ends up with 8 and 2 go to the hbar collector, meaning the fee of 1/4 of 10 (2.5FT) is rounded
+    down to 2. So the question is if the fallback of 100 should kick in when this happens. Currently, it looks
+    like it cannot.
+     */
+    @HapiTest
+    final Stream<DynamicTest> diogoTest2() {
+        final var NFT_KEY = "NFT_KEY";
+        final var hbarCollector = "hbarCollector";
+        final var tokenReceiver = "tokenReceiver";
+        final var tokenTreasury = "tokenTreasury";
+        final var tokenOwner = "tokenOwner";
+        final var alice = "alice";
+        final var feeDenom = "feeDenom";
+        final var nonFungibleToken = "nonFungibleToken";
+
+        return hapiTest(
+                newKeyNamed(NFT_KEY),
+                cryptoCreate(hbarCollector).balance(0L),
+                // reciever = 1MHbar
+                cryptoCreate(tokenReceiver).balance(ONE_MILLION_HBARS),
+                // treasury = 1MHbar
+                cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
+                // owner = 0hbar
+                cryptoCreate(tokenOwner).balance(0L),
+                // receiver = 4FT
+                tokenCreate(feeDenom).treasury(tokenReceiver).initialSupply(4),
+                tokenAssociate(tokenOwner, feeDenom),
+                tokenAssociate(hbarCollector, feeDenom),
+                tokenCreate(nonFungibleToken)
+                        .treasury(tokenTreasury)
+                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                        .initialSupply(0)
+                        .supplyKey(NFT_KEY)
+                        .supplyType(TokenSupplyType.INFINITE)
+                        // royalty is 1/4, 25% to hbar collector
+                        // fallback is 100hbar
+                        .withCustom(royaltyFeeWithFallback(
+                                1, 4, fixedHbarFeeInheritingRoyaltyCollector(100), hbarCollector)),
+                tokenAssociate(tokenReceiver, nonFungibleToken),
+                tokenAssociate(tokenOwner, nonFungibleToken),
+                // make two tokens
+                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
+                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta2".getBytes()))),
+                // give two NFTs to owner
+                cryptoTransfer(movingUnique(nonFungibleToken, 1L, 2L).between(tokenTreasury, tokenOwner)),
+
+                /* before
+                    owner:     0h, 2NFT, 0FT
+                    receiver: 1Mh, 0NFT, 4FT
+                    collector: 0h, 0NFT, 0FT
+                 */
+                getAccountBalance(tokenOwner)
+                        .hasTinyBars(0)
+                        .hasTokenBalance(nonFungibleToken, 2)
+                        .hasTokenBalance(feeDenom,0),
+                getAccountBalance(tokenReceiver)
+                        .hasTinyBars(ONE_MILLION_HBARS)
+                        .hasTokenBalance(nonFungibleToken, 0)
+                        .hasTokenBalance(feeDenom,4),
+                getAccountBalance(hbarCollector)
+                        .hasTinyBars(0)
+                        .hasTokenBalance(nonFungibleToken, 0)
+                        .hasTokenBalance(feeDenom, 0),
+                // swap 1 nft for 1 feeDenom between tokenOwner and tokenReceiver
+                cryptoTransfer(
+                        movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver),
+                        moving(0, feeDenom).between(tokenReceiver, tokenOwner)
+                )
+                        .signedByPayerAnd(tokenOwner, tokenReceiver),
+                /*  after
+                    owner:     0h, 1NFT, 1FT
+                    receiver: 1Mh, 1NFT, 3FT
+                    collector: 0h, 0NFT, 0FT
+                 */
+                getAccountBalance(tokenOwner)
+                        .hasTinyBars(0)
+                        .hasTokenBalance(nonFungibleToken, 1)
+                        .hasTokenBalance(feeDenom, 0),
+                getAccountBalance(tokenReceiver)
+                        .hasTinyBars(ONE_MILLION_HBARS-100)
+                        .hasTokenBalance(nonFungibleToken, 1)
+                        .hasTokenBalance(feeDenom, 4),
+                getAccountBalance(hbarCollector)
+                        .hasTinyBars(0)
+                        .hasTokenBalance(nonFungibleToken, 0)
+                        .hasTokenBalance(feeDenom, 0)
+        );
+    }
 }
