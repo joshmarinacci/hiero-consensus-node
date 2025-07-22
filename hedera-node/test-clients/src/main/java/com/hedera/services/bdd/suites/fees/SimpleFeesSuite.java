@@ -235,6 +235,16 @@ public class SimpleFeesSuite {
 //                                System.out.println("recomputed fee is " + fee);
                                 // get the active rate
                                 // get the fee schedule
+                                /*
+                                    given an event_transaction and a transaction_result we can
+                                    * parse get the transaction body from the embedded protobuf
+                                    * convert the body to the correct class for the transaction type
+                                    * re-create the fee parameters hashmap
+                                    * get the fee schedule that was in place when the transaction happened
+                                    * get the active exchange rate that was in place when the transaction happened
+                                    * calculate the Fees and FeeDetails again
+                                 */
+
                             }
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
