@@ -1,11 +1,19 @@
 package com.hedera.services.bdd.suites.fees;
 
+import com.hedera.hapi.block.stream.BlockItem;
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.ByteStringUtils;
 import com.hedera.services.bdd.junit.HapiTest;
 import com.hedera.services.bdd.junit.HapiTestLifecycle;
 import com.hedera.services.bdd.junit.LeakyHapiTest;
 import com.hedera.services.bdd.junit.support.TestLifecycle;
+import com.hedera.services.bdd.spec.HapiSpec;
+import com.hedera.services.bdd.spec.infrastructure.RegistryNotFound;
+import com.hedera.services.bdd.spec.utilops.streams.assertions.BlockStreamAssertion;
 import com.hederahashgraph.api.proto.java.TokenSupplyType;
 import com.hederahashgraph.api.proto.java.TokenType;
 import edu.umd.cs.findbugs.annotations.NonNull;
@@ -15,12 +23,15 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Nested;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FILE_FREE_BYTES;
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.HCS_FREE_BYTES;
+import static com.hedera.services.bdd.junit.support.validators.block.BlockContentsValidator.bodyFrom;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getAccountBalance;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getFileContents;
@@ -44,13 +55,16 @@ import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fix
 import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.royaltyFeeWithFallback;
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.moving;
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.movingUnique;
+import static com.hedera.services.bdd.spec.utilops.UtilVerbs.blockStreamMustIncludePassFrom;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsdWithin;
+import static com.hedera.services.bdd.spec.utilops.UtilVerbs.waitUntilNextBlock;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HBAR;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HUNDRED_HBARS;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_MILLION_HBARS;
+import static com.hederahashgraph.api.proto.java.ResponseCodeEnum.SUCCESS;
 
 @HapiTestLifecycle
 public class SimpleFeesSuite {
@@ -171,6 +185,73 @@ public class SimpleFeesSuite {
                     validateChargedUsd("delete-topic-txn", 0.005_00)
             );
         }
+
+
+        // test that we can get the create topic information back from the block stream
+        @HapiTest
+        @DisplayName("Restore FeeDetails for creating a topic")
+        final Stream<DynamicTest> createTopicFeeDetailsRestore() {
+            return hapiTest(
+                    blockStreamMustIncludePassFrom(generateFeeDetails("create-topic-txn")),
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                    createTopic("testTopic").blankMemo().payingWith(PAYER)
+                            .fee(ONE_HBAR)
+                            .via("create-topic-txn").hasKnownStatus(SUCCESS),
+                    validateChargedUsd("create-topic-txn", 0.02),
+                    waitUntilNextBlock().withBackgroundTraffic(true)
+            );
+        }
+
+        public static Function<HapiSpec, BlockStreamAssertion> generateFeeDetails(String creationTxn) {
+            return spec -> block -> {
+//                System.out.println("inside assertion");
+                final com.hederahashgraph.api.proto.java.TransactionID creationTxnId;
+                try {
+                    creationTxnId = spec.registry().getTxnId(creationTxn);
+                } catch (RegistryNotFound ignore) {
+                    return false;
+                }
+//                System.out.println("txid is " + creationTxnId);
+//                System.out.println("checking the spec " + spec + " and block " + block);
+                final var items = block.items();
+                for (BlockItem item : items) {
+//                    System.out.println("looking at item " + item);
+                    if (item.item().kind() == BlockItem.ItemOneOfType.EVENT_TRANSACTION) {
+                        System.out.println("is an event transaction. ");
+                        System.out.println("has application " + item.eventTransaction().hasApplicationTransaction());
+                        try {
+                            var txbody = bodyFrom(item.eventTransactionOrThrow());
+                            System.out.println("transaction body is " + txbody);
+                            if (txbody.hasConsensusCreateTopic()) {
+                                var create_body = txbody.consensusCreateTopicOrThrow();
+                                System.out.println("create topic body is " + create_body);
+
+                                EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
+                                Map<String, Object> params = new HashMap<>();
+                                params.put("numSignatures", 0);
+                                params.put("numKeys", 0);
+                                params.put("hasCustomFee", YesOrNo.NO);
+//                                var fee = entity.computeFee(params, feeContext.activeRate());
+//                                System.out.println("recomputed fee is " + fee);
+                                // get the active rate
+                                // get the fee schedule
+                            }
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                    }
+                    if (item.item().kind() == BlockItem.ItemOneOfType.TRANSACTION_RESULT) {
+                        System.out.println("is a transaction result. ");
+                        var tran = item.transactionResult();
+                        System.out.println("transaction is " + tran);
+                        System.out.println("fee charged in hbar is " + tran.transactionFeeCharged());
+                        System.out.println("transfer list is " + tran.transferList());
+                    }
+                }
+                return true;
+            };
+        }
+
     }
 
     @Nested
