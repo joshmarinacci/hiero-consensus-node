@@ -1828,7 +1828,7 @@ public class CryptoTransferSuite {
      * Debiting an account's fungible token balance *with* an approval waives its signature.
      */
     @HapiTest
-    final Stream<DynamicTest> debitingFTBalanceWithoutApprovalRequiresSig() {
+    final Stream<DynamicTest> debitingFtBalanceWithoutApprovalRequiresSig() {
         final String feeDenom = "denom";
         final String tokenTreasury = "tokenTreasury";
         final var tokenOwner = "tokenOwner";
@@ -1878,7 +1878,7 @@ public class CryptoTransferSuite {
      * Transferring an account's NFT *with* approval waives its signature.
      */
     @HapiTest
-    final Stream<DynamicTest> transferringNFTWithoutApprovalRequiresSig() {
+    final Stream<DynamicTest> transferringNftWithoutApprovalRequiresSig() {
         final var NFT_KEY = "NFT_KEY";
         final String tokenTreasury = "tokenTreasury";
         final var tokenOwner = "tokenOwner";
@@ -1980,7 +1980,7 @@ public class CryptoTransferSuite {
      * Crediting fungible token units to an account with receiverSigRequired=true requires its signature.
      */
     @HapiTest
-    final Stream<DynamicTest> creditingFTRequiresSig() {
+    final Stream<DynamicTest> creditingFtRequiresSig() {
         final String feeDenom = "denom";
         final var treasury = "tokenTreasury";
         final var receiver = "receiver";
@@ -2011,7 +2011,7 @@ public class CryptoTransferSuite {
      * Transferring an NFT to an account with receiverSigRequired=true requires its signature.
      */
     @HapiTest
-    final Stream<DynamicTest> transferNFTRequiresSig() {
+    final Stream<DynamicTest> transferNftRequiresSig() {
         final var tokenTreasury = "tokenTreasury";
         final var tokenReceiver = "receiver";
         final var NFT_KEY = "NFT_KEY";

@@ -1674,7 +1674,7 @@ public class TransferWithCustomRoyaltyFees {
      * Only when the fee is paid by a third party does the receiver not need to sign.
      */
     @HapiTest
-    final Stream<DynamicTest> transferNFTWithReceiverSigRequiredFalse() {
+    final Stream<DynamicTest> transferNftWithReceiverSigRequiredFalse() {
         return hapiTest(
                 newKeyNamed(NFT_KEY),
                 cryptoCreate(hbarCollector).balance(0L),
