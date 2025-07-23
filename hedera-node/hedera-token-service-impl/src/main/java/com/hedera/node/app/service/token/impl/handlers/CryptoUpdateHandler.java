@@ -36,6 +36,8 @@ import com.hedera.hapi.node.base.Timestamp;
 import com.hedera.hapi.node.state.token.Account;
 import com.hedera.hapi.node.token.CryptoUpdateTransactionBody;
 import com.hedera.hapi.node.transaction.TransactionBody;
+import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.EntityType;
 import com.hedera.node.app.service.token.CryptoSignatureWaivers;
@@ -56,12 +58,15 @@ import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
 import com.hedera.node.config.data.AutoRenewConfig;
 import com.hedera.node.config.data.EntitiesConfig;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.LedgerConfig;
 import com.hedera.node.config.data.TokensConfig;
 import com.swirlds.config.api.Configuration;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -316,6 +321,13 @@ public class CryptoUpdateHandler extends BaseCryptoHandler implements Transactio
     @NonNull
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CRYPTO_UPDATE, "Update an account", 2, false);
+            Map<String, Object> params = new HashMap<>();
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put("numKeys", 1);
+            return entity.computeFee(params, feeContext.activeRate());
+        }
         // Variable bytes plus two additional longs for balance and auto-renew period; plus a boolean for receiver sig
         // required.
         final var body = feeContext.body();

@@ -13,6 +13,7 @@ import com.hedera.services.bdd.junit.LeakyHapiTest;
 import com.hedera.services.bdd.junit.support.TestLifecycle;
 import com.hedera.services.bdd.spec.HapiSpec;
 import com.hedera.services.bdd.spec.infrastructure.RegistryNotFound;
+import com.hedera.services.bdd.spec.transactions.token.TokenMovement;
 import com.hedera.services.bdd.spec.utilops.streams.assertions.BlockStreamAssertion;
 import com.hederahashgraph.api.proto.java.TokenSupplyType;
 import com.hederahashgraph.api.proto.java.TokenType;
@@ -40,6 +41,7 @@ import static com.hedera.services.bdd.spec.queries.QueryVerbs.getTopicInfo;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.createTopic;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoCreate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoTransfer;
+import static com.hedera.services.bdd.spec.transactions.TxnVerbs.cryptoUpdate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.deleteTopic;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileAppend;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.fileCreate;
@@ -448,9 +450,49 @@ public class SimpleFeesSuite {
             );
         }
 
-    // TODO: CryptoCreate, create token with custom fees
+
+        @HapiTest
+        final Stream<DynamicTest> cryptoUpdateFee() {
+            final var CryptoUpdateFee_USD =  0.000_22;
+            final var treasury = "treasury";
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
+                    cryptoCreate("alice")
+                            .payingWith(treasury)
+                            .fee(ONE_HBAR)
+                            .balance(ONE_HBAR)
+                            .via("crypto-create-txn"),
+                    cryptoUpdate("alice")
+                            .payingWith(treasury)
+                            .fee(ONE_HBAR)
+                            .via("crypto-update-txn"),
+                    validateChargedUsd("crypto-update-txn", CryptoUpdateFee_USD)
+            );
+        }
+
+        // TODO: CryptoTransfer, transfer value in a FT
+        // TODO: CryptoTransfer, transfer value in hbar
+        // TODO: CryptoTransfer, transfer value in an NFT
+        @HapiTest
+        final Stream<DynamicTest> cryptoTransferFee() {
+            final var CryptoTransferFee_USD =  0.000_66;
+            final var treasury = "treasury";
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
+                    cryptoCreate("alice")
+                            .payingWith(treasury)
+                            .fee(ONE_HBAR)
+                            .balance(ONE_HBAR)
+                            .via("crypto-create-txn"),
+                    cryptoTransfer(TokenMovement.movingHbar(1).between(treasury,"alice"))
+                            .payingWith(treasury)
+                            .fee(ONE_HBAR)
+                            .via("crypto-transfer-txn"),
+                    validateChargedUsd("crypto-transfer-txn", CryptoTransferFee_USD)
+            );
+        }
+        // TODO: CryptoCreate, create token with custom fees
     // TODO: CryptoDelete, delete token
-    // TODO: CryptoTransfer, transfer value in a FT
     // TODO: CryptoGetAccountRecords: ??
     // TODO: CryptoGetAccountBalance: ??
     // TODO: CryptoGetInfo: ??

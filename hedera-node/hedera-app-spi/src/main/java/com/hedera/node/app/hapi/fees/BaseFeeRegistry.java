@@ -24,16 +24,16 @@ public final class BaseFeeRegistry {
         fees.put("PerGas", 0.0000000852);
 
         // Crypto service
-        fees.put("CryptoCreate", 0.05000);
-        fees.put("CryptoUpdate", 0.00022);
-        fees.put("CryptoTransfer", 0.00010);
-        fees.put("CryptoDelete", 0.00500);
-        fees.put("CryptoGetAccountRecords", 0.00010);
-        fees.put("CryptoGetAccountBalance", 0.00000);
-        fees.put("CryptoGetInfo", 0.00010);
-        fees.put("CryptoGetStakers", 0.00010);
-        fees.put("CryptoApproveAllowance", 0.05000);
-        fees.put("CryptoDeleteAllowance", 0.05000);
+        fees.put("CryptoCreate",            0.050_00);
+        fees.put("CryptoUpdate",            0.000_22);
+        fees.put("CryptoTransfer",          0.000_66);
+        fees.put("CryptoDelete",            0.005_00);
+        fees.put("CryptoGetAccountRecords", 0.000_10);
+        fees.put("CryptoGetAccountBalance", 0.000_00);
+        fees.put("CryptoGetInfo",           0.000_10);
+        fees.put("CryptoGetStakers",        0.000_10);
+        fees.put("CryptoApproveAllowance",  0.050_00);
+        fees.put("CryptoDeleteAllowance",   0.050_00);
 
         // HCS
         fees.put("ConsensusCreateTopic",                0.020_00);
