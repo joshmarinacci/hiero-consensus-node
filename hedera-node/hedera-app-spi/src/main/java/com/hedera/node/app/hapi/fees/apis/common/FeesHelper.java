@@ -11,6 +11,7 @@ public class FeesHelper {
         return switch (api) {
             case TOKEN_CREATE -> "Token";
             case CONSENSUS_CREATE_TOPIC, CONSENSUS_DELETE_TOPIC, CONSENSUS_UPDATE_TOPIC, CONSENSUS_GET_TOPIC_INFO -> "Consensus";
+            case CRYPTO_CREATE ->  "Crypto";
             default -> throw new IllegalArgumentException("Unsupported Hedera API: " + api);
         };
     }
@@ -22,6 +23,7 @@ public class FeesHelper {
             case CONSENSUS_DELETE_TOPIC -> "ConsensusDeleteTopic";
             case CONSENSUS_UPDATE_TOPIC -> "ConsensusUpdateTopic";
             case CONSENSUS_GET_TOPIC_INFO -> "ConsensusGetTopicInfo";
+            case CRYPTO_CREATE -> "CryptoCreate";
             default -> throw new IllegalArgumentException("Unsupported Hedera API: " + api);
         };
     }

@@ -430,7 +430,24 @@ public class SimpleFeesSuite {
     }
 
 
-    // TODO: CryptoCreate, create token
+    @Nested
+    class CryptoFees {
+        @HapiTest
+        final Stream<DynamicTest> cryptoCreateFee() {
+            // TODO: CryptoCreate, create account
+            final var CryptoCreateFee_USD =  0.05000;
+            final var treasury = "treasury";
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
+                    cryptoCreate("alice")
+                            .payingWith(treasury)
+                            .fee(ONE_HBAR)
+                            .balance(ONE_HBAR)
+                            .via("crypto-create-txn"),
+                    validateChargedUsd("crypto-create-txn", CryptoCreateFee_USD)
+            );
+        }
+
     // TODO: CryptoCreate, create token with custom fees
     // TODO: CryptoDelete, delete token
     // TODO: CryptoTransfer, transfer value in a FT
@@ -438,12 +455,15 @@ public class SimpleFeesSuite {
     // TODO: CryptoGetAccountBalance: ??
     // TODO: CryptoGetInfo: ??
     // TODO: CryptoApproveAllowance: approve single and multiple allowances
-    // TODO: CryptoDeleteAllowance: approvate
+    // TODO: CryptoDeleteAllowance:
+
+    }
+
+
 
     // TODO: Token services
     // TODO: scheduled transactions
     // TODO: smart contracts
-    // TODO: File service
     // TODO: random other stuff
 
     // TODO: delete this
