@@ -12,7 +12,6 @@ import com.hedera.services.bdd.junit.HapiTestLifecycle;
 import com.hedera.services.bdd.junit.LeakyHapiTest;
 import com.hedera.services.bdd.junit.support.TestLifecycle;
 import com.hedera.services.bdd.spec.HapiSpec;
-import com.hedera.services.bdd.spec.infrastructure.RegistryNotFound;
 import com.hedera.services.bdd.spec.transactions.token.TokenMovement;
 import com.hedera.services.bdd.spec.utilops.streams.assertions.BlockStreamAssertion;
 import com.hederahashgraph.api.proto.java.TokenSupplyType;
@@ -190,11 +189,30 @@ public class SimpleFeesSuite {
 
 
         // test that we can get the create topic information back from the block stream
+//        final HapiFileUpdate resetRatesOp = fileUpdate(EXCHANGE_RATES)
+//                .payingWith(EXCHANGE_RATE_CONTROL)
+//                .fee(ADEQUATE_FUNDS)
+//                .contents(spec -> spec.ratesProvider().rateSetWith(1, 12).toByteString());
+
         @HapiTest
         @DisplayName("Restore FeeDetails for creating a topic")
         final Stream<DynamicTest> createTopicFeeDetailsRestore() {
             return hapiTest(
                     blockStreamMustIncludePassFrom(generateFeeDetails("create-topic-txn")),
+//                    resetRatesOp,
+//                    cryptoTransfer(tinyBarsFromTo(GENESIS, EXCHANGE_RATE_CONTROL, ADEQUATE_FUNDS))
+//                            .fee(ONE_HUNDRED_HBARS),
+//                    fileUpdate(EXCHANGE_RATES)
+//                            .contents(spec -> {
+//                                ByteString newRates =
+//                                        spec.ratesProvider().rateSetWith(10, 121).toByteString();
+//                                System.out.println("saving the new rates " + newRates);
+//                                spec.registry().saveBytes("newRates", newRates);
+//                                return newRates;
+//                            })
+//                            .payingWith(EXCHANGE_RATE_CONTROL),
+//                    getFileContents(EXCHANGE_RATES)
+//                            .hasContents(spec -> spec.registry().getBytes("newRates")),
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR)
@@ -207,17 +225,21 @@ public class SimpleFeesSuite {
         public static Function<HapiSpec, BlockStreamAssertion> generateFeeDetails(String creationTxn) {
             return spec -> block -> {
 //                System.out.println("inside assertion");
-                final com.hederahashgraph.api.proto.java.TransactionID creationTxnId;
-                try {
-                    creationTxnId = spec.registry().getTxnId(creationTxn);
-                } catch (RegistryNotFound ignore) {
-                    return false;
-                }
+//                final com.hederahashgraph.api.proto.java.TransactionID creationTxnId;
+//                try {
+//                    creationTxnId = spec.registry().getTxnId(creationTxn);
+//                } catch (RegistryNotFound ignore) {
+//                    return false;
+//                }
 //                System.out.println("txid is " + creationTxnId);
 //                System.out.println("checking the spec " + spec + " and block " + block);
+//                System.out.println("rates " + spec.ratesProvider().rates());
+                // load the current rates
+                com.hederahashgraph.api.proto.java.ExchangeRate rate_proto = spec.ratesProvider().rates();
+                var current_rate = com.hedera.hapi.node.transaction.ExchangeRate.newBuilder().centEquiv(rate_proto.getCentEquiv()).hbarEquiv(rate_proto.getHbarEquiv()).build();
                 final var items = block.items();
                 for (BlockItem item : items) {
-//                    System.out.println("looking at item " + item);
+//                    System.out.println("looking at item " + item.item().kind());
                     if (item.item().kind() == BlockItem.ItemOneOfType.EVENT_TRANSACTION) {
                         System.out.println("is an event transaction. ");
                         System.out.println("has application " + item.eventTransaction().hasApplicationTransaction());
@@ -233,8 +255,9 @@ public class SimpleFeesSuite {
                                 params.put("numSignatures", 0);
                                 params.put("numKeys", 0);
                                 params.put("hasCustomFee", YesOrNo.NO);
-//                                var fee = entity.computeFee(params, feeContext.activeRate());
-//                                System.out.println("recomputed fee is " + fee);
+                                var fee = entity.computeFee(params, current_rate);
+                                System.out.println("recomputed fee is " + fee);
+                                // recomputed fee is Fees[nodeFee=1652800, networkFee=7438000, serviceFee=7438000, usd=0.02, details={Base fee=FeeDetail{1, .020000 }}]
                                 // get the active rate
                                 // get the fee schedule
                                 /*
@@ -247,6 +270,18 @@ public class SimpleFeesSuite {
                                     * calculate the Fees and FeeDetails again
                                  */
 
+                            }
+                        } catch (Exception e) {
+                            System.out.println(e.getMessage());
+                        }
+                    }
+                    if (item.item().kind() == BlockItem.ItemOneOfType.STATE_CHANGES) {
+                        System.out.println("is state change transaction. " + item);
+                        try {
+                            var state = item.stateChangesOrThrow();
+                            System.out.println("state is " + state);
+                            for (var change : state.stateChanges()) {
+                                System.out.println("  change is " + change);
                             }
                         } catch (Exception e) {
                             System.out.println(e.getMessage());
@@ -430,7 +465,6 @@ public class SimpleFeesSuite {
             );
         }
     }
-
 
     @Nested
     class CryptoFees {
