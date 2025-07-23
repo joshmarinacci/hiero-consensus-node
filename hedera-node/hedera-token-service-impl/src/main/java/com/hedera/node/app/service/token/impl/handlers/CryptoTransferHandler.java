@@ -30,8 +30,7 @@ import com.hedera.hapi.node.state.token.Nft;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.token.CryptoTransferTransactionBody;
 import com.hedera.hapi.node.transaction.AssessedCustomFee;
-import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.fees.apis.crypto.CryptoTransfer;
 import com.hedera.node.app.service.token.ReadableAccountStore;
 import com.hedera.node.app.service.token.ReadableNftStore;
 import com.hedera.node.app.service.token.ReadableTokenRelationStore;
@@ -207,11 +206,11 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CRYPTO_TRANSFER, "transfer crypto", 2, false);
+            CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 1);
-            return entity.computeFee(params, feeContext.activeRate());
+            return transfer.computeFee(params, feeContext.activeRate());
         }
         final var body = feeContext.body();
         final var op = body.cryptoTransferOrThrow();
