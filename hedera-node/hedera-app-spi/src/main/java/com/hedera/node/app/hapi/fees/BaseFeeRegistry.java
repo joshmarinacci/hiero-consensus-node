@@ -26,7 +26,7 @@ public final class BaseFeeRegistry {
         // Crypto service
         fees.put("CryptoCreate",            0.050_00);
         fees.put("CryptoUpdate",            0.000_22);
-        fees.put("CryptoTransfer",          0.000_66);
+        fees.put("CryptoTransfer",          0.000_10);
         fees.put("CryptoDelete",            0.005_00);
         fees.put("CryptoGetAccountRecords", 0.000_10);
         fees.put("CryptoGetAccountBalance", 0.000_00);

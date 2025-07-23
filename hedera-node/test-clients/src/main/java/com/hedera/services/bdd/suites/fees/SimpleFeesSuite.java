@@ -450,7 +450,6 @@ public class SimpleFeesSuite {
             );
         }
 
-
         @HapiTest
         final Stream<DynamicTest> cryptoUpdateFee() {
             final var CryptoUpdateFee_USD =  0.000_22;
@@ -475,7 +474,7 @@ public class SimpleFeesSuite {
         // TODO: CryptoTransfer, transfer value in an NFT
         @HapiTest
         final Stream<DynamicTest> cryptoTransferFee() {
-            final var CryptoTransferFee_USD =  0.000_66;
+            final var CryptoTransferFee_USD =  0.000_10;
             final var treasury = "treasury";
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
@@ -491,7 +490,8 @@ public class SimpleFeesSuite {
                     validateChargedUsd("crypto-transfer-txn", CryptoTransferFee_USD)
             );
         }
-        // TODO: CryptoCreate, create token with custom fees
+
+    // TODO: CryptoCreate, create token with custom fees
     // TODO: CryptoDelete, delete token
     // TODO: CryptoGetAccountRecords: ??
     // TODO: CryptoGetAccountBalance: ??
