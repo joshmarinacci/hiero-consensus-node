@@ -60,10 +60,18 @@ public class CryptoTransfer extends AbstractFeeModel {
         return (value instanceof Integer) ? (Integer) value : 0;
     }
 
-    // This API is complex. This same code can be called for
-    // 1. CryptoTransfer: just hbar transfers. The base fee here includes 1 hbar transfer entry between 2 accounts
-    // 2. TokenTransfer: fungible and/or non-fungible tokens and/or hbars. These tokens could have custom fee enabled. The base fee here includes 1 FT/NFT token transfer without custom fee
-    // 3. TokenAirdrop: fungible and/or non-fungible tokens. These tokens could have custom fee enabled. The base fee here includes 1 FT/NFT token transfer without custom fee
+    /*
+     This API is complex. This same code can be called for
+
+     1. CryptoTransfer: just hbar transfers. The base fee here includes 1
+        hbar transfer entry between 2 accounts
+     2. TokenTransfer: fungible and/or non-fungible tokens and/or hbars.
+        These tokens could have custom fee enabled. The base fee here
+        includes 1 FT/NFT token transfer without custom fee
+     3. TokenAirdrop: fungible and/or non-fungible tokens. These tokens
+        could have custom fee enabled. The base fee here includes 1 FT/NFT
+        token transfer without custom fee
+     */
     protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
         FeeResult fee = new FeeResult();
 

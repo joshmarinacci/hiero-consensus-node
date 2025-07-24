@@ -205,15 +205,29 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
     @NonNull
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
-        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
-            Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 1);
-            return transfer.computeFee(params, feeContext.activeRate());
-        }
         final var body = feeContext.body();
         final var op = body.cryptoTransferOrThrow();
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            System.out.println("transfers " + op.transfers());
+            System.out.println("token transfer" + op.tokenTransfers());
+            final var accounts = new HashSet<AccountID>();
+            for (final var amount : op.transfers().accountAmounts()) {
+                accounts.add(amount.accountID());
+            }
+//            for (final var tokenTransfers : op.tokenTransfers()) {
+//                totalTokensInvolved++;
+//                totalTokenTransfers += tokenTransfers.transfers().size();
+//                numNftOwnershipChanges += tokenTransfers.nftTransfers().size();
+//            }
+
+            CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
+            Map<String, Object> params = new HashMap<>();
+            System.out.println("number of txn signatures: " + feeContext.numTxnSignatures());
+            params.put("numSignatures", feeContext.numTxnSignatures());
+            System.out.println("account count " + accounts.size());
+            params.put("numAccountsInvolved", accounts.size());
+            return transfer.computeFee(params, feeContext.activeRate());
+        }
         final var config = feeContext.configuration();
         final var tokenMultiplier = config.getConfigData(FeesConfig.class).tokenTransferUsageMultiplier();
 

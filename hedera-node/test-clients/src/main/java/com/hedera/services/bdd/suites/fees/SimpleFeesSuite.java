@@ -55,6 +55,7 @@ import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fix
 import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fixedHbarFeeInheritingRoyaltyCollector;
 import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.royaltyFeeWithFallback;
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.moving;
+import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.movingHbar;
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.movingUnique;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.blockStreamMustIncludePassFrom;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
@@ -517,11 +518,51 @@ public class SimpleFeesSuite {
                             .fee(ONE_HBAR)
                             .balance(ONE_HBAR)
                             .via("crypto-create-txn"),
-                    cryptoTransfer(TokenMovement.movingHbar(1).between(treasury,"alice"))
+                    cryptoTransfer(movingHbar(1).between(treasury,"alice"))
                             .payingWith(treasury)
                             .fee(ONE_HBAR)
                             .via("crypto-transfer-txn"),
                     validateChargedUsd("crypto-transfer-txn", CryptoTransferFee_USD)
+            );
+        }
+        @HapiTest
+        final Stream<DynamicTest> cryptoTransferMultipleHBarFee() {
+            final var treasury = "treasury";
+            final var alice = "alice";
+            final var bob = "bob";
+            final var carol = "carol";
+            final var CryptoTransferFee_USD =  0.000_10;
+            final var PerCryptoTransferAccount = 0.000_01;
+            final var ExtraSig = 0.000_10;
+            /*
+            There are 4 accounts involved: treasury, alice, bob, & carol.
+
+            There are 3 sigs involved: treasury, alice, and bob
+
+            Note that if bob was sending less to carol (say 1) then his sig wouldn't be needed
+            because the amount from alice and the treasury exceeds the amount he is sending
+            to carol, so it would just send from alice and the treasury directly to carol.
+
+             */
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
+                    cryptoCreate(alice).payingWith(treasury).fee(ONE_HBAR).balance(ONE_HUNDRED_HBARS),
+                    cryptoCreate(bob).payingWith(treasury).fee(ONE_HBAR).balance(ONE_HUNDRED_HBARS),
+                    cryptoCreate(carol).payingWith(treasury).fee(ONE_HBAR).balance(ONE_HUNDRED_HBARS),
+                    cryptoTransfer(
+                            movingHbar(1).between(alice,bob),
+                            movingHbar(6).between(bob,carol),
+                            movingHbar(3).between(treasury,bob)
+                    )
+                            .payingWithNoSig(treasury)
+                            .signedBy(treasury, alice, bob)
+                            .fee(ONE_HBAR)
+                            .via("crypto-transfer-txn")
+                            .hasKnownStatus(SUCCESS),
+                    validateChargedUsd("crypto-transfer-txn",
+                            CryptoTransferFee_USD
+                                    + PerCryptoTransferAccount * (4-2)
+                                    + (3-1)*ExtraSig)
             );
         }
 
