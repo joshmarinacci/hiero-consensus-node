@@ -468,6 +468,11 @@ public class SimpleFeesSuite {
 
     @Nested
     class CryptoFees {
+        static final double CryptoTransferFee_USD =  0.000_10;
+        static final double TokenTransferFee_USD =  0.001_00;
+        static final double PerCryptoTransferAccount = 0.000_01;
+        static final double ExtraSig = 0.000_10;
+
         @HapiTest
         final Stream<DynamicTest> cryptoCreateFee() {
             // TODO: CryptoCreate, create account
@@ -508,7 +513,6 @@ public class SimpleFeesSuite {
         // TODO: CryptoTransfer, transfer value in an NFT
         @HapiTest
         final Stream<DynamicTest> cryptoTransferFee() {
-            final var CryptoTransferFee_USD =  0.000_10;
             final var treasury = "treasury";
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
@@ -531,9 +535,6 @@ public class SimpleFeesSuite {
             final var alice = "alice";
             final var bob = "bob";
             final var carol = "carol";
-            final var CryptoTransferFee_USD =  0.000_10;
-            final var PerCryptoTransferAccount = 0.000_01;
-            final var ExtraSig = 0.000_10;
             /*
             There are 4 accounts involved: treasury, alice, bob, & carol.
 
@@ -563,6 +564,47 @@ public class SimpleFeesSuite {
                             CryptoTransferFee_USD
                                     + PerCryptoTransferAccount * (4-2)
                                     + (3-1)*ExtraSig)
+            );
+        }
+
+        // transfer FT and hbar
+        @HapiTest
+        final Stream<DynamicTest> cryptoTransferHbarAndFungibleFee() {
+            final var treasury = "treasury";
+            final var alice = "alice";
+            final var bob = "bob";
+            final var fungibleToken = "fungibleToken";
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
+                    cryptoCreate(alice).payingWith(treasury).fee(ONE_HBAR).balance(ONE_HUNDRED_HBARS),
+                    cryptoCreate(bob).payingWith(treasury).fee(ONE_HBAR).balance(ONE_HUNDRED_HBARS),
+                    // create FT
+                    tokenCreate(fungibleToken)
+                            .payingWith(treasury)
+                            .treasury(treasury)
+                            .initialSupply(4)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-create-txn")
+                            .hasKnownStatus(SUCCESS),
+                    tokenAssociate(alice, fungibleToken),
+                    // transfer FT from treasury to alice
+                    cryptoTransfer(
+                            moving(4, fungibleToken).between(treasury,alice),
+                            movingHbar(10).between(alice,bob)
+                    )
+                            .fee(ONE_HBAR)
+                            .payingWithNoSig(treasury)
+                            .signedBy(treasury, alice)
+                            .via("crypto-transfer-txn")
+                            .hasKnownStatus(SUCCESS),
+                    // 3 accounts, 2 signatures, 2 ft transfer count
+                    // 2 accounts are free, 1 sigs are free
+                    // 1 extra account, 1 extra sig
+                    validateChargedUsd("crypto-transfer-txn",
+                            TokenTransferFee_USD
+                                    + PerCryptoTransferAccount * (3-2)
+                                    + ExtraSig* (2-1)
+                    )
             );
         }
 

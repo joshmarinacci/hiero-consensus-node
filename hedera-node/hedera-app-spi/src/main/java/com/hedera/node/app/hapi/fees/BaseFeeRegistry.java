@@ -61,9 +61,9 @@ public final class BaseFeeRegistry {
         fees.put("TokenUnfreezeAccount", 0.00100);
         fees.put("TokenAccountWipe", 0.00100);
         fees.put("TokenAssociateToAccount", 0.05000);
-        fees.put("TokenDissociateFromAccount", 0.05000);
-        fees.put("TokenTransfer", 0.001);
-        fees.put("TokenTransferWithCustomFee", 0.002);
+        fees.put("TokenDissociateFromAccount", 0.050_00);
+        fees.put("TokenTransfer",              0.001_00);
+        fees.put("TokenTransferWithCustomFee", 0.002_00);
         fees.put("TokenAirdrop", 0.10000);
         fees.put("TokenAirdropWithCustomFee", 0.10100);
         fees.put("TokenClaimAirdrop", 0.00100);

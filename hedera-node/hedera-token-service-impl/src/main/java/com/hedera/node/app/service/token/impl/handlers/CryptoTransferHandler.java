@@ -208,17 +208,22 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
         final var body = feeContext.body();
         final var op = body.cryptoTransferOrThrow();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            System.out.println("transfers " + op.transfers());
-            System.out.println("token transfer" + op.tokenTransfers());
+            System.out.println("hbar transfers " + op.transfersOrElse(TransferList.DEFAULT));
+            System.out.println("token transfers" + op.tokenTransfers());
             final var accounts = new HashSet<AccountID>();
-            for (final var amount : op.transfers().accountAmounts()) {
+            for (final var amount : op.transfersOrElse(TransferList.DEFAULT).accountAmounts()) {
                 accounts.add(amount.accountID());
             }
-//            for (final var tokenTransfers : op.tokenTransfers()) {
-//                totalTokensInvolved++;
-//                totalTokenTransfers += tokenTransfers.transfers().size();
-//                numNftOwnershipChanges += tokenTransfers.nftTransfers().size();
-//            }
+            var ftCount = 0;
+            for (final var tokenTransfers : op.tokenTransfers()) {
+                System.out.println("  token transfer: " + tokenTransfers);
+                System.out.println("  token is " + tokenTransfers.token());
+                for(final var tran : tokenTransfers.transfers()) {
+                    System.out.println("   sub transfer: " + tran);
+                    accounts.add(tran.accountID());
+                }
+                ftCount++;
+            }
 
             CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
             Map<String, Object> params = new HashMap<>();
@@ -226,6 +231,7 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
             params.put("numSignatures", feeContext.numTxnSignatures());
             System.out.println("account count " + accounts.size());
             params.put("numAccountsInvolved", accounts.size());
+            params.put("numFTNoCustomFeeEntries", ftCount);
             return transfer.computeFee(params, feeContext.activeRate());
         }
         final var config = feeContext.configuration();
