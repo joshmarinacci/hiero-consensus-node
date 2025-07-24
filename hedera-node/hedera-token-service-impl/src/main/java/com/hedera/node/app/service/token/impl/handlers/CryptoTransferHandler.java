@@ -215,14 +215,21 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
                 accounts.add(amount.accountID());
             }
             var ftCount = 0;
+            var nftCount = 0;
             for (final var tokenTransfers : op.tokenTransfers()) {
                 System.out.println("  token transfer: " + tokenTransfers);
                 System.out.println("  token is " + tokenTransfers.token());
                 for(final var tran : tokenTransfers.transfers()) {
-                    System.out.println("   sub transfer: " + tran);
+                    System.out.println("   sub FT transfer: " + tran);
                     accounts.add(tran.accountID());
+                    ftCount++;
                 }
-                ftCount++;
+                for(final var tran : tokenTransfers.nftTransfers()) {
+                    System.out.println("   sub NFT transfer: " + tran);
+                    accounts.add(tran.senderAccountID());
+                    accounts.add(tran.receiverAccountID());
+                    nftCount++;
+                }
             }
 
             CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
@@ -231,7 +238,10 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
             params.put("numSignatures", feeContext.numTxnSignatures());
             System.out.println("account count " + accounts.size());
             params.put("numAccountsInvolved", accounts.size());
+            System.out.println("ft count " + ftCount);
             params.put("numFTNoCustomFeeEntries", ftCount);
+            System.out.println("nft count " + nftCount);
+            params.put("numNFTNoCustomFeeEntries", nftCount);
             return transfer.computeFee(params, feeContext.activeRate());
         }
         final var config = feeContext.configuration();

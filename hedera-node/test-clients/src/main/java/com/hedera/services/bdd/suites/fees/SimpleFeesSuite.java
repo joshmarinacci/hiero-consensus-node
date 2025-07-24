@@ -472,12 +472,12 @@ public class SimpleFeesSuite {
         static final double TokenTransferFee_USD =  0.001_00;
         static final double PerCryptoTransferAccount = 0.000_01;
         static final double ExtraSig = 0.000_10;
+        static final String treasury = "treasury";
 
         @HapiTest
         final Stream<DynamicTest> cryptoCreateFee() {
             // TODO: CryptoCreate, create account
             final var CryptoCreateFee_USD =  0.05000;
-            final var treasury = "treasury";
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
                     cryptoCreate("alice")
@@ -492,7 +492,6 @@ public class SimpleFeesSuite {
         @HapiTest
         final Stream<DynamicTest> cryptoUpdateFee() {
             final var CryptoUpdateFee_USD =  0.000_22;
-            final var treasury = "treasury";
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
                     cryptoCreate("alice")
@@ -513,7 +512,6 @@ public class SimpleFeesSuite {
         // TODO: CryptoTransfer, transfer value in an NFT
         @HapiTest
         final Stream<DynamicTest> cryptoTransferFee() {
-            final var treasury = "treasury";
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
                     cryptoCreate("alice")
@@ -531,7 +529,6 @@ public class SimpleFeesSuite {
         // multiple hbar transfers at once to go beyond the free number of involved accounts
         @HapiTest
         final Stream<DynamicTest> cryptoTransferMultipleHBarFee() {
-            final var treasury = "treasury";
             final var alice = "alice";
             final var bob = "bob";
             final var carol = "carol";
@@ -570,7 +567,6 @@ public class SimpleFeesSuite {
         // transfer FT and hbar
         @HapiTest
         final Stream<DynamicTest> cryptoTransferHbarAndFungibleFee() {
-            final var treasury = "treasury";
             final var alice = "alice";
             final var bob = "bob";
             final var fungibleToken = "fungibleToken";
@@ -588,6 +584,7 @@ public class SimpleFeesSuite {
                             .hasKnownStatus(SUCCESS),
                     tokenAssociate(alice, fungibleToken),
                     // transfer FT from treasury to alice
+                    // transfer hbar from alice to bob
                     cryptoTransfer(
                             moving(4, fungibleToken).between(treasury,alice),
                             movingHbar(10).between(alice,bob)
@@ -598,8 +595,59 @@ public class SimpleFeesSuite {
                             .via("crypto-transfer-txn")
                             .hasKnownStatus(SUCCESS),
                     // 3 accounts, 2 signatures, 2 ft transfer count
+                    // 2 accounts are free, 1 sigs are free, 1 ft transfer is free
+                    // 1 extra account, 1 extra sig, 1 extra ft
+                    validateChargedUsd("crypto-transfer-txn",
+                            TokenTransferFee_USD
+                                    + PerCryptoTransferAccount * (3-2)
+                                    + TokenTransferFee_USD * (2-1)
+                                    + ExtraSig* (2-1)
+                    )
+            );
+        }
+
+        // transfer NFT and hbar
+        @HapiTest
+        final Stream<DynamicTest> cryptoTransferHbarAndNFTFee() {
+            final var alice = "alice";
+            final var bob = "bob";
+            final var nonFungibleToken = "nonFungibleToken";
+            final var NFT_KEY = "NFT_KEY";
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
+                    cryptoCreate(alice).payingWith(treasury).fee(ONE_HBAR).balance(ONE_HUNDRED_HBARS),
+                    cryptoCreate(bob).payingWith(treasury).fee(ONE_HBAR).balance(ONE_HUNDRED_HBARS),
+
+                    // make * mint the NFT
+                    newKeyNamed(NFT_KEY),
+                    tokenCreate(nonFungibleToken)
+                            .payingWith(treasury)
+                            .treasury(treasury)
+                            .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                            .initialSupply(0)
+                            .supplyKey(NFT_KEY)
+                            .supplyType(TokenSupplyType.INFINITE)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-create-txn"),
+                    mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes())))
+                            .payingWith(treasury)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-mint-txn"),
+                    tokenAssociate(alice, nonFungibleToken),
+                    // transfer NFT from treasury to alice
+                    // transfer hbar from alice to bob
+                    cryptoTransfer(
+                            movingUnique(nonFungibleToken,1L).between(treasury,alice),
+                            movingHbar(10).between(alice,bob)
+                    )
+                            .fee(ONE_HBAR)
+                            .payingWithNoSig(treasury)
+                            .signedBy(treasury, alice)
+                            .via("crypto-transfer-txn")
+                            .hasKnownStatus(SUCCESS),
+                    // 3 accounts, 2 signatures, 0 ft transfer count, 2 nft transfer count
                     // 2 accounts are free, 1 sigs are free
-                    // 1 extra account, 1 extra sig
+                    // so 1 extra account, 1 extra sig
                     validateChargedUsd("crypto-transfer-txn",
                             TokenTransferFee_USD
                                     + PerCryptoTransferAccount * (3-2)
@@ -607,9 +655,6 @@ public class SimpleFeesSuite {
                     )
             );
         }
-
-    // TODO:  transfer one FT token
-    // TODO:  multiple FT transfers
 
     // TODO: CryptoCreate, create token with custom fees
     // TODO: CryptoDelete, delete token
@@ -620,6 +665,7 @@ public class SimpleFeesSuite {
     // TODO: CryptoDeleteAllowance:
 
     }
+
     @Nested
     class TokenFees {
         static final String treasury = "treasury";
