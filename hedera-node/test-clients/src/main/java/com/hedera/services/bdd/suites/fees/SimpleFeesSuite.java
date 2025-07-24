@@ -525,6 +525,7 @@ public class SimpleFeesSuite {
                     validateChargedUsd("crypto-transfer-txn", CryptoTransferFee_USD)
             );
         }
+        // multiple hbar transfers at once to go beyond the free number of involved accounts
         @HapiTest
         final Stream<DynamicTest> cryptoTransferMultipleHBarFee() {
             final var treasury = "treasury";
@@ -566,6 +567,9 @@ public class SimpleFeesSuite {
             );
         }
 
+    // TODO:  transfer one FT token
+    // TODO:  multiple FT transfers
+
     // TODO: CryptoCreate, create token with custom fees
     // TODO: CryptoDelete, delete token
     // TODO: CryptoGetAccountRecords: ??
@@ -574,6 +578,25 @@ public class SimpleFeesSuite {
     // TODO: CryptoApproveAllowance: approve single and multiple allowances
     // TODO: CryptoDeleteAllowance:
 
+    }
+    @Nested
+    class TokenFees {
+        @HapiTest
+        final Stream<DynamicTest> tokenCreateFees() {
+            final var treasury = "treasury";
+            final var fungibleToken = "fungibleToken";
+            final var TokenCreateFee_USD =  1.0;
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
+                    tokenCreate(fungibleToken)
+                            .payingWith(treasury)
+                            .initialSupply(4)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-create-txn"),
+                    validateChargedUsd("token-create-txn",TokenCreateFee_USD)
+            );
+
+        }
     }
 
 

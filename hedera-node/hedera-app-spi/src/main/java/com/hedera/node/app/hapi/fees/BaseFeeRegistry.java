@@ -45,8 +45,8 @@ public final class BaseFeeRegistry {
         fees.put("ConsensusGetTopicInfo",               0.000_20);
 
         // HTS
-        fees.put("TokenCreate", 1.00000);
-        fees.put("TokenCreateWithCustomFee", 2.00000);
+        fees.put("TokenCreate",              1.000_00);
+        fees.put("TokenCreateWithCustomFee", 2.000_00);
         fees.put("TokenDelete", 0.00100);
         fees.put("TokenUpdate", 0.00100);
         fees.put("TokenMintFungible", 0.00100);
