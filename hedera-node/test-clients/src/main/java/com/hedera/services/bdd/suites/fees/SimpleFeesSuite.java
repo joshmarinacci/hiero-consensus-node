@@ -12,7 +12,6 @@ import com.hedera.services.bdd.junit.HapiTestLifecycle;
 import com.hedera.services.bdd.junit.LeakyHapiTest;
 import com.hedera.services.bdd.junit.support.TestLifecycle;
 import com.hedera.services.bdd.spec.HapiSpec;
-import com.hedera.services.bdd.spec.transactions.token.TokenMovement;
 import com.hedera.services.bdd.spec.utilops.streams.assertions.BlockStreamAssertion;
 import com.hederahashgraph.api.proto.java.TokenSupplyType;
 import com.hederahashgraph.api.proto.java.TokenType;
@@ -581,11 +580,14 @@ public class SimpleFeesSuite {
     }
     @Nested
     class TokenFees {
+        static final String treasury = "treasury";
+        static final double TokenCreateFee_USD =  1.0;
+        static final double TokenMintNonFungible = 0.020_00;
+        static final double TokenMintFungible = 0.001_00;
+        static final double ExtraSig = 0.000_10;
         @HapiTest
-        final Stream<DynamicTest> tokenCreateFees() {
-            final var treasury = "treasury";
+        final Stream<DynamicTest> createFT() {
             final var fungibleToken = "fungibleToken";
-            final var TokenCreateFee_USD =  1.0;
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
                     tokenCreate(fungibleToken)
@@ -595,7 +597,68 @@ public class SimpleFeesSuite {
                             .via("token-create-txn"),
                     validateChargedUsd("token-create-txn",TokenCreateFee_USD)
             );
-
+        }
+        @HapiTest
+        final Stream<DynamicTest> createNFT() {
+            final var nonFungibleToken = "nonFungibleToken";
+            final var NFT_KEY = "NFT_KEY";
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
+                    newKeyNamed(NFT_KEY),
+                    tokenCreate(nonFungibleToken)
+                            .payingWith(treasury)
+                            .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                            .initialSupply(0)
+                            .supplyKey(NFT_KEY)
+                            .supplyType(TokenSupplyType.INFINITE)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-create-txn"),
+                    validateChargedUsd("token-create-txn",TokenCreateFee_USD)
+            );
+        }
+        @HapiTest
+        final Stream<DynamicTest> mintFungibleFee() {
+            final var fungibleToken = "fungibleToken";
+            final var NFT_KEY = "NFT_KEY";
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
+                    newKeyNamed(NFT_KEY),
+                    tokenCreate(fungibleToken)
+                            .payingWith(treasury)
+                            .tokenType(TokenType.FUNGIBLE_COMMON)
+                            .initialSupply(0)
+                            .supplyKey(NFT_KEY)
+                            .supplyType(TokenSupplyType.INFINITE)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-create-txn"),
+                    mintToken(fungibleToken, 20)
+                            .payingWith(treasury)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-mint-txn"),
+                    validateChargedUsd("token-mint-txn",TokenMintFungible + ExtraSig*1)
+            );
+        }
+        @HapiTest
+        final Stream<DynamicTest> mintNftFee() {
+            final var nonFungibleToken = "nonFungibleToken";
+            final var NFT_KEY = "NFT_KEY";
+            return hapiTest(
+                    cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
+                    newKeyNamed(NFT_KEY),
+                    tokenCreate(nonFungibleToken)
+                            .payingWith(treasury)
+                            .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
+                            .initialSupply(0)
+                            .supplyKey(NFT_KEY)
+                            .supplyType(TokenSupplyType.INFINITE)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-create-txn"),
+                    mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes())))
+                            .payingWith(treasury)
+                            .fee(ONE_MILLION_HBARS)
+                            .via("token-mint-txn"),
+                    validateChargedUsd("token-mint-txn",TokenMintNonFungible + ExtraSig*1)
+            );
         }
     }
 

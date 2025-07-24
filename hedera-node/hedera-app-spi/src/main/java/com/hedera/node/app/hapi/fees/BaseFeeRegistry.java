@@ -47,10 +47,10 @@ public final class BaseFeeRegistry {
         // HTS
         fees.put("TokenCreate",              1.000_00);
         fees.put("TokenCreateWithCustomFee", 2.000_00);
-        fees.put("TokenDelete", 0.00100);
-        fees.put("TokenUpdate", 0.00100);
-        fees.put("TokenMintFungible", 0.00100);
-        fees.put("TokenMintNonFungible", 0.02000);
+        fees.put("TokenDelete",              0.001_00);
+        fees.put("TokenUpdate",              0.001_00);
+        fees.put("TokenMintFungible",        0.001_00);
+        fees.put("TokenMintNonFungible",     0.020_00);
         fees.put("TokenBurn", 0.00100);
         fees.put("TokenPause", 0.00100);
         fees.put("TokenUnpause", 0.00100);
