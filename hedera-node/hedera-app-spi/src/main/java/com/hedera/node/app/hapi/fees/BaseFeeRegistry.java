@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 public final class BaseFeeRegistry {
 
     private static final Map<String, Double> BASE_FEES;
-    private static final SimpleFeesSchedule SIMPLE_FEES_SCHEDULE;
+    private static final AbstractSimpleFeesSchedule SIMPLE_FEES_SCHEDULE;
 
     static {
         Map<String, Double> fees = new HashMap<>();
@@ -114,29 +114,38 @@ public final class BaseFeeRegistry {
         fees.put("BatchTransaction", 0.00100);
 
         BASE_FEES = Collections.unmodifiableMap(fees);
-
-        var temp = SimpleFeesSchedule.newBuilder().build();
-        try (final var fin = BaseFeeRegistry.class.getClassLoader().getResourceAsStream("simple-fees.json")) {
-            temp = SimpleFeesSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
-            System.out.println("parsed simple fees schedule: " + temp);
-        } catch (Exception ex) {
-            System.out.println("exception loading fees schedule " + ex.getMessage());
-            temp = SimpleFeesSchedule.newBuilder().build();
-        }
-        SIMPLE_FEES_SCHEDULE = temp;
-
+        SIMPLE_FEES_SCHEDULE = JsonSimpleFeesSchedule.fromJson();
     }
 
     private BaseFeeRegistry() {
         // prevent instantiation
     }
-
+//    public static double getBaseFee(String api) {
+//        return BASE_FEES.getOrDefault(api, 0.0);
+//    }
     public static double getBaseFee(String api) {
+        System.out.println("BASE FEE: " + api);
+        if(api == "PerKey") {
+            return SIMPLE_FEES_SCHEDULE.getExtrasFee("Keys");
+        }
+        if(api == "PerFileByte") {
+            return SIMPLE_FEES_SCHEDULE.getExtrasFee("Bytes");
+        }
+        if(api == "FileGetContents"
+        || api == "FileGetInfo"
+        || api == "CryptoTransfer"
+        || api == "CryptoCreate"
+        ) {
+            return BASE_FEES.getOrDefault(api, 0.0);
+        }
+        if (api == "ConsensusCreateTopic") {
+            return SIMPLE_FEES_SCHEDULE.getBaseFee(api);
+        }
         return BASE_FEES.getOrDefault(api, 0.0);
     }
 
-    public static Map<String, Double> getAllBaseFees() {
-        return BASE_FEES;
+    public static AbstractSimpleFeesSchedule getFeeSchedule() {
+        return SIMPLE_FEES_SCHEDULE;
     }
 
 }

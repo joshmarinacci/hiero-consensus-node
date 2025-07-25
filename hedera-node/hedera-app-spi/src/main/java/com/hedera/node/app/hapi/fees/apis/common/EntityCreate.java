@@ -57,6 +57,7 @@ public class EntityCreate extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
         super.setNumFreeSignatures(numFreeKeys + 1); // The user needs to sign each of the keys to verify that they have the corresponding private key
 
+        final var schedule = BaseFeeRegistry.getFeeSchedule();
         FeeResult fee = new FeeResult();
         if (customFeeCapable && values.get("hasCustomFee") == YesOrNo.YES) {
             fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee(api + "WithCustomFee"));

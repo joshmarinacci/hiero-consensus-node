@@ -23,7 +23,7 @@
       "transactions": [
         {
           "name": "ConsensusCreateTopic",
-          "baseFee": 0.01000,
+          "baseFee": 0.02000,
           "extras": [
             {
               "name": "SignatureVerifications",

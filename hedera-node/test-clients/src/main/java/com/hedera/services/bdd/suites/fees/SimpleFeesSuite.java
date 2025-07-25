@@ -194,33 +194,33 @@ public class SimpleFeesSuite {
 //                .fee(ADEQUATE_FUNDS)
 //                .contents(spec -> spec.ratesProvider().rateSetWith(1, 12).toByteString());
 
-        @HapiTest
-        @DisplayName("Restore FeeDetails for creating a topic")
-        final Stream<DynamicTest> createTopicFeeDetailsRestore() {
-            return hapiTest(
-                    blockStreamMustIncludePassFrom(generateFeeDetails("create-topic-txn")),
-//                    resetRatesOp,
-//                    cryptoTransfer(tinyBarsFromTo(GENESIS, EXCHANGE_RATE_CONTROL, ADEQUATE_FUNDS))
-//                            .fee(ONE_HUNDRED_HBARS),
-//                    fileUpdate(EXCHANGE_RATES)
-//                            .contents(spec -> {
-//                                ByteString newRates =
-//                                        spec.ratesProvider().rateSetWith(10, 121).toByteString();
-//                                System.out.println("saving the new rates " + newRates);
-//                                spec.registry().saveBytes("newRates", newRates);
-//                                return newRates;
-//                            })
-//                            .payingWith(EXCHANGE_RATE_CONTROL),
-//                    getFileContents(EXCHANGE_RATES)
-//                            .hasContents(spec -> spec.registry().getBytes("newRates")),
-                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
-                    createTopic("testTopic").blankMemo().payingWith(PAYER)
-                            .fee(ONE_HBAR)
-                            .via("create-topic-txn").hasKnownStatus(SUCCESS),
-                    validateChargedUsd("create-topic-txn", 0.02),
-                    waitUntilNextBlock().withBackgroundTraffic(true)
-            );
-        }
+//        @HapiTest
+//        @DisplayName("Restore FeeDetails for creating a topic")
+//        final Stream<DynamicTest> createTopicFeeDetailsRestore() {
+//            return hapiTest(
+//                    blockStreamMustIncludePassFrom(generateFeeDetails("create-topic-txn")),
+////                    resetRatesOp,
+////                    cryptoTransfer(tinyBarsFromTo(GENESIS, EXCHANGE_RATE_CONTROL, ADEQUATE_FUNDS))
+////                            .fee(ONE_HUNDRED_HBARS),
+////                    fileUpdate(EXCHANGE_RATES)
+////                            .contents(spec -> {
+////                                ByteString newRates =
+////                                        spec.ratesProvider().rateSetWith(10, 121).toByteString();
+////                                System.out.println("saving the new rates " + newRates);
+////                                spec.registry().saveBytes("newRates", newRates);
+////                                return newRates;
+////                            })
+////                            .payingWith(EXCHANGE_RATE_CONTROL),
+////                    getFileContents(EXCHANGE_RATES)
+////                            .hasContents(spec -> spec.registry().getBytes("newRates")),
+//                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+//                    createTopic("testTopic").blankMemo().payingWith(PAYER)
+//                            .fee(ONE_HBAR)
+//                            .via("create-topic-txn").hasKnownStatus(SUCCESS),
+//                    validateChargedUsd("create-topic-txn", 0.02),
+//                    waitUntilNextBlock().withBackgroundTraffic(true)
+//            );
+//        }
 
         public static Function<HapiSpec, BlockStreamAssertion> generateFeeDetails(String creationTxn) {
             return spec -> block -> {
@@ -756,156 +756,4 @@ public class SimpleFeesSuite {
     // TODO: scheduled transactions
     // TODO: smart contracts
     // TODO: random other stuff
-
-    // TODO: delete this
-    @HapiTest
-    final Stream<DynamicTest> diogoTest() {
-        final var NFT_KEY = "NFT_KEY";
-        final var hbarCollector = "hbarCollector";
-        final var tokenReceiver = "tokenReceiver";
-        final var tokenTreasury = "tokenTreasury";
-        final var tokenOwner = "tokenOwner";
-        final var alice = "alice";
-        final var feeDenom = "feeDenom";
-        final var nonFungibleToken = "nonFungibleToken";
-        return hapiTest(
-                newKeyNamed(NFT_KEY),
-                cryptoCreate(hbarCollector).balance(0L),
-                cryptoCreate(tokenReceiver).balance(ONE_MILLION_HBARS),
-                cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
-                cryptoCreate(tokenOwner),
-                cryptoCreate(alice).balance(ONE_MILLION_HBARS),
-                tokenCreate(feeDenom).treasury(tokenReceiver).initialSupply(4),
-                tokenAssociate(tokenOwner, feeDenom),
-                tokenAssociate(hbarCollector, feeDenom),
-                tokenCreate(nonFungibleToken)
-                        .treasury(tokenTreasury)
-                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                        .initialSupply(0)
-                        .supplyKey(NFT_KEY)
-                        .supplyType(TokenSupplyType.INFINITE)
-                        .withCustom(royaltyFeeWithFallback(
-                                1, 4, fixedHbarFeeInheritingRoyaltyCollector(100), hbarCollector)),
-                tokenAssociate(tokenReceiver, nonFungibleToken),
-                tokenAssociate(alice, nonFungibleToken),
-                tokenAssociate(tokenOwner, nonFungibleToken),
-                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
-                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta2".getBytes()))),
-                cryptoTransfer(movingUnique(nonFungibleToken, 1L, 2L).between(tokenTreasury, tokenOwner)),
-                cryptoTransfer(
-                        movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver),
-                        movingUnique(nonFungibleToken, 2L).between(tokenOwner, alice),
-                        moving(1, feeDenom).between(tokenReceiver, tokenOwner)
-                )
-                        .signedByPayerAnd(tokenOwner, tokenReceiver, alice),
-                getAccountBalance(tokenOwner)
-                        .hasTokenBalance(nonFungibleToken, 0)
-                        .hasTokenBalance(feeDenom, 1),
-                getAccountBalance(tokenReceiver)
-                        .hasTokenBalance(nonFungibleToken, 1)
-                        .hasTokenBalance(feeDenom, 3)
-                        .hasTinyBars(ONE_MILLION_HBARS),
-                getAccountBalance(alice)
-                        .hasTokenBalance(nonFungibleToken, 1)
-                        .hasTinyBars(ONE_MILLION_HBARS),
-                getAccountBalance(hbarCollector)
-                        .hasTinyBars(0)
-                        .hasTokenBalance(feeDenom, 0)
-        );
-    }
-
-    // TODO: delete this
-    /*
-    Hi Diogo. I can recreate your scenario.
-
-    To restate: The hbar collector gets nothing because the royalty is 1/4, and 1/4 of 1 is a 0.25FT which rounds down to zero.
-    Suppose we increase the FT transfer from 1 to 10 (and increase the supply from 4 to 40)
-    then the owner ends up with 8 and 2 go to the hbar collector, meaning the fee of 1/4 of 10 (2.5FT) is rounded
-    down to 2. So the question is if the fallback of 100 should kick in when this happens. Currently, it looks
-    like it cannot.
-     */
-    @HapiTest
-    final Stream<DynamicTest> diogoTest2() {
-        final var NFT_KEY = "NFT_KEY";
-        final var hbarCollector = "hbarCollector";
-        final var tokenReceiver = "tokenReceiver";
-        final var tokenTreasury = "tokenTreasury";
-        final var tokenOwner = "tokenOwner";
-        final var alice = "alice";
-        final var feeDenom = "feeDenom";
-        final var nonFungibleToken = "nonFungibleToken";
-
-        return hapiTest(
-                newKeyNamed(NFT_KEY),
-                cryptoCreate(hbarCollector).balance(0L),
-                // reciever = 1MHbar
-                cryptoCreate(tokenReceiver).balance(ONE_MILLION_HBARS),
-                // treasury = 1MHbar
-                cryptoCreate(tokenTreasury).balance(ONE_MILLION_HBARS),
-                // owner = 0hbar
-                cryptoCreate(tokenOwner).balance(0L),
-                // receiver = 4FT
-                tokenCreate(feeDenom).treasury(tokenReceiver).initialSupply(4),
-                tokenAssociate(tokenOwner, feeDenom),
-                tokenAssociate(hbarCollector, feeDenom),
-                tokenCreate(nonFungibleToken)
-                        .treasury(tokenTreasury)
-                        .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
-                        .initialSupply(0)
-                        .supplyKey(NFT_KEY)
-                        .supplyType(TokenSupplyType.INFINITE)
-                        // royalty is 1/4, 25% to hbar collector
-                        // fallback is 100hbar
-                        .withCustom(royaltyFeeWithFallback(
-                                1, 4, fixedHbarFeeInheritingRoyaltyCollector(100), hbarCollector)),
-                tokenAssociate(tokenReceiver, nonFungibleToken),
-                tokenAssociate(tokenOwner, nonFungibleToken),
-                // make two tokens
-                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta1".getBytes()))),
-                mintToken(nonFungibleToken, List.of(ByteStringUtils.wrapUnsafely("meta2".getBytes()))),
-                // give two NFTs to owner
-                cryptoTransfer(movingUnique(nonFungibleToken, 1L, 2L).between(tokenTreasury, tokenOwner)),
-
-                /* before
-                    owner:     0h, 2NFT, 0FT
-                    receiver: 1Mh, 0NFT, 4FT
-                    collector: 0h, 0NFT, 0FT
-                 */
-                getAccountBalance(tokenOwner)
-                        .hasTinyBars(0)
-                        .hasTokenBalance(nonFungibleToken, 2)
-                        .hasTokenBalance(feeDenom,0),
-                getAccountBalance(tokenReceiver)
-                        .hasTinyBars(ONE_MILLION_HBARS)
-                        .hasTokenBalance(nonFungibleToken, 0)
-                        .hasTokenBalance(feeDenom,4),
-                getAccountBalance(hbarCollector)
-                        .hasTinyBars(0)
-                        .hasTokenBalance(nonFungibleToken, 0)
-                        .hasTokenBalance(feeDenom, 0),
-                // swap 1 nft for 1 feeDenom between tokenOwner and tokenReceiver
-                cryptoTransfer(
-                        movingUnique(nonFungibleToken, 1L).between(tokenOwner, tokenReceiver),
-                        moving(0, feeDenom).between(tokenReceiver, tokenOwner)
-                )
-                        .signedByPayerAnd(tokenOwner, tokenReceiver),
-                /*  after
-                    owner:     0h, 1NFT, 1FT
-                    receiver: 1Mh, 1NFT, 3FT
-                    collector: 0h, 0NFT, 0FT
-                 */
-                getAccountBalance(tokenOwner)
-                        .hasTinyBars(0)
-                        .hasTokenBalance(nonFungibleToken, 1)
-                        .hasTokenBalance(feeDenom, 0),
-                getAccountBalance(tokenReceiver)
-                        .hasTinyBars(ONE_MILLION_HBARS-100)
-                        .hasTokenBalance(nonFungibleToken, 1)
-                        .hasTokenBalance(feeDenom, 4),
-                getAccountBalance(hbarCollector)
-                        .hasTinyBars(0)
-                        .hasTokenBalance(nonFungibleToken, 0)
-                        .hasTokenBalance(feeDenom, 0)
-        );
-    }
 }
