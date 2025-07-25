@@ -453,7 +453,7 @@ public class CryptoCreateHandler extends BaseCryptoHandler implements Transactio
     @NonNull
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CRYPTO_CREATE, "Create an account", 2, false);
+            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CRYPTO_CREATE, "Create an account", 2, false);
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 1);

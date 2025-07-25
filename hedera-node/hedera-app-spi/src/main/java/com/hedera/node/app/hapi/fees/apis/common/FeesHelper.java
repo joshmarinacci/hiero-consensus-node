@@ -3,7 +3,7 @@ package com.hedera.node.app.hapi.fees.apis.common;
 import com.hedera.hapi.node.base.HederaFunctionality;
 
 public class FeesHelper {
-    public static EntityCreate makeEntity(HederaFunctionality api, String description, int numFreeKeys, boolean customFeeCapable) {
+    public static EntityCreate makeCreateEntity(HederaFunctionality api, String description, int numFreeKeys, boolean customFeeCapable) {
         return new EntityCreate(lookupServiceName(api), lookupAPIName(api), description, numFreeKeys, customFeeCapable);
     }
 
@@ -16,7 +16,7 @@ public class FeesHelper {
         };
     }
 
-    private static String lookupAPIName(HederaFunctionality api) {
+    public static String lookupAPIName(HederaFunctionality api) {
         return switch (api) {
             case TOKEN_CREATE -> "TokenCreate";
             case CONSENSUS_CREATE_TOPIC -> "ConsensusCreateTopic";

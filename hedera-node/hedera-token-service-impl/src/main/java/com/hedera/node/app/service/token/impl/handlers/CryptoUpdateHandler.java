@@ -322,7 +322,7 @@ public class CryptoUpdateHandler extends BaseCryptoHandler implements Transactio
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CRYPTO_UPDATE, "Update an account", 2, false);
+            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CRYPTO_UPDATE, "Update an account", 2, false);
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 1);

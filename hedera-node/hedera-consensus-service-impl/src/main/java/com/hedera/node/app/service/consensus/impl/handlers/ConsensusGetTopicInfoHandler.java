@@ -33,7 +33,6 @@ import com.hedera.hapi.node.consensus.ConsensusTopicInfo;
 import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.Query;
 import com.hedera.hapi.node.transaction.Response;
-import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
@@ -171,7 +170,7 @@ public class ConsensusGetTopicInfoHandler extends PaidQueryHandler {
     @Override
     public Fees computeFees(@NonNull QueryContext queryContext) {
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeEntity(HederaFunctionality.CONSENSUS_GET_TOPIC_INFO, "Query topic info", 0, false);
+            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_GET_TOPIC_INFO, "Query topic info", 0, false);
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", 0);
             params.put("numKeys", 0);

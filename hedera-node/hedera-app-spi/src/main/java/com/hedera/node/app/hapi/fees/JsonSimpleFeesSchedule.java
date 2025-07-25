@@ -45,6 +45,18 @@ public class JsonSimpleFeesSchedule implements AbstractSimpleFeesSchedule {
         System.out.println("getFee " + name);
         return this.transactions.get(name).baseFee();
     }
+
+    @Override
+    public int getBaseExtrasIncluded(String api, String name) {
+        for (var extra : this.transactions.get(api).extras()) {
+            System.out.println("extra " + extra.name());
+            if (extra.name().equals(name)) {
+                return extra.includedCount();
+            }
+        }
+        return 0;
+    }
+
     @Override
     public double getExtrasFee(String name) {
         System.out.println("getExtrasFee " + name);
