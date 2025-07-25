@@ -511,20 +511,24 @@ public class ConsensusSubmitMessageHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         final var op = feeContext.body().consensusSubmitMessageOrThrow();
+        final var topic =
+                feeContext.readableStore(ReadableTopicStore.class).getTopic(op.topicIDOrElse(TopicID.DEFAULT));
+
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             HCSSubmit submit = new HCSSubmit();
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);
-            params.put("hasCustomFee", YesOrNo.NO);
             params.put("numBytes",(int)op.message().length());
+            params.put("hasCustomFee", YesOrNo.NO);
+            if(topic !=null && !topic.customFees().isEmpty()) {
+                params.put("hasCustomFee", YesOrNo.YES);
+            }
             return submit.computeFee(params, feeContext.activeRate());
         }
         final var calculatorFactory = feeContext.feeCalculatorFactory();
         final var msgSize = op.message().length();
 
-        final var topic =
-                feeContext.readableStore(ReadableTopicStore.class).getTopic(op.topicIDOrElse(TopicID.DEFAULT));
         if (topic != null && !topic.customFees().isEmpty()) {
             final var calculator = calculatorFactory.feeCalculator(SubType.SUBMIT_MESSAGE_WITH_CUSTOM_FEES);
             calculator.resetUsage();

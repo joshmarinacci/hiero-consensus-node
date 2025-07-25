@@ -1,6 +1,7 @@
 package com.hedera.node.app.hapi.fees.apis.consensus;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.AbstractSimpleFeesSchedule;
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
@@ -44,7 +45,9 @@ public class HCSSubmit extends AbstractFeeModel {
             fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee("ConsensusSubmitMessageWithCustomFee"));
         }
         int numBytes = (int) values.get("numBytes");
-        int excessBytes = numBytes - HCS_FREE_BYTES;
+        var schedule = BaseFeeRegistry.getFeeSchedule();
+        var free = schedule.getBaseExtrasIncluded("ConsensusSubmitMessage", AbstractSimpleFeesSchedule.Bytes);
+        int excessBytes = numBytes - free;
         if (excessBytes > 0) {
             fee.addDetail("Additional message size",  excessBytes, excessBytes * BaseFeeRegistry.getBaseFee("PerHCSByte"));
         }

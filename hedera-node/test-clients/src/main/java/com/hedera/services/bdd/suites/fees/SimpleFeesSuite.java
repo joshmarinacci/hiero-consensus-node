@@ -51,7 +51,6 @@ import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenAssociate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.tokenCreate;
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.updateTopic;
 import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fixedConsensusHbarFee;
-import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.royaltyFeeWithFallback;
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.moving;
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.movingHbar;
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.movingUnique;
@@ -143,13 +142,35 @@ public class SimpleFeesSuite {
         @HapiTest
         @DisplayName("Simple fee for submitting a message")
         final Stream<DynamicTest> submitMessageFee() {
-            final byte[] messageBytes = new byte[600]; // up to 1k
+            // 100 is less than the free size, so there's no per byte charge
+            final var byte_size = 100;
+            final byte[] messageBytes = new byte[byte_size]; // up to 1k
             Arrays.fill(messageBytes, (byte) 0b1);
-            final var excess_bytes = 600 - HCS_FREE_BYTES;
-            final var base = BaseFeeRegistry.getBaseFee("ConsensusSubmitMessage");
+            return hapiTest(
+                    newKeyNamed(PAYER),
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                    // create topic, provide up to 1 hbar to pay for it
+                    createTopic("testTopic").blankMemo().payingWith(PAYER)
+                            .fee(ONE_HBAR).via("create-topic-txn"),
+                    validateChargedUsd("create-topic-txn", 0.020_00),
+                    // submit message, provide up to 1 hbar to pay for it
+                    submitMessageTo("testTopic").blankMemo().payingWith(PAYER).message(new String(messageBytes))
+                            .fee(ONE_HBAR)
+                            .via("submit-message-txn"),
+                    validateChargedUsd("submit-message-txn", 0.00033, 1)
+            );
+        }
+
+        @HapiTest
+        @DisplayName("Simple fee for submitting a large message")
+        final Stream<DynamicTest> submitBiggerMessageFee() {
+            // 600 is more than the included byte size, so we must calculate the excess
+            final var byte_size = 800;
+            final byte[] messageBytes = new byte[byte_size]; // up to 1k
+            Arrays.fill(messageBytes, (byte) 0b1);
+            final var excess_bytes = byte_size - 256;
+            final var base = 0.00033;
             final var per_byte = BaseFeeRegistry.getBaseFee("PerHCSByte");
-            System.out.println("COST: " + base + " " + excess_bytes + " " + per_byte);
-            System.out.println("COST: " + (base + excess_bytes * per_byte));
             return hapiTest(
                     newKeyNamed(PAYER),
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
@@ -166,11 +187,32 @@ public class SimpleFeesSuite {
         }
 
         //TODO: Submit message with custom fee
-
-        //TODO: submit bigger message
+        // this currently crashes in a crypto transfer *after* the submit message with
+//        @HapiTest
+//        @DisplayName("Simple fee for submitting a message with a custom fee")
+//        final Stream<DynamicTest> submitMessageWithCustomFee() {
+//            final var byte_size = 100;
+//            final byte[] messageBytes = new byte[byte_size]; // up to 1k
+//            Arrays.fill(messageBytes, (byte) 0b1);
+//            final var collector = "collector";
+//            return hapiTest(
+//                    newKeyNamed(PAYER),
+//                    cryptoCreate(collector),
+//                    cryptoCreate(PAYER).balance(ONE_MILLION_HBARS),
+//                    createTopic("testTopic").blankMemo().payingWith(PAYER)
+//                            .withConsensusCustomFee(fixedConsensusHbarFee(1, collector))
+//                            .fee(ONE_HUNDRED_HBARS).via("create-topic-txn"),
+//                    validateChargedUsd("create-topic-txn", 3),
+//                    // submit message, provide up to 1 hbar to pay for it
+//                    submitMessageTo("testTopic").blankMemo().payingWith(PAYER).message(new String(messageBytes))
+//                            .fee(ONE_HUNDRED_HBARS)
+//                            .via("submit-message-txn"),
+//                    validateChargedUsd("submit-message-txn", 0.05, 1),
+//            );
+//        }
 
         // delete topic
-        @LeakyHapiTest(overrides = "fees.simpleFeesEnabled")
+        @HapiTest()
         final Stream<DynamicTest> deleteTopicFee() {
             return hapiTest(
                     overriding("fees.simpleFeesEnabled", "true"),

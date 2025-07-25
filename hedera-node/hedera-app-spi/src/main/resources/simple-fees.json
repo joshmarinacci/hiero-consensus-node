@@ -44,6 +44,24 @@
         {
           "name": "ConsensusUpdateTopic",
           "baseFee": 0.00033
+        },
+        {
+          "name": "ConsensusSubmitMessage",
+          "baseFee": 0.00033,
+          "extras": [
+            {
+              "name": "Bytes",
+              "includedCount": 256
+            }
+          ]
+        },
+        {
+          "name": "ConsensusSubmitMessageWithCustomFee",
+          "baseFee": 0.05
+        },
+        {
+          "name": "ConsensusDeleteTopic",
+          "baseFee": 0.00500
         }
       ]
     },

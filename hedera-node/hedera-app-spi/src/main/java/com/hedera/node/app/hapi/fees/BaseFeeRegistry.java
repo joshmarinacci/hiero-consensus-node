@@ -1,4 +1,5 @@
 package com.hedera.node.app.hapi.fees;
+
 import com.hedera.hapi.node.consensus.SimpleFeesSchedule;
 import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
 
@@ -18,39 +19,39 @@ public final class BaseFeeRegistry {
         // Addons
         fees.put("PerSignature", 0.0001);
         fees.put("PerKey", 0.01);
-        fees.put("PerHCSByte",  0.000_011);
+        fees.put("PerHCSByte", 0.000_011);
         fees.put("PerFileByte", 0.000_011);
         fees.put("PerCryptoTransferAccount", 0.000_01);
         fees.put("PerGas", 0.0000000852);
 
         // Crypto service
-        fees.put("CryptoCreate",            0.050_00);
-        fees.put("CryptoUpdate",            0.000_22);
-        fees.put("CryptoTransfer",          0.000_10);
-        fees.put("CryptoDelete",            0.005_00);
+        fees.put("CryptoCreate", 0.050_00);
+        fees.put("CryptoUpdate", 0.000_22);
+        fees.put("CryptoTransfer", 0.000_10);
+        fees.put("CryptoDelete", 0.005_00);
         fees.put("CryptoGetAccountRecords", 0.000_10);
         fees.put("CryptoGetAccountBalance", 0.000_00);
-        fees.put("CryptoGetInfo",           0.000_10);
-        fees.put("CryptoGetStakers",        0.000_10);
-        fees.put("CryptoApproveAllowance",  0.050_00);
-        fees.put("CryptoDeleteAllowance",   0.050_00);
+        fees.put("CryptoGetInfo", 0.000_10);
+        fees.put("CryptoGetStakers", 0.000_10);
+        fees.put("CryptoApproveAllowance", 0.050_00);
+        fees.put("CryptoDeleteAllowance", 0.050_00);
 
         // HCS
-        fees.put("ConsensusCreateTopic",                0.020_00);
-        fees.put("ConsensusCreateTopicWithCustomFee",   2.000_00);
-        fees.put("ConsensusUpdateTopic",                0.000_22);
-        fees.put("ConsensusDeleteTopic",                0.005_00);
-        fees.put("ConsensusSubmitMessage",              0.000_10);
-        fees.put("ConsensusSubmitMessageWithCustomFee", 0.050_00);
-        fees.put("ConsensusGetTopicInfo",               0.000_20);
+//        fees.put("ConsensusCreateTopic",                0.020_00);
+//        fees.put("ConsensusCreateTopicWithCustomFee",   2.000_00);
+//        fees.put("ConsensusUpdateTopic",                0.000_22);
+//        fees.put("ConsensusDeleteTopic", 0.005_00);
+//        fees.put("ConsensusSubmitMessage",              0.000_10);
+//        fees.put("ConsensusSubmitMessageWithCustomFee", 0.050_00);
+        fees.put("ConsensusGetTopicInfo", 0.000_20);
 
         // HTS
-        fees.put("TokenCreate",              1.000_00);
+        fees.put("TokenCreate", 1.000_00);
         fees.put("TokenCreateWithCustomFee", 2.000_00);
-        fees.put("TokenDelete",              0.001_00);
-        fees.put("TokenUpdate",              0.001_00);
-        fees.put("TokenMintFungible",        0.001_00);
-        fees.put("TokenMintNonFungible",     0.020_00);
+        fees.put("TokenDelete", 0.001_00);
+        fees.put("TokenUpdate", 0.001_00);
+        fees.put("TokenMintFungible", 0.001_00);
+        fees.put("TokenMintNonFungible", 0.020_00);
         fees.put("TokenBurn", 0.00100);
         fees.put("TokenPause", 0.00100);
         fees.put("TokenUnpause", 0.00100);
@@ -62,7 +63,7 @@ public final class BaseFeeRegistry {
         fees.put("TokenAccountWipe", 0.00100);
         fees.put("TokenAssociateToAccount", 0.05000);
         fees.put("TokenDissociateFromAccount", 0.050_00);
-        fees.put("TokenTransfer",              0.001_00);
+        fees.put("TokenTransfer", 0.001_00);
         fees.put("TokenTransferWithCustomFee", 0.002_00);
         fees.put("TokenAirdrop", 0.10000);
         fees.put("TokenAirdropWithCustomFee", 0.10100);
@@ -94,12 +95,12 @@ public final class BaseFeeRegistry {
         fees.put("EthereumTransactionSuccess", 0.00000);
         fees.put("EthereumTransactionFail", 0.00010);
         // Files
-        fees.put("FileCreate",      0.050_00);
-        fees.put("FileUpdate",      0.050_00);
-        fees.put("FileDelete",      0.007_00);
-        fees.put("FileAppend",      0.050_00);
+        fees.put("FileCreate", 0.050_00);
+        fees.put("FileUpdate", 0.050_00);
+        fees.put("FileDelete", 0.007_00);
+        fees.put("FileAppend", 0.050_00);
         fees.put("FileGetContents", 0.000_66);
-        fees.put("FileGetInfo",     0.000_66);
+        fees.put("FileGetInfo", 0.000_66);
 
         // Misc
         fees.put("GetVersionInfo", 0.00010);
@@ -123,11 +124,15 @@ public final class BaseFeeRegistry {
 
     public static double getBaseFee(String api) {
         System.out.println("BASE FEE: " + api);
-        if(api.equals("PerKey")) return SIMPLE_FEES_SCHEDULE.getExtrasFee("Keys");
-        if(api.equals("PerFileByte")) return SIMPLE_FEES_SCHEDULE.getExtrasFee("Bytes");
+        if (api.equals("PerKey")) return SIMPLE_FEES_SCHEDULE.getExtrasFee("Keys");
+        if (api.equals("PerFileByte")) return SIMPLE_FEES_SCHEDULE.getExtrasFee("Bytes");
+        if (api.equals("PerHCSByte")) return SIMPLE_FEES_SCHEDULE.getExtrasFee("Bytes");
         if (api.equals("ConsensusCreateTopic")
-            || api.equals("ConsensusCreateTopicWithCustomFee")
-            || api.equals("ConsensusUpdateTopic")
+                || api.equals("ConsensusCreateTopicWithCustomFee")
+                || api.equals("ConsensusUpdateTopic")
+                || api.equals("ConsensusSubmitMessage")
+                || api.equals("ConsensusSubmitMessageWithCustomFee")
+                || api.equals("ConsensusDeleteTopic")
         ) {
             return SIMPLE_FEES_SCHEDULE.getBaseFee(api);
         }
