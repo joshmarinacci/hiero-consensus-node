@@ -99,7 +99,7 @@ public class SimpleFeesSuite {
                             .payingWith(PAYER)
                             .fee(ONE_HUNDRED_HBARS)
                             .via("create-topic-txn"),
-                    validateChargedUsd("create-topic-txn", 2)
+                    validateChargedUsd("create-topic-txn", 3)
             );
         }
 
@@ -117,7 +117,7 @@ public class SimpleFeesSuite {
                     // update topic, provide up to 100 hbar to pay for it
                     updateTopic("testTopic").adminKey(ADMIN).payingWith(PAYER)
                             .fee(ONE_HUNDRED_HBARS).via("update-topic-txn"),
-                    validateChargedUsd("update-topic-txn", 0.000_22)
+                    validateChargedUsd("update-topic-txn", 0.000_33)
             );
         }
 

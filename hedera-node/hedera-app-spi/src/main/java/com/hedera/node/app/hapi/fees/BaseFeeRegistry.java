@@ -120,25 +120,15 @@ public final class BaseFeeRegistry {
     private BaseFeeRegistry() {
         // prevent instantiation
     }
-//    public static double getBaseFee(String api) {
-//        return BASE_FEES.getOrDefault(api, 0.0);
-//    }
+
     public static double getBaseFee(String api) {
         System.out.println("BASE FEE: " + api);
-        if(api == "PerKey") {
-            return SIMPLE_FEES_SCHEDULE.getExtrasFee("Keys");
-        }
-        if(api == "PerFileByte") {
-            return SIMPLE_FEES_SCHEDULE.getExtrasFee("Bytes");
-        }
-        if(api == "FileGetContents"
-        || api == "FileGetInfo"
-        || api == "CryptoTransfer"
-        || api == "CryptoCreate"
+        if(api.equals("PerKey")) return SIMPLE_FEES_SCHEDULE.getExtrasFee("Keys");
+        if(api.equals("PerFileByte")) return SIMPLE_FEES_SCHEDULE.getExtrasFee("Bytes");
+        if (api.equals("ConsensusCreateTopic")
+            || api.equals("ConsensusCreateTopicWithCustomFee")
+            || api.equals("ConsensusUpdateTopic")
         ) {
-            return BASE_FEES.getOrDefault(api, 0.0);
-        }
-        if (api == "ConsensusCreateTopic") {
             return SIMPLE_FEES_SCHEDULE.getBaseFee(api);
         }
         return BASE_FEES.getOrDefault(api, 0.0);

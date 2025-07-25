@@ -33,13 +33,17 @@
         },
         {
           "name": "ConsensusCreateTopicWithCustomFee",
-          "baseFee": 2.0,
+          "baseFee": 3.0,
           "extras": [
             {
               "name": "SignatureVerifications",
               "includedCount": 1
             }
           ]
+        },
+        {
+          "name": "ConsensusUpdateTopic",
+          "baseFee": 0.00033
         }
       ]
     },
