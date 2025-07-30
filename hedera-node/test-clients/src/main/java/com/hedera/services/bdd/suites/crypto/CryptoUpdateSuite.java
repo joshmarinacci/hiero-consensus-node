@@ -154,10 +154,10 @@ public class CryptoUpdateSuite {
 
     private static final UnaryOperator<String> ROTATION_TXN = account -> account + "KeyRotation";
 
-        /*
-       Test that long-zero EVM address has the expected value before and after
-       key rotation, and that hte record stream does not imply anything different.
-     */
+    /*
+      Test that long-zero EVM address has the expected value before and after
+      key rotation, and that hte record stream does not imply anything different.
+    */
     @HapiTest
     final Stream<DynamicTest> keyRotationDoesNotChangeEvmAddressForLongZero() {
         final var accountsToCreate = new TreeMap<ECKind, String>((Comparator.comparing(Enum::ordinal)));
@@ -196,14 +196,13 @@ public class CryptoUpdateSuite {
                 rotateKeys(accountsToHaveKeysRotated),
 
                 // --- ROTATE KEYS ---
-                doingContextual(TxnUtils::triggerAndCloseAtLeastOneFileIfNotInterrupted)
-        ));
+                doingContextual(TxnUtils::triggerAndCloseAtLeastOneFileIfNotInterrupted)));
     }
 
     /*
-       Test that auto and hollow EVM address has the expected value before and after
-       key rotation, and that hte record stream does not imply anything different.
-     */
+      Test that auto and hollow EVM address has the expected value before and after
+      key rotation, and that hte record stream does not imply anything different.
+    */
     @HapiTest
     final Stream<DynamicTest> keyRotationDoesNotChangeEvmAddressForAutoAndHollow() {
         final var accountsToCreate = new TreeMap<ECKind, String>((Comparator.comparing(Enum::ordinal)));
@@ -261,11 +260,9 @@ public class CryptoUpdateSuite {
                 cryptoTransfer(tinyBarsFromTo(accountsToCreate.get(ECKind.HOLLOW), FUNDING, 1))
                         .payingWith(accountsToCreate.get(ECKind.HOLLOW))
                         .sigMapPrefixes(uniqueWithFullPrefixesFor(accountsToCreate.get(ECKind.HOLLOW))),
-
                 saveAllEvmAddresses(evmAddresses, accountsToCreate),
                 rotateKeys(accountsToHaveKeysRotated),
-                doingContextual(TxnUtils::triggerAndCloseAtLeastOneFileIfNotInterrupted)
-        ));
+                doingContextual(TxnUtils::triggerAndCloseAtLeastOneFileIfNotInterrupted)));
     }
 
     /*
@@ -308,11 +305,9 @@ public class CryptoUpdateSuite {
                             .evmAddress(evmAddress)
                             .via(accountsToCreate.get(ECKind.EXPLICIT_ALIAS));
                 }),
-
                 saveAllEvmAddresses(evmAddresses, accountsToCreate),
                 rotateKeys(accountsToHaveKeysRotated),
-                doingContextual(TxnUtils::triggerAndCloseAtLeastOneFileIfNotInterrupted)
-        ));
+                doingContextual(TxnUtils::triggerAndCloseAtLeastOneFileIfNotInterrupted)));
     }
 
     private static VisibleItemsValidator keyRotationsValidator(@NonNull final List<String> accountsToHaveKeysRotated) {
@@ -342,7 +337,8 @@ public class CryptoUpdateSuite {
                 .toArray(SpecOperation[]::new));
     }
 
-    private CustomSpecAssert saveAllEvmAddresses(Map<ECKind, Address> evmAddresses, Map<ECKind, String> accountsToCreate) {
+    private CustomSpecAssert saveAllEvmAddresses(
+            Map<ECKind, Address> evmAddresses, Map<ECKind, String> accountsToCreate) {
         return withOpContext((spec, opLog) -> {
             for (final var e : evmAddresses.entrySet()) {
                 spec.registry()
@@ -360,7 +356,6 @@ public class CryptoUpdateSuite {
                 .toArray(String[]::new);
         return allTxnIds;
     }
-
 
     @HapiTest
     final Stream<DynamicTest> updateForMaxAutoAssociationsForAccountsWorks() {
