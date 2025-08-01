@@ -2,6 +2,7 @@ package com.hedera.node.app.hapi.fees.apis.schedule;
 
 import com.hedera.hapi.node.consensus.ServiceMethod;
 import com.hedera.node.app.hapi.fees.JsonSimpleFeesSchedule;
+import com.hedera.node.app.hapi.fees.MockSimpleFeesSchedule;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -23,7 +24,6 @@ public class FeeScheduleTest {
             assertNull(feeSchedule.extras.get("MadeUpFieldName"));
         });
     }
-    //TODO: test for missing fields in the JSON
     @Test
     void testMissingJsonFields() {
         assertDoesNotThrow(() -> {
@@ -42,4 +42,11 @@ public class FeeScheduleTest {
         });
     }
 
+    @Test
+    //test that we can load the mock fees and use them
+    void mockTest() {
+        var schedule = new MockSimpleFeesSchedule();
+        schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
+        assertEquals(schedule.getNetworkBaseFee("ConsensusCreateTopic"),8.8);
+    }
 }
