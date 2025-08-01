@@ -9,7 +9,7 @@ import static java.util.Objects.requireNonNull;
 public final class BaseFeeRegistry {
 
     private static final Map<String, Double> BASE_FEES;
-    private static final AbstractSimpleFeesSchedule SIMPLE_FEES_SCHEDULE;
+    private static final AbstractFeesSchedule SIMPLE_FEES_SCHEDULE;
 
     static {
         Map<String, Double> fees = new HashMap<>();
@@ -112,7 +112,7 @@ public final class BaseFeeRegistry {
         fees.put("BatchTransaction", 0.00100);
 
         BASE_FEES = Collections.unmodifiableMap(fees);
-        SIMPLE_FEES_SCHEDULE = JsonSimpleFeesSchedule.fromJson();
+        SIMPLE_FEES_SCHEDULE = JsonFeesSchedule.fromJson();
     }
 
     private BaseFeeRegistry() {
@@ -136,7 +136,7 @@ public final class BaseFeeRegistry {
         return BASE_FEES.getOrDefault(api, 0.0);
     }
 
-    public static AbstractSimpleFeesSchedule getFeeSchedule() {
+    public static AbstractFeesSchedule getFeeSchedule() {
         return SIMPLE_FEES_SCHEDULE;
     }
 

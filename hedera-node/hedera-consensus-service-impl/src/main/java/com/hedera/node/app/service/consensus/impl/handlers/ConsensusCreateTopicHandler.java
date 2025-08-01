@@ -23,7 +23,7 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.consensus.ConsensusCreateTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
-import com.hedera.node.app.hapi.fees.AbstractSimpleFeesSchedule;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
@@ -233,7 +233,7 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
             EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
             entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(
                     FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_CREATE_TOPIC),
-                    AbstractSimpleFeesSchedule.SignatureVerifications));
+                    AbstractFeesSchedule.SignatureVerifications));
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);

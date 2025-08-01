@@ -1,6 +1,6 @@
 package com.hedera.node.app.hapi.fees;
 
-public interface AbstractSimpleFeesSchedule {
+public interface AbstractFeesSchedule {
     public static String SignatureVerifications = "SignatureVerifications";
     public static String Bytes = "Bytes";
 

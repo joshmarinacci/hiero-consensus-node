@@ -6,9 +6,9 @@ import com.hedera.hapi.node.consensus.ServiceMethod;
 
 import java.util.HashMap;
 
-public class MockSimpleFeesSchedule implements AbstractSimpleFeesSchedule {
+public class MockFeesSchedule implements AbstractFeesSchedule {
     public final HashMap<String, ServiceMethod> methods;
-    public MockSimpleFeesSchedule() {
+    public MockFeesSchedule() {
         methods = new HashMap<>();
     }
     @Override

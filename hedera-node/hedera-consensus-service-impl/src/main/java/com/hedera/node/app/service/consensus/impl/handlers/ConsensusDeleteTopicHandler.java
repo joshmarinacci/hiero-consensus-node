@@ -13,7 +13,7 @@ import com.hedera.hapi.node.base.TopicID;
 import com.hedera.hapi.node.consensus.ConsensusDeleteTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.TransactionBody;
-import com.hedera.node.app.hapi.fees.AbstractSimpleFeesSchedule;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
@@ -123,7 +123,7 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
             final var service_name = "Crypto";
             final var api_name = FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_DELETE_TOPIC);
             EntityCreate entity = new EntityCreate(service_name, api_name, "Delete a topic", 0, false );
-            entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(api_name, AbstractSimpleFeesSchedule.SignatureVerifications));
+            entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(api_name, AbstractFeesSchedule.SignatureVerifications));
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);

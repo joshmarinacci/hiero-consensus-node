@@ -11,13 +11,13 @@ import java.util.HashMap;
 
 import static java.util.Objects.requireNonNull;
 
-public class JsonSimpleFeesSchedule implements AbstractSimpleFeesSchedule {
+public class JsonFeesSchedule implements AbstractFeesSchedule {
     public final SimpleFeesSchedule schedule;
     private final HashMap<String, Service> services;
     private final HashMap<String, ServiceMethod> serviceMethods;
     public final HashMap<String, FeeExtra> extras;
 
-    private JsonSimpleFeesSchedule(SimpleFeesSchedule buf) {
+    private JsonFeesSchedule(SimpleFeesSchedule buf) {
         this.schedule = buf;
         this.extras = new HashMap<>();
         for(var extra: buf.extras()) {
@@ -46,11 +46,11 @@ public class JsonSimpleFeesSchedule implements AbstractSimpleFeesSchedule {
         }
     }
 
-    public static JsonSimpleFeesSchedule fromJson() {
+    public static JsonFeesSchedule fromJson() {
         try (final var fin = BaseFeeRegistry.class.getClassLoader().getResourceAsStream("simple-fees.json")) {
             final var buf = SimpleFeesSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
 //            System.out.println("parsed simple fees schedule: " + buf);
-            return new JsonSimpleFeesSchedule(buf);
+            return new JsonFeesSchedule(buf);
         } catch (Exception e) {
             System.out.println("exception loading fees schedule " + e.getMessage());
             throw new RuntimeException(e);

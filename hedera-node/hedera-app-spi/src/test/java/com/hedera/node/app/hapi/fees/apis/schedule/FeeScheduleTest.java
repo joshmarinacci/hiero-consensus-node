@@ -1,8 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.schedule;
 
 import com.hedera.hapi.node.consensus.ServiceMethod;
-import com.hedera.node.app.hapi.fees.JsonSimpleFeesSchedule;
-import com.hedera.node.app.hapi.fees.MockSimpleFeesSchedule;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
+import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class FeeScheduleTest {
     @Test
     void testLoadingFeeScheduleFromJson() {
         assertDoesNotThrow(() -> {
-            final var feeSchedule = JsonSimpleFeesSchedule.fromJson();
+            final var feeSchedule = JsonFeesSchedule.fromJson();
             assertEquals(feeSchedule.getNodeBaseFee("ConsensusCreateTopic"),0.01000);
             assertEquals(feeSchedule.getNetworkBaseFee("ConsensusCreateTopic"),0.02000);
 
@@ -27,7 +27,7 @@ public class FeeScheduleTest {
     @Test
     void testMissingJsonFields() {
         assertDoesNotThrow(() -> {
-            final var feeSchedule = JsonSimpleFeesSchedule.fromJson();
+            final var feeSchedule = JsonFeesSchedule.fromJson();
             for (var service : feeSchedule.schedule.services()) {
                 var methods = new ArrayList<ServiceMethod>();
                 methods.addAll(service.transactions());
@@ -45,7 +45,7 @@ public class FeeScheduleTest {
     @Test
     //test that we can load the mock fees and use them
     void mockTest() {
-        var schedule = new MockSimpleFeesSchedule();
+        var schedule = new MockFeesSchedule();
         schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
         assertEquals(schedule.getNetworkBaseFee("ConsensusCreateTopic"),8.8);
     }
