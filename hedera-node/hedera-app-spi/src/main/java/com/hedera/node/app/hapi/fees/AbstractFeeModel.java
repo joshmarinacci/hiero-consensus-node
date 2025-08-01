@@ -83,6 +83,30 @@ public abstract class AbstractFeeModel {
         System.out.println("Fees: " + this.getService() + ":" + this.getDescription()+":\n  " + fees);
         return fees;
     }
+
+    public Fees computeFee2(Map<String, Object> values, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule) {
+        preprocessEnumValues(values);
+
+        FeeResult result = computeApiSpecificFee2(values, feesSchedule);
+
+        // Compute the fee for parameters that are common across all APIs
+//        if (values.containsKey("numSignatures")) {
+//            final int numSignatures = (int) values.get("numSignatures");
+//            if (numSignatures > numFreeSignatures) {
+//                final int additionalSignatures = numSignatures - numFreeSignatures;
+//                final double fee = additionalSignatures * BaseFeeRegistry.getBaseFee("PerSignature");
+//                result.addDetail("Additional signature verifications", additionalSignatures, fee);
+//            }
+//        }
+
+        //TODO: I'm pretty sure these calculations are wrong
+        final var nodeTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.node), exchangeRate);
+        final var networkTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.network*0.5), exchangeRate);
+        final var serviceTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.network*0.5), exchangeRate);
+        final var fees =  new Fees(nodeTc,networkTc,serviceTc, result.fee, result.details);
+        System.out.println("Fees: " + this.getService() + ":" + this.getDescription()+":\n  " + fees);
+        return fees;
+    }
     private long tinyCentsToTinyBar(long tcents, ExchangeRate cr) {
         final var currentRate = fromPbj(cr);
         return tcents* currentRate.getHbarEquiv()/currentRate.getCentEquiv() * 100;
@@ -94,6 +118,9 @@ public abstract class AbstractFeeModel {
 
     // Compute API specific fee (e.g. cryptoCreate price is based on the number of keys)
     protected abstract FeeResult computeApiSpecificFee(Map<String, Object> values);
+    protected FeeResult computeApiSpecificFee2(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     @SuppressWarnings("unchecked")
     private void preprocessEnumValues(Map<String, Object> values) {

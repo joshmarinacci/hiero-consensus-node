@@ -6,6 +6,8 @@ import java.util.Map;
 
 public class FeeResult {
     public double fee = 0.0;
+    public double node = 0.0;
+    public double network = 0.0;
     public Map<String, FeeDetail> details = new LinkedHashMap<>();
 
     public void addDetail(String label, int value, double cost) {

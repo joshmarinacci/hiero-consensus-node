@@ -1,6 +1,7 @@
 package com.hedera.node.app.hapi.fees.apis.common;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
@@ -69,6 +70,24 @@ public class EntityCreate extends AbstractFeeModel {
 
         if (numKeys > numFreeKeys) {
             fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * BaseFeeRegistry.getBaseFee("PerKey"));
+        }
+        return fee;
+    }
+    protected FeeResult computeApiSpecificFee2(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
+        super.setNumFreeSignatures(numFreeKeys + 1); // The user needs to sign each of the keys to verify that they have the corresponding private key
+
+        FeeResult fee = new FeeResult();
+        if (customFeeCapable && values.get("hasCustomFee") == YesOrNo.YES) {
+            fee.addDetail("Base fee", 1, feesSchedule.getNetworkBaseFee(api + "WithCustomFee"));
+        } else {
+            fee.addDetail("Base Network fee", 1, feesSchedule.getNetworkBaseFee(api));
+            fee.addDetail("Base Node fee", 1, feesSchedule.getNodeBaseFee(api));
+        }
+
+        int numKeys = (int) values.get("numKeys");
+
+        if (numKeys > numFreeKeys) {
+            fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getExtrasFee("PerKey"));
         }
         return fee;
     }

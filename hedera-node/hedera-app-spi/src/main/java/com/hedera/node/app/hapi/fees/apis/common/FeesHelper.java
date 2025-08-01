@@ -1,8 +1,12 @@
 package com.hedera.node.app.hapi.fees.apis.common;
 
 import com.hedera.hapi.node.base.HederaFunctionality;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
 
 public class FeesHelper {
+    public static AbstractFeeModel createModel(String service, String method) {
+        return new EntityCreate(service,method, "description",0,false);
+    }
     public static EntityCreate makeCreateEntity(HederaFunctionality api, String description, int numFreeKeys, boolean customFeeCapable) {
         return new EntityCreate(lookupServiceName(api), lookupAPIName(api), description, numFreeKeys, customFeeCapable);
     }

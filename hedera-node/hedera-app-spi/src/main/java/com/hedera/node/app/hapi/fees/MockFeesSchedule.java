@@ -22,19 +22,29 @@ public class MockFeesSchedule implements AbstractFeesSchedule {
     }
 
     @Override
+    public double getNodeBaseFee(String api) {
+        return Double.parseDouble(this.methods.get(api).node().base());
+    }
+
+    @Override
     public int getNetworkBaseExtrasIncluded(String api, String name) {
         return 0;
     }
 
     public void setNetworkBaseFee(String name, double v) {
-        if(!this.methods.containsKey(name)) {
-            this.methods.put(name, ServiceMethod.DEFAULT);
-        }
+        if(!this.methods.containsKey(name)) this.methods.put(name, ServiceMethod.DEFAULT);
         var network = this.methods.get(name).networkOrElse(FeeComponent.DEFAULT);
         var new_network = network.copyBuilder().base(""+v).build();
         System.out.println(new_network);
         var new_method = this.methods.get(name).copyBuilder().network(new_network).build();
         System.out.println(new_method);
+        this.methods.put(name, new_method);
+    }
+    public void setNodeBaseFee(String name, double v) {
+        if(!this.methods.containsKey(name)) this.methods.put(name, ServiceMethod.DEFAULT);
+        var node = this.methods.get(name).nodeOrElse(FeeComponent.DEFAULT);
+        var new_node = node.copyBuilder().base(""+v).build();
+        var new_method = this.methods.get(name).copyBuilder().node(new_node).build();
         this.methods.put(name, new_method);
     }
 }

@@ -3,10 +3,16 @@ package com.hedera.node.app.hapi.fees.apis.schedule;
 import com.hedera.hapi.node.consensus.ServiceMethod;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.MockFeesSchedule;
+import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+import static com.hedera.node.app.hapi.fees.apis.common.FeesHelper.createModel;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FeeScheduleTest {
@@ -48,5 +54,26 @@ public class FeeScheduleTest {
         var schedule = new MockFeesSchedule();
         schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
         assertEquals(schedule.getNetworkBaseFee("ConsensusCreateTopic"),8.8);
+    }
+
+    @Test
+    //test that we can create a fees model from the service name
+    void createModelFromNames() {
+        var service = "Consensus";
+        var method = "ConsensusCreateTopic";
+        var schedule = new MockFeesSchedule();
+        schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
+        schedule.setNodeBaseFee("ConsensusCreateTopic",9.9);
+
+        var model = createModel(service,method);
+        assertInstanceOf(EntityCreate.class, model);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("numSignatures", 0);
+        params.put("numKeys", 0);
+        params.put("hasCustomFee", YesOrNo.NO);
+        model.checkParameters(params);
+        var fees = model.computeFee2(params,new MockExchangeRate().activeRate(),schedule);
+        assertTrue(Math.abs(fees.usd()-(8.8+9.9))<0.1);
     }
 }
