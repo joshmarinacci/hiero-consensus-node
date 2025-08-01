@@ -6,7 +6,7 @@ public interface AbstractSimpleFeesSchedule {
 
     public double getExtrasFee(String name);
 
-    public double getBaseFee(String api);
+    public double getNetworkBaseFee(String api);
 
-    int getBaseExtrasIncluded(String api, String name);
+    int getNetworkBaseExtrasIncluded(String api, String name);
 }

@@ -123,7 +123,7 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
             final var service_name = "Crypto";
             final var api_name = FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_DELETE_TOPIC);
             EntityCreate entity = new EntityCreate(service_name, api_name, "Delete a topic", 0, false );
-            entity.setNumFreeSignatures(schedule.getBaseExtrasIncluded(api_name, AbstractSimpleFeesSchedule.SignatureVerifications));
+            entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(api_name, AbstractSimpleFeesSchedule.SignatureVerifications));
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);

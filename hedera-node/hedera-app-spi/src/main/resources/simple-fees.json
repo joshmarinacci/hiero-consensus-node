@@ -2,19 +2,19 @@
   "extras": [
     {
       "name": "SignatureVerifications",
-      "fee": 0.00001
+      "fee": "0.00001"
     },
     {
       "name": "Gas",
-      "fee": 0.0000000852
+      "fee": "0.0000000852"
     },
     {
       "name": "Keys",
-      "fee": 0.01
+      "fee": "0.01"
     },
     {
       "name": "Bytes",
-      "fee": 0.000011
+      "fee": "0.000011"
     }
   ],
   "services": [
@@ -23,45 +23,104 @@
       "transactions": [
         {
           "name": "ConsensusCreateTopic",
-          "baseFee": 0.02000,
-          "extras": [
-            {
-              "name": "SignatureVerifications",
-              "includedCount": 1
-            }
-          ]
+          "node": {
+            "base": "0.01000",
+            "extras": [
+              {
+                "name": "SignatureVerifications",
+                "includedCount": 1
+              }
+            ]
+          },
+          "network": {
+            "base": "0.02000",
+            "extras": [
+              {
+                "name": "SignatureVerifications",
+                "includedCount": 1
+              }
+            ]
+          }
         },
         {
           "name": "ConsensusCreateTopicWithCustomFee",
-          "baseFee": 3.0,
-          "extras": [
-            {
-              "name": "SignatureVerifications",
-              "includedCount": 1
-            }
-          ]
+          "node": {
+            "base": "1.0",
+            "extras": [
+              {
+                "name": "SignatureVerifications",
+                "includedCount": 1
+              }
+            ]
+          },
+          "network": {
+            "base": "2.0"
+          }
         },
         {
           "name": "ConsensusUpdateTopic",
-          "baseFee": 0.00033
+          "node": {
+            "base": "0.00011"
+          },
+          "network": {
+            "base": "0.00022"
+          }
         },
         {
           "name": "ConsensusSubmitMessage",
-          "baseFee": 0.00033,
-          "extras": [
-            {
-              "name": "Bytes",
-              "includedCount": 256
-            }
-          ]
+          "node": {
+            "base": "0.00011",
+            "extras": [
+              {
+                "name": "Bytes",
+                "includedCount": 256
+              }
+            ]
+          },
+          "network": {
+            "base": "0.00022"
+          }
         },
         {
           "name": "ConsensusSubmitMessageWithCustomFee",
-          "baseFee": 0.05
+          "node": {
+            "base": "0.01"
+          },
+          "network": {
+            "base": "0.04"
+          }
         },
         {
           "name": "ConsensusDeleteTopic",
-          "baseFee": 0.00500
+          "node": {
+            "base": "0.001"
+          },
+          "network": {
+            "base": "0.004"
+          }
+        }
+      ],
+      "queries": [
+        {
+          "name": "ConsensusCreateTopic",
+          "node": {
+            "base": "0.01000",
+            "extras": [
+              {
+                "name": "SignatureVerifications",
+                "includedCount": 1
+              }
+            ]
+          },
+          "network": {
+            "base": "0.02000",
+            "extras": [
+              {
+                "name": "SignatureVerifications",
+                "includedCount": 1
+              }
+            ]
+          }
         }
       ]
     },
@@ -70,23 +129,41 @@
       "transactions": [
         {
           "name": "FileCreate",
-          "baseFee": 0.05000,
-          "extras": [
-            {
-              "name": "SignatureVerifications",
-              "includedCount": 1
-            },
-            {
-              "name": "Keys",
-              "includedCount": 1
-            },
-            {
-              "name": "Bytes",
-              "includedCount": 1000
-            }
-          ]
+          "node": {
+            "base": "0.01",
+            "extras": [
+              {
+                "name": "SignatureVerifications",
+                "includedCount": 1
+              },
+              {
+                "name": "Keys",
+                "includedCount": 1
+              },
+              {
+                "name": "Bytes",
+                "includedCount": 1000
+              }
+            ]
+          },
+          "network": {
+            "base": "0.04"
+          }
         }
       ]
     }
-  ]
+  ],
+  "unreadable": {
+    "fee": "1.0"
+  },
+  "invalid": {
+    "network": {
+    }
+  },
+  "unhandled": {
+    "node": {
+    },
+    "network": {
+    }
+  }
 }

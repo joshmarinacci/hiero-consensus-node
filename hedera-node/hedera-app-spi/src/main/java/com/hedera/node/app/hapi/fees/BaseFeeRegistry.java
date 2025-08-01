@@ -1,8 +1,5 @@
 package com.hedera.node.app.hapi.fees;
 
-import com.hedera.hapi.node.consensus.SimpleFeesSchedule;
-import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -134,7 +131,7 @@ public final class BaseFeeRegistry {
                 || api.equals("ConsensusSubmitMessageWithCustomFee")
                 || api.equals("ConsensusDeleteTopic")
         ) {
-            return SIMPLE_FEES_SCHEDULE.getBaseFee(api);
+            return SIMPLE_FEES_SCHEDULE.getNetworkBaseFee(api);
         }
         return BASE_FEES.getOrDefault(api, 0.0);
     }

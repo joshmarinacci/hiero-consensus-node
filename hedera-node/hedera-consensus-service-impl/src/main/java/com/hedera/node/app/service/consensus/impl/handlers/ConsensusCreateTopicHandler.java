@@ -231,7 +231,7 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             final var schedule = BaseFeeRegistry.getFeeSchedule();
             EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
-            entity.setNumFreeSignatures(schedule.getBaseExtrasIncluded(
+            entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(
                     FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_CREATE_TOPIC),
                     AbstractSimpleFeesSchedule.SignatureVerifications));
             Map<String, Object> params = new HashMap<>();

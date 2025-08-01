@@ -46,7 +46,7 @@ public class HCSSubmit extends AbstractFeeModel {
         }
         int numBytes = (int) values.get("numBytes");
         var schedule = BaseFeeRegistry.getFeeSchedule();
-        var free = schedule.getBaseExtrasIncluded("ConsensusSubmitMessage", AbstractSimpleFeesSchedule.Bytes);
+        var free = schedule.getNetworkBaseExtrasIncluded("ConsensusSubmitMessage", AbstractSimpleFeesSchedule.Bytes);
         int excessBytes = numBytes - free;
         if (excessBytes > 0) {
             fee.addDetail("Additional message size",  excessBytes, excessBytes * BaseFeeRegistry.getBaseFee("PerHCSByte"));

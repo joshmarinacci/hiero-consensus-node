@@ -206,7 +206,7 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
             final var api_name = FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_UPDATE_TOPIC);
             final var service_name = "Crypto";
             EntityCreate entity = new EntityCreate(service_name,api_name, "Update a topic", 2, false);
-            entity.setNumFreeSignatures(schedule.getBaseExtrasIncluded(api_name, AbstractSimpleFeesSchedule.SignatureVerifications));
+            entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(api_name, AbstractSimpleFeesSchedule.SignatureVerifications));
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);
