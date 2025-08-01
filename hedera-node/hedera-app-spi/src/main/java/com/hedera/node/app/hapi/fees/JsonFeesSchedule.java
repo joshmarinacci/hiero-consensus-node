@@ -78,6 +78,17 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     }
 
     @Override
+    public int getNodeBaseExtrasIncluded(String api, String name) {
+        for (var extra : this.serviceMethods.get(api).network().extras()) {
+            System.out.println("JSON: getNetworkBaseExtrasIncluded  " + extra.name());
+            if (extra.name().equals(name)) {
+                return extra.includedCount();
+            }
+        }
+        return 0;
+    }
+
+    @Override
     public double getExtrasFee(String name) {
         System.out.println("JSON: getExtrasFee " + name);
         return Double.parseDouble(this.extras.get(name).fee());

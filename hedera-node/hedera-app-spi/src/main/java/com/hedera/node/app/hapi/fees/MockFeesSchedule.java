@@ -1,50 +1,103 @@
 package com.hedera.node.app.hapi.fees;
 
 
-import com.hedera.hapi.node.consensus.FeeComponent;
 import com.hedera.hapi.node.consensus.ServiceMethod;
 
 import java.util.HashMap;
+class FeeComponent {
+    private double base;
+    private HashMap<String,Integer> extras;
+    FeeComponent() {
+        this.base = 0.0;
+        this.extras = new HashMap<String, Integer>();
+    }
+    public double getBase() {
+        return this.base;
+    }
+    public void setBase(double base) {
+        this.base = base;
+    }
 
+    public void setExtraIncluded(String name, int count) {
+        this.extras.put(name, count);
+    }
+
+    public int getExtraIncluded(String name) {
+        return this.extras.get(name);
+    }
+}
+class MockServiceMethod {
+    private FeeComponent network;
+    private FeeComponent node;
+    MockServiceMethod() {
+        this.network = new FeeComponent();
+        this.node = new FeeComponent();
+    }
+
+    FeeComponent network() {
+        return this.network;
+    }
+    FeeComponent node() {
+        return this.node;
+    }
+}
 public class MockFeesSchedule implements AbstractFeesSchedule {
-    public final HashMap<String, ServiceMethod> methods;
+    final HashMap<String, MockServiceMethod> methods;
+    final HashMap<String, Double> extras;
     public MockFeesSchedule() {
         methods = new HashMap<>();
+        extras = new HashMap<>();
     }
     @Override
     public double getExtrasFee(String name) {
-        return 0;
+        return this.extras.get(name);
     }
 
     @Override
     public double getNetworkBaseFee(String api) {
-        return Double.parseDouble(this.methods.get(api).network().base());
+        return this.methods.get(api).network().getBase();
     }
 
     @Override
     public double getNodeBaseFee(String api) {
-        return Double.parseDouble(this.methods.get(api).node().base());
+        return this.methods.get(api).node().getBase();
+    }
+
+    MockServiceMethod getMethod(String api) {
+        if (!this.methods.containsKey(api)) {
+            this.methods.put(api, new MockServiceMethod());
+        }
+        return this.methods.get(api);
+    }
+    @Override
+    public int getNetworkBaseExtrasIncluded(String method, String name) {
+        System.out.println("getNetworkBaseExtrasIncluded method " + method + " " + name);
+        return this.getMethod(method).network().getExtraIncluded(name);
     }
 
     @Override
-    public int getNetworkBaseExtrasIncluded(String api, String name) {
-        return 0;
+    public int getNodeBaseExtrasIncluded(String method, String extra) {
+        return this.getMethod(method).node().getExtraIncluded(extra);
     }
 
-    public void setNetworkBaseFee(String name, double v) {
-        if(!this.methods.containsKey(name)) this.methods.put(name, ServiceMethod.DEFAULT);
-        var network = this.methods.get(name).networkOrElse(FeeComponent.DEFAULT);
-        var new_network = network.copyBuilder().base(""+v).build();
-        System.out.println(new_network);
-        var new_method = this.methods.get(name).copyBuilder().network(new_network).build();
-        System.out.println(new_method);
-        this.methods.put(name, new_method);
+    public void setNetworkBaseFee(String method, double v) {
+        this.getMethod(method).network().setBase(v);
     }
-    public void setNodeBaseFee(String name, double v) {
-        if(!this.methods.containsKey(name)) this.methods.put(name, ServiceMethod.DEFAULT);
-        var node = this.methods.get(name).nodeOrElse(FeeComponent.DEFAULT);
-        var new_node = node.copyBuilder().base(""+v).build();
-        var new_method = this.methods.get(name).copyBuilder().node(new_node).build();
-        this.methods.put(name, new_method);
+    public void setNodeBaseFee(String method, double v) {
+        this.getMethod(method).node().setBase(v);
+    }
+
+    public void setNetworkExtrasIncluded(String method, String signatureVerifications, int count) {
+        if(!this.methods.containsKey(method)) this.methods.put(method, new MockServiceMethod());
+        this.methods.get(method).network().setExtraIncluded(signatureVerifications,count);
+    }
+
+    public void setNodeExtrasIncluded(String method, String signatureVerifications, int count) {
+        if(!this.methods.containsKey(method)) this.methods.put(method, new MockServiceMethod());
+        this.methods.get(method).node().setExtraIncluded(signatureVerifications,count);
+    }
+
+    public void setExtrasFee(String signatureVerifications, double fee) {
+        this.extras.put(signatureVerifications,fee);
     }
 }

@@ -10,4 +10,5 @@ public interface AbstractFeesSchedule {
     double getNodeBaseFee(String api);
 
     int getNetworkBaseExtrasIncluded(String api, String name);
+    int getNodeBaseExtrasIncluded(String api, String name);
 }

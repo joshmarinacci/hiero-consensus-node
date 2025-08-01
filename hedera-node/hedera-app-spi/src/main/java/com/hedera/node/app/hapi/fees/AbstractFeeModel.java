@@ -19,8 +19,12 @@ public abstract class AbstractFeeModel {
             new ParameterDefinition("numSignatures", "number", null,MIN_SIGNATURES, MIN_SIGNATURES, MAX_SIGNATURES, "Executed Signatures Verifications count")
     );
 
-    // Returns the description of the API
+    // Returns the service name of the API
     public abstract String getService();
+
+    public String getMethodName() {
+        throw  new UnsupportedOperationException("Not supported yet.");
+    }
 
     // Returns the description of the API
     public abstract String getDescription();
@@ -90,14 +94,22 @@ public abstract class AbstractFeeModel {
         FeeResult result = computeApiSpecificFee2(values, feesSchedule);
 
         // Compute the fee for parameters that are common across all APIs
-//        if (values.containsKey("numSignatures")) {
-//            final int numSignatures = (int) values.get("numSignatures");
-//            if (numSignatures > numFreeSignatures) {
-//                final int additionalSignatures = numSignatures - numFreeSignatures;
-//                final double fee = additionalSignatures * BaseFeeRegistry.getBaseFee("PerSignature");
-//                result.addDetail("Additional signature verifications", additionalSignatures, fee);
-//            }
-//        }
+        if (values.containsKey("numSignatures")) {
+            final double per_sig_cost = feesSchedule.getExtrasFee("SignatureVerifications");
+            final int numSignatures = (int) values.get("numSignatures");
+            final int network_included = feesSchedule.getNetworkBaseExtrasIncluded(this.getMethodName(),"SignatureVerifications");
+            final int node_included = feesSchedule.getNodeBaseExtrasIncluded(this.getMethodName(),"SignatureVerifications");
+            if (numSignatures > network_included) {
+                final int additionalSignatures = numSignatures - network_included;
+                final double fee = additionalSignatures * per_sig_cost;
+                result.addDetail("Additional network signature verifications", additionalSignatures, fee);
+            }
+            if (numSignatures > node_included) {
+                final int additionalSignatures = numSignatures - node_included;
+                final double fee = additionalSignatures * per_sig_cost;
+                result.addDetail("Additional node signature verifications", additionalSignatures, fee);
+            }
+        }
 
         //TODO: I'm pretty sure these calculations are wrong
         final var nodeTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.node), exchangeRate);

@@ -58,14 +58,12 @@ public class FeeScheduleTest {
 
     @Test
     //test that we can create a fees model from the service name
-    void createModelFromNames() {
-        var service = "Consensus";
-        var method = "ConsensusCreateTopic";
+    void createModelFromStrings() {
         var schedule = new MockFeesSchedule();
         schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
         schedule.setNodeBaseFee("ConsensusCreateTopic",9.9);
 
-        var model = createModel(service,method);
+        var model = createModel("Consensus","ConsensusCreateTopic");
         assertInstanceOf(EntityCreate.class, model);
 
         Map<String, Object> params = new HashMap<>();
@@ -75,5 +73,38 @@ public class FeeScheduleTest {
         model.checkParameters(params);
         var fees = model.computeFee2(params,new MockExchangeRate().activeRate(),schedule);
         assertTrue(Math.abs(fees.usd()-(8.8+9.9))<0.1);
+    }
+
+    @Test
+    // account for differences in included signature verifications
+    void createModelWithVaryingIncludedSignatures() {
+        var schedule = new MockFeesSchedule();
+        schedule.setExtrasFee("SignatureVerifications",1);
+        schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
+        schedule.setNetworkExtrasIncluded("ConsensusCreateTopic","SignatureVerifications",1);
+        schedule.setNodeBaseFee("ConsensusCreateTopic",9.9);
+        schedule.setNodeExtrasIncluded("ConsensusCreateTopic","SignatureVerifications",2);
+
+        /*
+         fee should be
+         network base: 8.8
+            node base: 9.9
+            sigs: 8 sigs * 1 per sig
+            network has 1 sigs included, so fee: 1 * 7
+            node    has 2 sigs included, so fee: 1 * 6
+         */
+        var correct = 8.8 + 9.9 + 1*7.0 + 1*6.0;
+        var exchangeRate = new MockExchangeRate().activeRate(); // 1/12
+
+        var model = createModel("Consensus","ConsensusCreateTopic");
+        assertInstanceOf(EntityCreate.class, model);
+        Map<String, Object> params = new HashMap<>();
+        params.put("numSignatures", 8);
+        params.put("numKeys", 0);
+        params.put("hasCustomFee", YesOrNo.NO);
+
+        var fees = model.computeFee2(params, exchangeRate, schedule);
+        assertTrue(Math.abs(fees.usd()-correct)<0.1);
+
     }
 }
