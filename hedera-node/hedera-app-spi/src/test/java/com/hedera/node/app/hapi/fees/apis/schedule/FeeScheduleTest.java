@@ -6,6 +6,7 @@ import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
+import com.hedera.node.app.hapi.fees.apis.consensus.HCSSubmit;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.hedera.node.app.hapi.fees.apis.common.FeesHelper.createModel;
+import static com.hedera.node.app.hapi.fees.apis.common.FeesHelper.genericComputeFee;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FeeScheduleTest {
@@ -105,6 +107,32 @@ public class FeeScheduleTest {
 
         var fees = model.computeFee2(params, exchangeRate, schedule);
         assertTrue(Math.abs(fees.usd()-correct)<0.1);
+    }
+    @Test
+    void ensureCorrectModelsAreCreated() {
+        assertInstanceOf(EntityCreate.class, createModel("Consensus","ConsensusCreateTopic"));
+        assertInstanceOf(HCSSubmit.class, createModel("Consensus","ConsensusSubmitMessage"));
+        assertInstanceOf(HCSSubmit.class, createModel("Consensus","ConsensusSubmitMessageWithCustomFee"));
+    }
 
+    @Test
+    void testGenericFeeCompute() {
+        var schedule = new MockFeesSchedule();
+        schedule.setExtrasFee("SignatureVerifications",1);
+        schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
+        schedule.setNetworkExtrasIncluded("ConsensusCreateTopic","SignatureVerifications",1);
+        schedule.setNodeBaseFee("ConsensusCreateTopic",9.9);
+        schedule.setNodeExtrasIncluded("ConsensusCreateTopic","SignatureVerifications",2);
+        var correct = 8.8 + 9.9 + 1*7.0 + 1*6.0;
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("numSignatures", 8);
+        params.put("numKeys", 0);
+        params.put("hasCustomFee", YesOrNo.NO);
+
+        var rate = new MockExchangeRate().activeRate();
+
+        var fees = genericComputeFee("Consensus","ConsensusCreateTopic",params,rate,schedule);
+        assertTrue(Math.abs(fees.usd()-correct)<0.1);
     }
 }

@@ -1,11 +1,22 @@
 package com.hedera.node.app.hapi.fees.apis.common;
 
 import com.hedera.hapi.node.base.HederaFunctionality;
+import com.hedera.hapi.node.transaction.ExchangeRate;
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.fees.apis.consensus.HCSSubmit;
+import com.hedera.node.app.spi.fees.Fees;
+
+import java.util.Map;
 
 public class FeesHelper {
     public static AbstractFeeModel createModel(String service, String method) {
-        return new EntityCreate(service,method, "description",0,false);
+        return switch (method) {
+            case "ConsensusCreateTopic" -> new EntityCreate(service,method, "description",0,false);
+            case "ConsensusSubmitMessage" -> new HCSSubmit();
+            case "ConsensusSubmitMessageWithCustomFee" -> new HCSSubmit();
+            default -> throw new IllegalStateException("Unexpected value: " + method);
+        };
     }
     public static EntityCreate makeCreateEntity(HederaFunctionality api, String description, int numFreeKeys, boolean customFeeCapable) {
         return new EntityCreate(lookupServiceName(api), lookupAPIName(api), description, numFreeKeys, customFeeCapable);
@@ -31,6 +42,9 @@ public class FeesHelper {
             case CRYPTO_UPDATE -> "CryptoUpdate";
             default -> throw new IllegalArgumentException("Unsupported Hedera API: " + api);
         };
+    }
+    public static Fees genericComputeFee(String service, String method, Map<String,Object> params, ExchangeRate rate, AbstractFeesSchedule feeSchedule) {
+        return createModel(service, method).computeFee2(params,rate,feeSchedule);
     }
 }
 
