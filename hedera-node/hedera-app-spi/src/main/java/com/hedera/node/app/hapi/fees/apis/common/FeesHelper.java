@@ -12,14 +12,14 @@ import java.util.Map;
 public class FeesHelper {
     public static AbstractFeeModel createModel(String service, String method) {
         return switch (method) {
-            case "ConsensusCreateTopic" -> new EntityCreate(service,method, "description",0,false);
+            case "ConsensusCreateTopic" -> new EntityCreate(service,method, "description",false);
             case "ConsensusSubmitMessage" -> new HCSSubmit();
             case "ConsensusSubmitMessageWithCustomFee" -> new HCSSubmit();
             default -> throw new IllegalStateException("Unexpected value: " + method);
         };
     }
-    public static EntityCreate makeCreateEntity(HederaFunctionality api, String description, int numFreeKeys, boolean customFeeCapable) {
-        return new EntityCreate(lookupServiceName(api), lookupAPIName(api), description, numFreeKeys, customFeeCapable);
+    public static EntityCreate makeCreateEntity(HederaFunctionality api, String description, boolean customFeeCapable) {
+        return new EntityCreate(lookupServiceName(api), lookupAPIName(api), description, customFeeCapable);
     }
 
     private static String lookupServiceName(HederaFunctionality api) {
@@ -44,7 +44,8 @@ public class FeesHelper {
         };
     }
     public static Fees genericComputeFee(String service, String method, Map<String,Object> params, ExchangeRate rate, AbstractFeesSchedule feeSchedule) {
-        return createModel(service, method).computeFee2(params,rate,feeSchedule);
+        throw new UnsupportedOperationException("Not supported yet.");
+//        return createModel(service, method).computeFee2(params,rate,feeSchedule);
     }
 }
 

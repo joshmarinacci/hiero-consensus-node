@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.fees.apis.consensus;
 
+import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.spi.fees.Fees;
@@ -23,7 +24,7 @@ class HCSSubmitTest {
 
         for (int numBytes = 10; numBytes < 1000; numBytes += 10) {
             params.put("numBytes", numBytes);
-            Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+            Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), new MockFeesSchedule());
 
             double overage = (numBytes <= HCS_FREE_BYTES)
                     ? 0.0001
@@ -43,7 +44,7 @@ class HCSSubmitTest {
 
         for (int numBytes = 10; numBytes < 1000; numBytes += 10) {
             params.put("numBytes", numBytes);
-            Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+            Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), new MockFeesSchedule());
 
 //            double overage = (numBytes <= 128) ? 0.0001 : (((0.0001 + (numBytes - 128) * 0.00001) * 100000000) / 100000000);
 

@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package proto;
+
+option java_package = "com.hederahashgraph.api.proto.java";
+// <<<pbj.java_package = "com.hedera.hapi.node.consensus">>> This comment is special code for setting PBJ Compiler java package
+option java_multiple_files = true;
+
+message SimpleFeeSchedule {
+  NodeFee node_fee = 1;
+  NetworkFee network_fee_ratio = 2;
+  UnreadableTransactionFee unreadable_transaction_fee = 3;
+  repeated ExtraFeeDefinition defined_extras = 4;
+  repeated Service service_fees = 5;
+}
+message ExtraFeeDefinition {
+  string name = 1;
+  // USD in thousandths of one cent
+  uint64 fee = 2;
+}
+message NodeFee {
+  // USD in thousandths of one cent
+  uint64 base_fee = 1;
+  repeated ExtraFeeReference extras = 2;
+}
+message NetworkFee {
+  uint32 multiplier = 1;
+}
+
+message Service {
+  string name = 1;
+  repeated ServiceFee transactions = 2;
+  repeated ServiceFee queries = 3;
+}
+
+message ServiceFee {
+  string name = 1;
+  // USD in thousandths of one cent
+  uint64 base_fee = 2;
+  repeated ExtraFeeReference extras = 3;
+}
+message ExtraFeeReference {
+  string name = 1;
+  uint32 includedCount = 2;
+}
+message UnreadableTransactionFee {
+  uint64 fee_value = 1;
+}
+

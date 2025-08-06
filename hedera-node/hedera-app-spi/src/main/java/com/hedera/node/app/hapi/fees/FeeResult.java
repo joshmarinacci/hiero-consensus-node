@@ -5,21 +5,21 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class FeeResult {
-    public double fee = 0.0;
-    public double node = 0.0;
-    public double network = 0.0;
+    public long service = 0;
+    public long node = 0;
+    public long network = 0;
     public Map<String, FeeDetail> details = new LinkedHashMap<>();
 
-    public void addDetail(String label, int value, double cost) {
+    public void addDetail(String label, long value, long cost) {
         details.put(label, new FeeDetail(value, cost));
-        fee = Math.round((fee + cost) * 1_000_000.0) / 1_000_000.0;
+        service += cost;
     }
 
     public static class FeeDetail {
-        public int value;
-        public double fee;
+        public long value;
+        public long fee;
 
-        public FeeDetail(int value, double fee) {
+        public FeeDetail(long value, long fee) {
             this.value = value;
             this.fee = fee;
         }
@@ -32,7 +32,7 @@ public class FeeResult {
     @Override
     public String toString() {
         return "FeeResult{" +
-                "fee=" + String.format("%.6f", fee) +
+                "fee=" + service +
                 ", details=" + details +
                 '}';
     }

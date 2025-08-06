@@ -1,0 +1,26 @@
+{
+  "nodeFee": {
+    "baseFee": 1,
+    "extras": [
+      {
+        "name": "Signatures", "includedCount": 1
+      }
+    ]
+  },
+  "networkFeeRatio": {
+    "multiplier": 2
+  },
+  "unreadableTransactionFee": {
+    "feeValue": 100
+  },
+
+  "definedExtras": [
+    { "name":  "Signatures", "fee": 88 },
+    { "name":  "Bytes", "fee":  8},
+    { "name":  "Keys", "fee":  1},
+    { "name":  "TokenTypes", "fee":  3}
+  ],
+  "serviceFees": [
+
+  ]
+}

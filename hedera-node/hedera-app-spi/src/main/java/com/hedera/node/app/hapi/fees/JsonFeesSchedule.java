@@ -1,43 +1,50 @@
 package com.hedera.node.app.hapi.fees;
 
-import com.hedera.hapi.node.consensus.FeeExtra;
+import com.hedera.hapi.node.consensus.ExtraFeeDefinition;
 import com.hedera.hapi.node.consensus.Service;
-import com.hedera.hapi.node.consensus.ServiceMethod;
-import com.hedera.hapi.node.consensus.SimpleFeesSchedule;
+import com.hedera.hapi.node.consensus.ServiceFee;
+import com.hedera.hapi.node.consensus.SimpleFeeSchedule;
 import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
 
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
 public class JsonFeesSchedule implements AbstractFeesSchedule {
-    public final SimpleFeesSchedule schedule;
+    public final SimpleFeeSchedule schedule;
     private final HashMap<String, Service> services;
-    private final HashMap<String, ServiceMethod> serviceMethods;
-    public final HashMap<String, FeeExtra> extras;
+    private final HashMap<String, ServiceFee> serviceMethods;
+    public final HashMap<String, ExtraFeeDefinition> extras;
 
-    private JsonFeesSchedule(SimpleFeesSchedule buf) {
+    public static JsonFeesSchedule fromJson() {
+        try (final var fin = BaseFeeRegistry.class.getClassLoader().getResourceAsStream("simple-fee-schedule.json")) {
+            final var buf = SimpleFeeSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
+            System.out.println("parsed simple fees schedule: " + buf);
+            return new JsonFeesSchedule(buf);
+        } catch (Exception e) {
+            System.out.println("exception loading fees schedule " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    private JsonFeesSchedule(SimpleFeeSchedule buf) {
         this.schedule = buf;
         this.extras = new HashMap<>();
-        for(var extra: buf.extras()) {
+        for(var extra: buf.definedExtras()) {
             this.extras.put(extra.name(), extra);
         }
         this.services = new HashMap<>();
         this.serviceMethods = new HashMap<>();
-        for (var service : buf.services()) {
+        for (var service : buf.serviceFees()) {
             this.services.put(service.name(), service);
             System.out.println("service " + service.name());
             for (var txn : service.transactions()) {
                 this.serviceMethods.put(txn.name(),txn);
                 System.out.println("transaction " + txn.name());
                 System.out.println("txn " + txn);
-                if(!txn.hasNetwork()) {
-                    System.err.println("txn has no network");
-                }
-                if(!txn.hasNode()) {
-                    System.err.println("txn has no network");
-                }
             }
             for (var txn : service.queries()) {
                 this.serviceMethods.put(txn.name(),txn);
@@ -46,30 +53,30 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
         }
     }
 
-    public static JsonFeesSchedule fromJson() {
-        try (final var fin = BaseFeeRegistry.class.getClassLoader().getResourceAsStream("simple-fees.json")) {
-            final var buf = SimpleFeesSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
-//            System.out.println("parsed simple fees schedule: " + buf);
-            return new JsonFeesSchedule(buf);
-        } catch (Exception e) {
-            System.out.println("exception loading fees schedule " + e.getMessage());
-            throw new RuntimeException(e);
-        }
-    }
 
-    public double getNodeBaseFee(String name) {
-        System.out.println("JSON: getBaseFee " + name);
-        return Double.parseDouble(this.serviceMethods.get(name).node().base());
-    }
-    public double getNetworkBaseFee(String name) {
-        System.out.println("JSON: getBaseFee " + name);
-        return Double.parseDouble(this.serviceMethods.get(name).network().base());
+    @Override
+    public List<String> getDefinedExtraNames() {
+        return this.schedule.definedExtras().stream().map(e -> e.name()).collect(Collectors.toList());
     }
 
     @Override
-    public int getNetworkBaseExtrasIncluded(String api, String name) {
-        for (var extra : this.serviceMethods.get(api).network().extras()) {
-            System.out.println("JSON: getNetworkBaseExtrasIncluded  " + extra.name());
+    public long getExtrasFee(String name) {
+        return 0;
+    }
+
+    @Override
+    public long getNodeBaseFee() {
+        return this.schedule.nodeFee().baseFee();
+    }
+
+    @Override
+    public List<String> getNodeExtraNames() {
+        return this.schedule.nodeFee().extras().stream().map(e -> e.name()).collect(Collectors.toList());
+    }
+
+    @Override
+    public long getNodeExtraIncludedCount(String name) {
+        for(var extra : this.schedule.nodeFee().extras()) {
             if (extra.name().equals(name)) {
                 return extra.includedCount();
             }
@@ -78,20 +85,23 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     }
 
     @Override
-    public int getNodeBaseExtrasIncluded(String api, String name) {
-        for (var extra : this.serviceMethods.get(api).network().extras()) {
-            System.out.println("JSON: getNetworkBaseExtrasIncluded  " + extra.name());
-            if (extra.name().equals(name)) {
-                return extra.includedCount();
-            }
-        }
+    public long getNetworkMultiplier() {
         return 0;
     }
 
     @Override
-    public double getExtrasFee(String name) {
-        System.out.println("JSON: getExtrasFee " + name);
-        return Double.parseDouble(this.extras.get(name).fee());
+    public long getServiceBaseFee(String method) {
+        return 0;
     }
 
+    @Override
+    public List<String> getServiceExtras(String method) {
+        return List.of();
+    }
+
+
+    @Override
+    public long getServiceExtraIncludedCount(String method, String name) {
+        return 0;
+    }
 }

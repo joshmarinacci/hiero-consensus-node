@@ -1,14 +1,29 @@
 package com.hedera.node.app.hapi.fees;
 
+import java.util.List;
+
 public interface AbstractFeesSchedule {
-    String SignatureVerifications = "SignatureVerifications";
-    String Bytes = "Bytes";
 
-    double getExtrasFee(String name);
+    enum Extras {
+        Signatures,
+        Bytes,
+        Keys,
+        TokenTypes,
+    }
+    String SIGNATURES = "Signatures";
 
-    double getNetworkBaseFee(String api);
-    double getNodeBaseFee(String api);
+    List<String> getDefinedExtraNames();
+    long getExtrasFee(String name);
 
-    int getNetworkBaseExtrasIncluded(String api, String name);
-    int getNodeBaseExtrasIncluded(String api, String name);
+    long getNodeBaseFee();
+    List<String> getNodeExtraNames();
+    long getNodeExtraIncludedCount(String name);
+
+    long getNetworkMultiplier();
+
+    long getServiceBaseFee(String method);
+    List<String> getServiceExtras(String method);
+    long getServiceExtraIncludedCount(String method, String name);
+
+
 }

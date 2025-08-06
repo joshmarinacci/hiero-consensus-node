@@ -1,103 +1,117 @@
 package com.hedera.node.app.hapi.fees;
 
 
-import com.hedera.hapi.node.consensus.ServiceMethod;
 
 import java.util.HashMap;
-class FeeComponent {
-    private double base;
-    private HashMap<String,Integer> extras;
-    FeeComponent() {
-        this.base = 0.0;
-        this.extras = new HashMap<String, Integer>();
-    }
-    public double getBase() {
-        return this.base;
-    }
-    public void setBase(double base) {
-        this.base = base;
-    }
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-    public void setExtraIncluded(String name, int count) {
-        this.extras.put(name, count);
-    }
-
-    public int getExtraIncluded(String name) {
-        return this.extras.get(name);
-    }
-}
 class MockServiceMethod {
-    private FeeComponent network;
-    private FeeComponent node;
-    MockServiceMethod() {
-        this.network = new FeeComponent();
-        this.node = new FeeComponent();
+    long base;
+    Map<String, Long> extras;
+
+    MockServiceMethod(long base) {
+        this.base = base;
+        this.extras = new HashMap<>();
     }
 
-    FeeComponent network() {
-        return this.network;
+    public void addExtra(String extra, long included) {
+        this.extras.put(extra,included);
     }
-    FeeComponent node() {
-        return this.node;
+
+    public long getBaseFee() {
+        return this.base;
     }
 }
 public class MockFeesSchedule implements AbstractFeesSchedule {
     final HashMap<String, MockServiceMethod> methods;
-    final HashMap<String, Double> extras;
+    final HashMap<String, Long> extras;
+    final HashMap<String, Long> nodeExtras;
+    private long node_base;
+    private long networkMultiplier;
+
     public MockFeesSchedule() {
         methods = new HashMap<>();
         extras = new HashMap<>();
+        nodeExtras = new HashMap<>();
+        node_base = 0L;
     }
+
     @Override
-    public double getExtrasFee(String name) {
+    public List<String> getDefinedExtraNames() {
+        return this.extras.keySet().stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public long getExtrasFee(String name) {
+        if(!this.extras.containsKey(name)) {
+            throw new Error(" Missing extra parameter '" + name + "'.");
+        }
         return this.extras.get(name);
     }
-
-    @Override
-    public double getNetworkBaseFee(String api) {
-        return this.methods.get(api).network().getBase();
+    public void setExtrasFee(String name, long value) {
+        this.extras.put(name,value);
     }
 
     @Override
-    public double getNodeBaseFee(String api) {
-        return this.methods.get(api).node().getBase();
+    public long getNodeBaseFee() {
+        return this.node_base;
     }
-
-    MockServiceMethod getMethod(String api) {
-        if (!this.methods.containsKey(api)) {
-            this.methods.put(api, new MockServiceMethod());
-        }
-        return this.methods.get(api);
-    }
-    @Override
-    public int getNetworkBaseExtrasIncluded(String method, String name) {
-        System.out.println("getNetworkBaseExtrasIncluded method " + method + " " + name);
-        return this.getMethod(method).network().getExtraIncluded(name);
+    public void setNodeBaseFee(long value) {
+        this.node_base = value;
     }
 
     @Override
-    public int getNodeBaseExtrasIncluded(String method, String extra) {
-        return this.getMethod(method).node().getExtraIncluded(extra);
+    public List<String> getNodeExtraNames() {
+        return nodeExtras.keySet().stream().collect(Collectors.toList());
     }
 
-    public void setNetworkBaseFee(String method, double v) {
-        this.getMethod(method).network().setBase(v);
+    @Override
+    public long getNodeExtraIncludedCount(String name) {
+        return nodeExtras.get(name);
     }
-    public void setNodeBaseFee(String method, double v) {
-        this.getMethod(method).node().setBase(v);
-    }
-
-    public void setNetworkExtrasIncluded(String method, String signatureVerifications, int count) {
-        if(!this.methods.containsKey(method)) this.methods.put(method, new MockServiceMethod());
-        this.methods.get(method).network().setExtraIncluded(signatureVerifications,count);
+    public void setNodeExtraIncludedCount(String signatures, long value) {
+        this.nodeExtras.put(signatures,value);
     }
 
-    public void setNodeExtrasIncluded(String method, String signatureVerifications, int count) {
-        if(!this.methods.containsKey(method)) this.methods.put(method, new MockServiceMethod());
-        this.methods.get(method).node().setExtraIncluded(signatureVerifications,count);
+    @Override
+    public long getNetworkMultiplier() {
+        return this.networkMultiplier;
+    }
+    public void setNetworkMultiplier(long multiplier) {
+        this.networkMultiplier = multiplier;
     }
 
-    public void setExtrasFee(String signatureVerifications, double fee) {
-        this.extras.put(signatureVerifications,fee);
+    @Override
+    public long getServiceBaseFee(String method) {
+        if(!methods.containsKey(method)) throw new Error("ServiceBaseFee for " + method + " not found");
+        return this.methods.get(method).getBaseFee();
     }
+    public void setServiceBaseFee(String method, long value) {
+        System.out.println("inserting " + method + " " + value);
+        if(!methods.containsKey(method)) this.methods.put(method, new MockServiceMethod(0));
+        this.methods.get(method).base = value;
+    }
+
+    @Override
+    public List<String> getServiceExtras(String method) {
+        if(!methods.containsKey(method)) throw new Error("ServiceBaseFee for " + method + " not found");
+        return this.methods.get(method).extras.keySet().stream().collect(Collectors.toList());
+    }
+
+    @Override
+    public long getServiceExtraIncludedCount(String method, String name) {
+        if(!methods.containsKey(method)) throw new Error("ServiceBaseFee for " + method + " not found");
+        if(!methods.get(method).extras.containsKey(name)) throw new Error("ServiceExtraIncludedCount for " + method + " " + name + " not found");
+        return this.methods.get(method).extras.get(name);
+    }
+    public void setServiceExtraIncludedCount(String method, String signatures, long value) {
+        if(!methods.containsKey(method)) this.methods.put(method, new MockServiceMethod(0));
+        this.methods.get(method).extras.put(signatures,value);
+    }
+    public void setServiceExtraIncludedCount(String method, Extras extra, long value) {
+        this.setServiceExtraIncludedCount(method, extra.name(), value);
+    }
+
 }

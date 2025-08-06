@@ -2,6 +2,7 @@ package com.hedera.node.app.hapi.fees.apis.consensus;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
 import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
@@ -16,7 +17,7 @@ public class HCSSubmit extends AbstractFeeModel {
 
     private final List<ParameterDefinition> params = List.of(
             new ParameterDefinition("hasCustomFee", "list", new String[] { "Yes", "No" }, "No", 0, 0, "Does this topic have custom fee"),
-            new ParameterDefinition("numBytes", "number", null, HCS_FREE_BYTES, HCS_MIN_BYTES, HCS_MAX_BYTES, "Size of the message (bytes)")
+            new ParameterDefinition(Extras.Bytes.toString(), "number", null, null, HCS_MIN_BYTES, HCS_MAX_BYTES, "Size of the message (bytes)")
     );
 
     @Override
@@ -35,21 +36,26 @@ public class HCSSubmit extends AbstractFeeModel {
     }
 
     @Override
-    protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
+    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
         YesOrNo hasCustomFee = (YesOrNo) values.get("hasCustomFee");
-        if (hasCustomFee == YesOrNo.NO) {
-            fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee("ConsensusSubmitMessage"));
-        } else {
-            fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee("ConsensusSubmitMessageWithCustomFee"));
+        if (!values.containsKey("hasCustomFee")) {
+            throw new Error(" Missing hasCustomFee parameter.");
         }
-        int numBytes = (int) values.get("numBytes");
-        var schedule = BaseFeeRegistry.getFeeSchedule();
-        var free = schedule.getNetworkBaseExtrasIncluded("ConsensusSubmitMessage", AbstractFeesSchedule.Bytes);
-        int excessBytes = numBytes - free;
+        if (hasCustomFee == YesOrNo.NO) {
+            fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee("ConsensusSubmitMessage"));
+        } else {
+            fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee("ConsensusSubmitMessageWithCustomFee"));
+        }
+        if(!values.containsKey(Extras.Bytes.toString())) {
+            throw new Error("Missing Bytes parameter.");
+        }
+        long numBytes = (long) values.get(Extras.Bytes.toString());
+        var free = feesSchedule.getServiceExtraIncludedCount("ConsensusSubmitMessage", Extras.Bytes.toString());
+        var excessBytes = numBytes - free;
         if (excessBytes > 0) {
-            fee.addDetail("Additional message size",  excessBytes, excessBytes * BaseFeeRegistry.getBaseFee("PerHCSByte"));
+            fee.addDetail("Additional message size",  excessBytes, excessBytes * feesSchedule.getExtrasFee(Extras.Bytes.toString()));
         }
         return fee;
     }

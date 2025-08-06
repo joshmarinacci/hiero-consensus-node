@@ -1,8 +1,10 @@
 package com.hedera.node.app.hapi.fees.apis.common;
 
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.spi.fees.Fees;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -12,107 +14,111 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EntityCreateTest {
 
-    @Test
-    void testEntityCreateDummyService() {
-        EntityCreate entity = new EntityCreate("dummyService", "dummyAPI", "dummy description", 5, false);
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 7);
+    static MockFeesSchedule schedule;
 
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(2 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Entity create");
+    @BeforeAll
+    static void setup() {
+        schedule = new MockFeesSchedule();
+        schedule.setExtrasFee(Extras.Keys.toString(),1L);
+
+        schedule.setServiceBaseFee("CryptoCreate",22L);
+        schedule.setServiceExtraIncludedCount("CryptoCreate",Extras.Keys,2L);
+
+        schedule.setServiceBaseFee("TokenCreate",33L);
+        schedule.setServiceExtraIncludedCount("TokenCreate",Extras.Keys,7L);
+
+        schedule.setServiceBaseFee("TokenCreateWithCustomFee",38L);
+        schedule.setServiceExtraIncludedCount("TokenCreateWithCustomFee",Extras.Keys,7L);
+
+        schedule.setServiceBaseFee("ConsensusCreateTopic",15L);
+        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic",Extras.Keys,1L);
+
+        schedule.setServiceBaseFee("ContractCreate",15L);
+        schedule.setServiceExtraIncludedCount("ContractCreate",Extras.Keys,1L);
+
+        schedule.setServiceBaseFee("ScheduleCreate",15L);
+        schedule.setServiceExtraIncludedCount("ScheduleCreate",Extras.Keys,1L);
     }
-
-    @Test
-    void testEntityCreateDummyServiceWithMultipleSignatures() {
-        EntityCreate entity = new EntityCreate("dummyService", "dummyAPI", "dummy description", 5, false);
-        Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 10);
-        params.put("numKeys", 5);
-
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(4 * BaseFeeRegistry.getBaseFee("PerSignature"), fee.usd(), "Entity Create - multiple signatures");
-    }
-
     @Test
     void testEntityCreateCryptoService() {
-        EntityCreate entity = new EntityCreate("Crypto", "CryptoCreate", "Create an account", 2, false);
+        EntityCreate entity = new EntityCreate("Crypto", "CryptoCreate", "Create an account", false);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 10);
+        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extras.Keys.toString(), 10L);
 
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(BaseFeeRegistry.getBaseFee("CryptoCreate") + 8 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Crypto Create");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
+        assertEquals(schedule.getServiceBaseFee("CryptoCreate") + 8 * schedule.getExtrasFee("Keys"), fee.usd(), "Crypto Create");
     }
 
     @Test
     void testEntityCreateCustomFeeCapableTokenServiceNoCustomFee() {
-        EntityCreate entity = new EntityCreate("Token", "TokenCreate", "Create a token type", 7, true);
+        EntityCreate entity = new EntityCreate("Token", "TokenCreate", "Create a token type", true);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 10);
+        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extras.Keys.toString(), 10L);
         params.put("hasCustomFee", YesOrNo.NO);
 
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(BaseFeeRegistry.getBaseFee("TokenCreate") + 3 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Token Create - no custom fee");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
+        assertEquals(schedule.getServiceBaseFee("TokenCreate") + 3 * schedule.getExtrasFee("Keys"), fee.usd(), "Token Create - no custom fee");
     }
 
     @Test
     void testEntityCreateCustomFeeCapableTokenServiceWithCustomFee() {
-        EntityCreate entity = new EntityCreate("Token", "TokenCreate", "Create a token type", 7, true);
+        EntityCreate entity = new EntityCreate("Token", "TokenCreate", "Create a token type", true);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 10);
+        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extras.Keys.toString(), 10L);
         params.put("hasCustomFee", YesOrNo.YES);
 
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(BaseFeeRegistry.getBaseFee("TokenCreateWithCustomFee") + 3 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Token Create - has custom fee");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
+        assertEquals(schedule.getServiceBaseFee("TokenCreateWithCustomFee") + 3 * schedule.getExtrasFee("Keys"), fee.usd(), "Token Create - has custom fee");
     }
 
     @Test
     void testEntityCreateCustomFeeCapableTopicServiceNoCustomFee() {
-        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic", 1, true);
+        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic",  true);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 5);
+        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extras.Keys.toString(), 5L);
         params.put("hasCustomFee", YesOrNo.NO);
 
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(0 + BaseFeeRegistry.getBaseFee("ConsensusCreateTopic") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Topic Create - no custom fee");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
+        assertEquals(0 + schedule.getServiceBaseFee("ConsensusCreateTopic") + 4 * schedule.getExtrasFee("Keys"), fee.usd(), "Topic Create - no custom fee");
     }
 
     @Test
     void testEntityCreateCustomFeeCapableTopicServiceWithCustomFee() {
-        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic", 1, true);
+        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic",  true);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 5);
+        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extras.Keys.toString(), 5L);
         params.put("hasCustomFee", YesOrNo.YES);
 
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(0 + BaseFeeRegistry.getBaseFee("ConsensusCreateTopicWithCustomFee") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Topic Create - with custom fee");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
+        assertEquals(0 + schedule.getServiceBaseFee("ConsensusCreateTopicWithCustomFee") + 4 * schedule.getExtrasFee("Keys"), fee.usd(), "Topic Create - with custom fee");
     }
 
     @Test
     void testEntityCreateContractService() {
-        EntityCreate entity = new EntityCreate("Smart Contract", "ContractCreate", "Create a smart contract", 1, false);
+        EntityCreate entity = new EntityCreate("Smart Contract", "ContractCreate", "Create a smart contract", false);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 10);
+        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extras.Keys.toString(), 5L);
+        params.put("numSignatures", 10L);
 
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(0 + BaseFeeRegistry.getBaseFee("ContractCreate") + 9 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Contract Create");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
+        assertEquals(0 + schedule.getServiceBaseFee("ContractCreate") + 9 * schedule.getExtrasFee("Keys"), fee.usd(), "Contract Create");
     }
 
     @Test
     void testEntityCreateScheduleService() {
-        EntityCreate entity = new EntityCreate("Miscellaneous", "ScheduleCreate", "Create a schedule", 1, false);
+        EntityCreate entity = new EntityCreate("Miscellaneous", "ScheduleCreate", "Create a schedule", false);
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 5);
+        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extras.Keys.toString(), 5L);
 
-        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate());
-        assertEquals(0 + BaseFeeRegistry.getBaseFee("ScheduleCreate") + 4 * BaseFeeRegistry.getBaseFee("PerKey"), fee.usd(), "Contract Create");
+        Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
+        assertEquals(0 + schedule.getServiceBaseFee("ScheduleCreate") + 4 * schedule.getExtrasFee("Keys"), fee.usd(), "Contract Create");
     }
 
 

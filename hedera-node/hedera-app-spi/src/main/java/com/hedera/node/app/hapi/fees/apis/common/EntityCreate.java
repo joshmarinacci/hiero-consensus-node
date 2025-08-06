@@ -2,7 +2,6 @@ package com.hedera.node.app.hapi.fees.apis.common;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
 import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 
@@ -18,7 +17,6 @@ public class EntityCreate extends AbstractFeeModel {
     private final String service;
     private final String api;
     private final String description;
-    private final int numFreeKeys;
     private final boolean customFeeCapable;
 
     private final List<ParameterDefinition> params = List.of(
@@ -28,11 +26,10 @@ public class EntityCreate extends AbstractFeeModel {
             new ParameterDefinition("hasCustomFee", "list", new Object[] {YesOrNo.YES, YesOrNo.NO}, YesOrNo.NO, 0, 0, "Enable custom fee?")
     );
 
-    public EntityCreate(String service, String api, String description, int numFreeKeys, boolean customFeeCapable) {
+    public EntityCreate(String service, String api, String description, boolean customFeeCapable) {
         this.service = service;
         this.api = api;
         this.description = description;
-        this.numFreeKeys = numFreeKeys;
         this.customFeeCapable = customFeeCapable;
     }
 
@@ -58,41 +55,27 @@ public class EntityCreate extends AbstractFeeModel {
     }
 
     @Override
-    protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
-        super.setNumFreeSignatures(numFreeKeys + 1); // The user needs to sign each of the keys to verify that they have the corresponding private key
-
-        final var schedule = BaseFeeRegistry.getFeeSchedule();
-        FeeResult fee = new FeeResult();
+    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
+        FeeResult result = new FeeResult();
         if (customFeeCapable && values.get("hasCustomFee") == YesOrNo.YES) {
-            fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee(api + "WithCustomFee"));
+            result.addDetail("Base result", 1, feesSchedule.getServiceBaseFee(api + "WithCustomFee"));
         } else {
-            fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee(api));
+            result.addDetail("Base result", 1, feesSchedule.getServiceBaseFee(api));
         }
 
-        int numKeys = (int) values.get("numKeys");
-
-        if (numKeys > numFreeKeys) {
-            fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * BaseFeeRegistry.getBaseFee("PerKey"));
+        final List<String> extras = feesSchedule.getServiceExtras(api);
+        for(var extra : extras) {
+            final long node_bytes_fee = feesSchedule.getExtrasFee(extra);
+            final long node_bytes_included = feesSchedule.getServiceExtraIncludedCount(api,extra);
+            System.out.println("processing extra " + extra);
+            final long used = (long) values.get(extra);
+            if (used > node_bytes_included) {
+                final long additional_bytes = used - node_bytes_included;
+                final long more_fee = additional_bytes * node_bytes_fee;
+                result.addDetail("Node Bytes Overage", additional_bytes, more_fee);
+            }
         }
-        return fee;
-    }
-    protected FeeResult computeApiSpecificFee2(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
-        super.setNumFreeSignatures(numFreeKeys + 1); // The user needs to sign each of the keys to verify that they have the corresponding private key
-
-        FeeResult fee = new FeeResult();
-        if (customFeeCapable && values.get("hasCustomFee") == YesOrNo.YES) {
-            fee.addDetail("Base fee", 1, feesSchedule.getNetworkBaseFee(api + "WithCustomFee"));
-        } else {
-            fee.addDetail("Base Network fee", 1, feesSchedule.getNetworkBaseFee(api));
-            fee.addDetail("Base Node fee", 1, feesSchedule.getNodeBaseFee(api));
-        }
-
-        int numKeys = (int) values.get("numKeys");
-
-        if (numKeys > numFreeKeys) {
-            fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getExtrasFee("PerKey"));
-        }
-        return fee;
+        return result;
     }
 }
 

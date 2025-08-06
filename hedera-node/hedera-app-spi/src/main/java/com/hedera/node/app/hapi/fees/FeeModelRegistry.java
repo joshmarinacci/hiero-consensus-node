@@ -23,9 +23,9 @@ public class FeeModelRegistry {
 
     static {
         // Crypto
-        registry.put("CryptoCreate", new EntityCreate("Crypto", "CryptoCreate", "Create a new Account", FREE_KEYS_DEFAULT, false));
+        registry.put("CryptoCreate", new EntityCreate("Crypto", "CryptoCreate", "Create a new Account", false));
         registry.put("CryptoTransfer", new CryptoTransfer("Crypto", "CryptoTransfer"));
-        registry.put("CryptoUpdate", new EntityUpdate("Crypto", "CryptoUpdate", "Updates an existing account", 1));
+        registry.put("CryptoUpdate", new EntityUpdate("Crypto", "CryptoUpdate", "Updates an existing account"));
         registry.put("CryptoDelete", new NoParametersAPI("Crypto", "CryptoDelete", "Deletes an existing account"));
         registry.put("CryptoGetAccountRecords", new NoParametersAPI("Crypto", "CryptoGetAccountRecords", "Retrieves records for an account"));
         registry.put("CryptoGetAccountBalance", new NoParametersAPI("Crypto", "CryptoGetAccountBalance", "Retrieves an account’s balance"));
@@ -35,15 +35,15 @@ public class FeeModelRegistry {
         registry.put("CryptoDeleteAllowance", new CryptoAllowance("CryptoDeleteAllowance", "Deletes non-fungible approved allowances from an owner's account"));
 
         // HCS
-        registry.put("ConsensusCreateTopic", new EntityCreate("Consensus", "ConsensusCreateTopic", "Create a new topic", FREE_KEYS_DEFAULT, true));
-        registry.put("ConsensusUpdateTopic", new EntityUpdate("Consensus", "ConsensusUpdateTopic", "Update an existing topic", 1));
+        registry.put("ConsensusCreateTopic", new EntityCreate("Consensus", "ConsensusCreateTopic", "Create a new topic", true));
+        registry.put("ConsensusUpdateTopic", new EntityUpdate("Consensus", "ConsensusUpdateTopic", "Update an existing topic"));
         registry.put("ConsensusDeleteTopic", new NoParametersAPI("Consensus", "ConsensusDeleteTopic", "Delete an existing topic"));
         registry.put("ConsensusSubmitMessage", new HCSSubmit());
         registry.put("ConsensusGetTopicInfo", new NoParametersAPI("Consensus", "ConsensusGetTopicInfo", "Retrieve a topic’s metadata"));
 
         // Token
-        registry.put("TokenCreate", new EntityCreate("Token", "TokenCreate", "Create a new token-type", FREE_KEYS_TOKEN, true));
-        registry.put("TokenUpdate", new EntityUpdate("Token", "TokenUpdate", "Update an existing token-type", 7));
+        registry.put("TokenCreate", new EntityCreate("Token", "TokenCreate", "Create a new token-type", true));
+        registry.put("TokenUpdate", new EntityUpdate("Token", "TokenUpdate", "Update an existing token-type"));
         registry.put("TokenTransfer", new CryptoTransfer("Token", "TokenTransfer"));
         registry.put("TokenDelete", new NoParametersAPI("Token", "TokenDelete", "Delete an existing token"));
         registry.put("TokenMint", new TokenMint());
@@ -69,7 +69,7 @@ public class FeeModelRegistry {
 
         // Smart Contracts
         registry.put("ContractCreate", new ContractCreate("ContractCreate", "Create a new Smart Contract", true));
-        registry.put("ContractUpdate", new EntityUpdate("Smart Contract", "ContractUpdate", "Update an existing Smart Contract", 1));
+        registry.put("ContractUpdate", new EntityUpdate("Smart Contract", "ContractUpdate", "Update an existing Smart Contract"));
         registry.put("ContractDelete", new NoParametersAPI("Smart Contract", "ContractDelete", "Delete an existing smart contract"));
         registry.put("ContractCall", new ContractBasedOnGas("ContractCall", "Execute a smart contract call", false));
         registry.put("EthereumTransaction", new ContractBasedOnGas("EthereumTransaction", "Submits a wrapped Ethereum Transaction per HIP-410", false));
@@ -88,7 +88,7 @@ public class FeeModelRegistry {
 
 
         // Miscellaneous
-        registry.put("ScheduleCreate", new EntityCreate("Miscellaneous", "ScheduleCreate", "Create a new scheduled transaction", FREE_KEYS_DEFAULT, false));
+        registry.put("ScheduleCreate", new EntityCreate("Miscellaneous", "ScheduleCreate", "Create a new scheduled transaction", false));
         registry.put("ScheduleSign", new NoParametersAPI("Miscellaneous", "ScheduleSign", "Add a signature to a scheduled transaction"));
         registry.put("ScheduleDelete", new NoParametersAPI("Miscellaneous", "ScheduleDelete", "Delete a scheduled transaction"));
         registry.put("ScheduleGetInfo", new NoParametersAPI("Miscellaneous", "ScheduleGetInfo", "Retrieve information about a scheduled transaction"));

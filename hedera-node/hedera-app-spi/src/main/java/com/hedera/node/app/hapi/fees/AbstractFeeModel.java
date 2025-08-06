@@ -13,8 +13,6 @@ import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.MIN_SIGNATU
 import static com.hedera.node.app.hapi.utils.CommonPbjConverters.fromPbj;
 
 public abstract class AbstractFeeModel {
-    int numFreeSignatures = 1;
-
     protected static final List<ParameterDefinition> COMMON_PARAMS = List.of(
             new ParameterDefinition("numSignatures", "number", null,MIN_SIGNATURES, MIN_SIGNATURES, MAX_SIGNATURES, "Executed Signatures Verifications count")
     );
@@ -58,64 +56,45 @@ public abstract class AbstractFeeModel {
         }
         return FeeCheckResult.success();
     }
-    public void setNumFreeSignatures(int numFreeSignatures) {
-        this.numFreeSignatures = numFreeSignatures;
-    }
-
 
     // Compute the fee. There are 2 parts to the fee. There's the API specific fee (e.g. cryptoCreate price is based on the number of keys), and there's fee for parameters that are common across all APIs (e.g. number of signatures)
-    public Fees computeFee(Map<String, Object> values, ExchangeRate exchangeRate) {
+    public Fees computeFee(Map<String, Object> values, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule) {
         preprocessEnumValues(values);
+        //  get base fee for the service
+        var result = computeApiSpecificFee(values, feesSchedule);
 
-        FeeResult result = computeApiSpecificFee(values);
-
-        // Compute the fee for parameters that are common across all APIs
-        if (values.containsKey("numSignatures")) {
-            final int numSignatures = (int) values.get("numSignatures");
-            if (numSignatures > numFreeSignatures) {
-                final int additionalSignatures = numSignatures - numFreeSignatures;
-                final double fee = additionalSignatures * BaseFeeRegistry.getBaseFee("PerSignature");
-                result.addDetail("Additional signature verifications", additionalSignatures, fee);
+        //  calculate the node fee
+        final var node_base_fee = feesSchedule.getNodeBaseFee();
+        long total_node_fee = node_base_fee;
+        result.details.put("Node Base Fee", new FeeResult.FeeDetail(1, node_base_fee));
+        final List<String> extras = feesSchedule.getNodeExtraNames();
+        for(var extra : extras) {
+            final var node_bytes_fee = feesSchedule.getExtrasFee(extra);
+            final long node_bytes_included = feesSchedule.getNodeExtraIncludedCount(extra);
+            System.out.println("Node Extra: " + extra + " costs " + node_bytes_fee+ " each, included " + node_bytes_included);
+            System.out.println("using " + values.get(extra) + " of " + extra);
+            final long used = (long) values.get(extra);
+            if (used > node_bytes_included) {
+                final long additional_bytes = used - node_bytes_included;
+                System.out.println("overage " + additional_bytes);
+                final long extras_fee = additional_bytes * node_bytes_fee;
+                System.out.println("overage total fee " + extras_fee);
+                total_node_fee += extras_fee;
+                result.details.put("Node Bytes Overage", new FeeResult.FeeDetail(additional_bytes, extras_fee));
             }
         }
+        final long total_network_fee = total_node_fee * feesSchedule.getNetworkMultiplier();
+        System.out.println("total node fee: " + total_node_fee);
+        System.out.println("total network fee: " + total_network_fee);
+        System.out.println("total node fee: " + result.service);
+        result.details.put("Network Fee ", new FeeResult.FeeDetail(1, total_network_fee));
 
         //TODO: I'm pretty sure these calculations are wrong
-        final var nodeTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.10), exchangeRate);
-        final var networkTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.45), exchangeRate);
-        final var serviceTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.fee*0.45), exchangeRate);
-        final var fees =  new Fees(nodeTc,networkTc,serviceTc, result.fee, result.details);
-        System.out.println("Fees: " + this.getService() + ":" + this.getDescription()+":\n  " + fees);
-        return fees;
-    }
-
-    public Fees computeFee2(Map<String, Object> values, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule) {
-        preprocessEnumValues(values);
-
-        FeeResult result = computeApiSpecificFee2(values, feesSchedule);
-
-        // Compute the fee for parameters that are common across all APIs
-        if (values.containsKey("numSignatures")) {
-            final double per_sig_cost = feesSchedule.getExtrasFee("SignatureVerifications");
-            final int numSignatures = (int) values.get("numSignatures");
-            final int network_included = feesSchedule.getNetworkBaseExtrasIncluded(this.getMethodName(),"SignatureVerifications");
-            final int node_included = feesSchedule.getNodeBaseExtrasIncluded(this.getMethodName(),"SignatureVerifications");
-            if (numSignatures > network_included) {
-                final int additionalSignatures = numSignatures - network_included;
-                final double fee = additionalSignatures * per_sig_cost;
-                result.addDetail("Additional network signature verifications", additionalSignatures, fee);
-            }
-            if (numSignatures > node_included) {
-                final int additionalSignatures = numSignatures - node_included;
-                final double fee = additionalSignatures * per_sig_cost;
-                result.addDetail("Additional node signature verifications", additionalSignatures, fee);
-            }
-        }
-
-        //TODO: I'm pretty sure these calculations are wrong
-        final var nodeTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.node), exchangeRate);
-        final var networkTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.network*0.5), exchangeRate);
-        final var serviceTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.network*0.5), exchangeRate);
-        final var fees =  new Fees(nodeTc,networkTc,serviceTc, result.fee, result.details);
+//        final var nodeTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.node), exchangeRate);
+//        final var networkTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.network*0.5), exchangeRate);
+//        final var serviceTc = this.tinyCentsToTinyBar(this.usdToTinycents(result.network*0.5), exchangeRate);
+//        return base_fee + total_node_fee + service_fee;
+        final var fees =  new Fees(total_node_fee, total_network_fee, result.service, result.service + result.node + result.network, result.details);
         System.out.println("Fees: " + this.getService() + ":" + this.getDescription()+":\n  " + fees);
         return fees;
     }
@@ -129,10 +108,7 @@ public abstract class AbstractFeeModel {
     }
 
     // Compute API specific fee (e.g. cryptoCreate price is based on the number of keys)
-    protected abstract FeeResult computeApiSpecificFee(Map<String, Object> values);
-    protected FeeResult computeApiSpecificFee2(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+    protected abstract FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule);
 
     @SuppressWarnings("unchecked")
     private void preprocessEnumValues(Map<String, Object> values) {

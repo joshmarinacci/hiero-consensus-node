@@ -28,7 +28,7 @@ import java.util.Map;
  *                   This must be non-negative. The sum of node, network, and service fees must be less than
  *                   {@link Long#MAX_VALUE}.
  */
-public record Fees(long nodeFee, long networkFee, long serviceFee, double usd, Map<String, FeeResult.FeeDetail> details ) {
+public record Fees(long nodeFee, long networkFee, long serviceFee, long usd, Map<String, FeeResult.FeeDetail> details ) {
     /** A constant representing zero fees. */
     public static final Fees FREE = new Fees(0, 0, 0, 0, new HashMap<>());
     /**
@@ -143,7 +143,7 @@ public record Fees(long nodeFee, long networkFee, long serviceFee, double usd, M
         private long nodeFee;
         private long networkFee;
         private long serviceFee;
-        private double newFee;
+        private long newFee;
 
         /**
          * Set the node fee.
@@ -178,7 +178,7 @@ public record Fees(long nodeFee, long networkFee, long serviceFee, double usd, M
             return this;
         }
 
-        public Builder newFee(double newFee) {
+        public Builder newFee(long newFee) {
             System.out.println("returning the new fee " + newFee);
             this.newFee = newFee;
             return this;
