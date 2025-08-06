@@ -25,7 +25,7 @@ public class FeeResult {
         }
         @Override
         public String toString() {
-            return "FeeDetail{" + this.value + ", " + new DecimalFormat("#.000 000").format(this.fee) + "}";
+            return "FeeDetail{" + this.value + ", " + this.fee + "}";
         }
     }
 

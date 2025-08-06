@@ -15,8 +15,8 @@
   },
 
   "definedExtras": [
-    { "name":  "Signatures", "fee": 88 },
-    { "name":  "Bytes", "fee":  8},
+    { "name":  "Signatures", "fee": 1 },
+    { "name":  "Bytes", "fee":  1},
     { "name":  "Keys", "fee":  1},
     { "name":  "TokenTypes", "fee":  3}
   ],
@@ -44,6 +44,16 @@
           "extras": [
             {
               "name": "Signatures", "includedCount": 1
+            }
+          ]
+        },
+        {
+          "name": "ConsensusUpdateTopic",
+          "baseFee": 19,
+          "extras": [
+            {
+              "name": "Signatures", "includedCount": 1,
+              "name": "Keys", "includedCount": 1
             }
           ]
         }

@@ -2,14 +2,14 @@ package com.hedera.services.bdd.suites.fees;
 
 import com.hedera.hapi.block.stream.BlockItem;
 import com.hedera.hapi.node.base.HederaFunctionality;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.ByteStringUtils;
 import com.hedera.services.bdd.junit.HapiTest;
 import com.hedera.services.bdd.junit.HapiTestLifecycle;
-import com.hedera.services.bdd.junit.LeakyHapiTest;
 import com.hedera.services.bdd.junit.support.TestLifecycle;
 import com.hedera.services.bdd.spec.HapiSpec;
 import com.hedera.services.bdd.spec.utilops.streams.assertions.BlockStreamAssertion;
@@ -29,7 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FILE_FREE_BYTES;
-import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.HCS_FREE_BYTES;
 import static com.hedera.services.bdd.junit.support.validators.block.BlockContentsValidator.bodyFrom;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getAccountBalance;
@@ -56,6 +55,7 @@ import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.movi
 import static com.hedera.services.bdd.spec.transactions.token.TokenMovement.movingUnique;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
+import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedFee;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsdWithin;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HBAR;
@@ -82,7 +82,7 @@ public class SimpleFeesSuite {
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedUsd("create-topic-txn", 0.02)
+                    validateChargedFee("create-topic-txn", 19 + 1 + 2)
             );
         }
 
@@ -110,13 +110,16 @@ public class SimpleFeesSuite {
                     newKeyNamed(ADMIN),
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     // create topic. provide up to 100 hbar to pay for it
-                    createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(ADMIN)
+                    createTopic("testTopic").blankMemo().payingWith(PAYER)
+                            .adminKeyName(ADMIN)
                             .fee(ONE_HUNDRED_HBARS).via("create-topic-txn"),
-                    validateChargedUsd("create-topic-txn", 0.020_00),
+                    // create topic should be base:19 + key:(2-1), node:(base:1, sig:1) * 3 to include network
+                    validateChargedFee("create-topic-txn", 19 + 1 + (1+1)*3),
                     // update topic, provide up to 100 hbar to pay for it
+                    // update topic is base:19 + key(1-1), node:(base:1,sig:1)*3 to include network
                     updateTopic("testTopic").adminKey(ADMIN).payingWith(PAYER)
                             .fee(ONE_HUNDRED_HBARS).via("update-topic-txn"),
-                    validateChargedUsd("update-topic-txn", 0.000_33)
+                    validateChargedFee("update-topic-txn",19  + (1+1)*3)
             );
         }
 
@@ -170,7 +173,7 @@ public class SimpleFeesSuite {
             Arrays.fill(messageBytes, (byte) 0b1);
             final var excess_bytes = byte_size - 256;
             final var base = 0.00033;
-            final var per_byte = BaseFeeRegistry.getBaseFee("PerHCSByte");
+            final var per_byte = JsonFeesSchedule.fromJson().getServiceBaseFee("PerHCSByte");
             return hapiTest(
                     newKeyNamed(PAYER),
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
@@ -289,12 +292,12 @@ public class SimpleFeesSuite {
                                 var create_body = txbody.consensusCreateTopicOrThrow();
                                 System.out.println("create topic body is " + create_body);
 
-                                EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
+                                EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", true);
                                 Map<String, Object> params = new HashMap<>();
                                 params.put("numSignatures", 0);
                                 params.put("numKeys", 0);
                                 params.put("hasCustomFee", YesOrNo.NO);
-                                var fee = entity.computeFee(params, current_rate);
+                                var fee = entity.computeFee(params, current_rate, JsonFeesSchedule.fromJson());
                                 System.out.println("recomputed fee is " + fee);
                                 // recomputed fee is Fees[nodeFee=1652800, networkFee=7438000, serviceFee=7438000, usd=0.02, details={Base fee=FeeDetail{1, .020000 }}]
                                 // get the active rate
