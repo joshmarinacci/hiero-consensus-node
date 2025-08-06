@@ -2,6 +2,7 @@ package com.hedera.node.app.hapi.fees.apis.common;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
 import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 
@@ -20,7 +21,7 @@ public class EntityCreate extends AbstractFeeModel {
     private final boolean customFeeCapable;
 
     private final List<ParameterDefinition> params = List.of(
-            new ParameterDefinition("numKeys", "number", null, MIN_KEYS, MIN_KEYS, MAX_KEYS, "Number of keys")
+            new ParameterDefinition(Extras.Keys.toString(), "number", null, MIN_KEYS, MIN_KEYS, MAX_KEYS, "Number of keys")
     );
     private final List<ParameterDefinition> customFeeParams = List.of(
             new ParameterDefinition("hasCustomFee", "list", new Object[] {YesOrNo.YES, YesOrNo.NO}, YesOrNo.NO, 0, 0, "Enable custom fee?")

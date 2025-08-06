@@ -1,7 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.common;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 
@@ -16,21 +17,22 @@ public class EntityUpdate extends AbstractFeeModel {
     private final String service;
     private final String api;
     private final String description;
-    private final int numFreeKeys;
 
     private final List<ParameterDefinition> params = List.of(
             new ParameterDefinition("numKeys", "number", null,MIN_KEYS, MIN_KEYS, MAX_KEYS, "Number of keys")
     );
 
-    public EntityUpdate(String service, String api, String description, int numFreeKeys) {
+    public EntityUpdate(String service, String api, String description) {
         this.service = service;
         this.api = api;
         this.description = description;
-        this.numFreeKeys = numFreeKeys;
     }
 
     @Override
     public String getService() { return service; }
+
+    @Override
+    public String getMethodName() { return this.api; }
 
     @Override
     public String getDescription() {
@@ -43,16 +45,14 @@ public class EntityUpdate extends AbstractFeeModel {
     }
 
     @Override
-    protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
-        FeeResult fee = new FeeResult();
-
-        fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee(api));
-
-        int numKeys = (int) values.get("numKeys");
+    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
+        FeeResult result = new FeeResult();
+        result.addDetail("Base result", 1, feesSchedule.getServiceBaseFee(api));
+        final long numKeys = (long) values.get(Extras.Keys.toString());
+        final long numFreeKeys = feesSchedule.getServiceExtraIncludedCount(api,Extras.Keys.toString());
         if (numKeys > numFreeKeys) {
-            fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * BaseFeeRegistry.getBaseFee("PerKey"));
+            result.addDetail("Additional Keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getExtrasFee(Extras.Keys.toString()));
         }
-
-        return fee;
+        return result;
     }
 }
