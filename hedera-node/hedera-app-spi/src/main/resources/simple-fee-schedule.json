@@ -21,6 +21,33 @@
     { "name":  "TokenTypes", "fee":  3}
   ],
   "serviceFees": [
-
+    {
+      "name": "Crypto",
+      "transactions": [
+        {
+          "name": "CryptoCreate",
+          "base_fee": 22,
+          "extras": [
+            {
+              "name": "Signatures", "includedCount": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Consensus",
+      "transactions": [
+        {
+          "name": "ConsensusCreateTopic",
+          "baseFee": 19,
+          "extras": [
+            {
+              "name": "Signatures", "includedCount": 1
+            }
+          ]
+        }
+      ]
+    }
   ]
 }

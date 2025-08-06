@@ -23,8 +23,8 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.consensus.ConsensusCreateTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
@@ -229,19 +229,16 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
         final var hasCustomFees =
                 !body.consensusCreateTopicOrThrow().customFees().isEmpty();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            final var schedule = BaseFeeRegistry.getFeeSchedule();
-            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", 0, true);
-            entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(
-                    FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_CREATE_TOPIC),
-                    AbstractFeesSchedule.SignatureVerifications));
+            final var feeSchedule = JsonFeesSchedule.fromJson();
+            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", true);
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 0);
+            params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
+            params.put(Extras.Keys.toString(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
             if(hasCustomFees){
                 params.put("hasCustomFee", YesOrNo.YES);
             }
-            return entity.computeFee(params, feeContext.activeRate());
+            return entity.computeFee(params, feeContext.activeRate(), feeSchedule);
         }
         final var subType = hasCustomFees ? SubType.TOPIC_CREATE_WITH_CUSTOM_FEES : SubType.DEFAULT;
 

@@ -35,8 +35,7 @@ import com.hedera.hapi.node.base.TopicID;
 import com.hedera.hapi.node.consensus.ConsensusUpdateTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.TransactionBody;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
@@ -202,16 +201,14 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            final var schedule = BaseFeeRegistry.getFeeSchedule();
             final var api_name = FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_UPDATE_TOPIC);
             final var service_name = "Crypto";
-            EntityCreate entity = new EntityCreate(service_name,api_name, "Update a topic", 2, false);
-            entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(api_name, AbstractFeesSchedule.SignatureVerifications));
+            EntityCreate entity = new EntityCreate(service_name,api_name, "Update a topic", false);
             Map<String, Object> params = new HashMap<>();
             params.put("numSignatures", feeContext.numTxnSignatures());
             params.put("numKeys", 0);
             params.put("hasCustomFee", YesOrNo.NO);
-            return entity.computeFee(params, feeContext.activeRate());
+            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var op = feeContext.body();
         final var topicUpdate = op.consensusUpdateTopicOrElse(ConsensusUpdateTopicTransactionBody.DEFAULT);
