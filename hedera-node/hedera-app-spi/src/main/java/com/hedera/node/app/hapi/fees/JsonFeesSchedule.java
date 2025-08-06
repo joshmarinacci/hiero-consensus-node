@@ -20,7 +20,7 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     public final HashMap<String, ExtraFeeDefinition> extras;
 
     public static JsonFeesSchedule fromJson() {
-        try (final var fin = BaseFeeRegistry.class.getClassLoader().getResourceAsStream("simple-fee-schedule.json")) {
+        try (final var fin = JsonFeesSchedule.class.getClassLoader().getResourceAsStream("simple-fee-schedule.json")) {
             final var buf = SimpleFeeSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
             System.out.println("parsed simple fees schedule: " + buf);
             return new JsonFeesSchedule(buf);

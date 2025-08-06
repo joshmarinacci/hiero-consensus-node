@@ -3,7 +3,6 @@ package com.hedera.node.app.hapi.fees.apis.consensus;
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
 import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;

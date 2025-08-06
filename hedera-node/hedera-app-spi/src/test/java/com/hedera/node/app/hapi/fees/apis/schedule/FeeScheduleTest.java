@@ -73,7 +73,7 @@ public class FeeScheduleTest {
     //test that we can load the mock fees and use them
     void mockTest() {
         var schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Signatures.toString(),8);
+        schedule.setExtrasFee(Extras.Signatures,8);
         assertEquals(schedule.getExtrasFee(Extras.Signatures.toString()),8);
     }
 
@@ -81,7 +81,7 @@ public class FeeScheduleTest {
     //test that we can create a fees model from the service name
     void createModelFromStrings() {
         var schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Signatures.toString(),6);
+        schedule.setExtrasFee(Extras.Signatures,6);
         schedule.setNodeBaseFee(2);
         schedule.setNodeExtraIncludedCount(Extras.Signatures.toString(),2L);
         schedule.setNetworkMultiplier(3);
@@ -119,7 +119,7 @@ public class FeeScheduleTest {
     // account for differences in included signature verifications
     void createModelWithVaryingIncludedSignatures() {
         var schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Signatures.toString(),1);
+        schedule.setExtrasFee(Extras.Signatures,1);
         schedule.setNodeBaseFee(2);
 //        schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
         schedule.setNodeExtraIncludedCount(Extras.Signatures.toString(),1L);
@@ -156,8 +156,8 @@ public class FeeScheduleTest {
         var schedule = new MockFeesSchedule();
         schedule.setServiceBaseFee("ConsensusSubmitMessage",10L);
         schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage",Extras.Bytes,0);
-        schedule.setExtrasFee(Extras.Signatures.toString(),1L);
-        schedule.setExtrasFee(Extras.Bytes.toString(),1L);
+        schedule.setExtrasFee(Extras.Signatures,1L);
+        schedule.setExtrasFee(Extras.Bytes,1L);
         var exchangeRate = new MockExchangeRate().activeRate(); // 1/12
         Map<String, Object> params = new HashMap<>();
         params.put("hasCustomFee", YesOrNo.NO);

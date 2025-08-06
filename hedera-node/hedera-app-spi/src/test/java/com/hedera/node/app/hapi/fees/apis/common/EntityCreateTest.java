@@ -19,7 +19,7 @@ class EntityCreateTest {
     @BeforeAll
     static void setup() {
         schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Keys.toString(),1L);
+        schedule.setExtrasFee(Extras.Keys,1L);
 
         schedule.setServiceBaseFee("CryptoCreate",22L);
         schedule.setServiceExtraIncludedCount("CryptoCreate",Extras.Keys,2L);
@@ -32,6 +32,10 @@ class EntityCreateTest {
 
         schedule.setServiceBaseFee("ConsensusCreateTopic",15L);
         schedule.setServiceExtraIncludedCount("ConsensusCreateTopic",Extras.Keys,1L);
+
+        schedule.setServiceBaseFee("ConsensusCreateTopicWithCustomFee",30L);
+        schedule.setServiceExtraIncludedCount("ConsensusCreateTopicWithCustomFee",Extras.Keys,1L);
+
 
         schedule.setServiceBaseFee("ContractCreate",15L);
         schedule.setServiceExtraIncludedCount("ContractCreate",Extras.Keys,1L);
@@ -103,8 +107,7 @@ class EntityCreateTest {
         EntityCreate entity = new EntityCreate("Smart Contract", "ContractCreate", "Create a smart contract", false);
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.toString(), 1L);
-        params.put(Extras.Keys.toString(), 5L);
-        params.put("numSignatures", 10L);
+        params.put(Extras.Keys.toString(), 10L);
 
         Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(0 + schedule.getServiceBaseFee("ContractCreate") + 9 * schedule.getExtrasFee("Keys"), fee.usd(), "Contract Create");

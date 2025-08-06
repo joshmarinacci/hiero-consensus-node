@@ -53,6 +53,9 @@ public class MockFeesSchedule implements AbstractFeesSchedule {
     public void setExtrasFee(String name, long value) {
         this.extras.put(name,value);
     }
+    public void setExtrasFee(Extras name, long value) {
+        this.extras.put(name.name(),value);
+    }
 
     @Override
     public long getNodeBaseFee() {
