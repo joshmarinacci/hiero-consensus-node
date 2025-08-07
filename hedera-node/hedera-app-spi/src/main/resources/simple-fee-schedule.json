@@ -46,6 +46,13 @@
             {  "name": "Signatures", "includedCount": 1 },
             {  "name": "Keys",       "includedCount": 1 }
           ]
+        },
+        {
+          "name": "TokenCreate",
+          "baseFee": 22,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1 }
+          ]
         }
       ]
     },

@@ -719,7 +719,7 @@ public class SimpleFeesSuite {
                             .initialSupply(4)
                             .fee(ONE_MILLION_HBARS)
                             .via("token-create-txn"),
-                    validateChargedUsd("token-create-txn",TokenCreateFee_USD)
+                    validateChargedFee("token-create-txn", 22 + 2*3 + 1)
             );
         }
         @HapiTest
