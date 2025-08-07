@@ -13,7 +13,9 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.file.FileDeleteTransactionBody;
 import com.hedera.hapi.node.state.file.File;
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.file.FileOperations;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.FileFeeBuilder;
@@ -130,10 +132,10 @@ public class FileDeleteHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             FileOperations transfer = new FileOperations("FileDelete", "dummy description");
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", 0);//feeContext.numTxnSignatures());
-            params.put("numKeys", 0);
-            params.put("numBytes", 0);//(int)txnBody.fileDeleteOrThrow().contents().length());
-            return transfer.computeFee(params, feeContext.activeRate());
+            params.put(Extras.Signatures.name(), 0L);
+            params.put(Extras.Keys.name(), 0L);
+            params.put(Extras.Bytes.name(), 0L);
+            return transfer.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         return feeContext
                 .feeCalculatorFactory()

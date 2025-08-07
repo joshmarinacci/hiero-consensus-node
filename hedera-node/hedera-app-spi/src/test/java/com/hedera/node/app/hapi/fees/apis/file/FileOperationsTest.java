@@ -40,7 +40,6 @@ class FileOperationsTest {
             long overage = (numBytes <= FILE_FREE_BYTES)
                     ? 50
                     : ((50 + (numBytes - FILE_FREE_BYTES) * 11));
-//            overage = Math.round(overage * 1000000000) / 1000000000.0;
             assertEquals(overage, fee.usd(), "FILE operation fee - " + numBytes + " bytes");
         }
     }

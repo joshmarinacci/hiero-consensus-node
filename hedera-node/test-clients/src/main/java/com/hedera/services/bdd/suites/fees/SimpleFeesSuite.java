@@ -381,15 +381,11 @@ public class SimpleFeesSuite {
             );
         }
 
-        // TODO: FileDelete transaction body doesn't expose the file contents so we can't
-        //  calculate how many bytes are being deleted
+        // File delete is a flat fee. Doesn't depend on th enumber of bytes
         @HapiTest
         final Stream<DynamicTest> fileDeleteFee() {
-            final var FileDelete = 0.007_00;
             final var byte_count = 1789;
-
             var contents = "0".repeat(byte_count).getBytes();
-
             return hapiTest(
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     fileCreate("test")
@@ -397,11 +393,11 @@ public class SimpleFeesSuite {
                             .contents(contents)
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-file-txn"),
-                    validateChargedUsd("create-file-txn", FileCreate + (byte_count - FILE_FREE_BYTES) * PerFileByte),
+                    validateChargedFee("create-file-txn", 50 + (byte_count - FILE_FREE_BYTES) * 1 + 4*3),
                     fileDelete("test")
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("delete-file-txn"),
-                    validateChargedUsd("delete-file-txn", FileDelete)// + (byte_count - FILE_FREE_BYTES) * PerFileByte)
+                    validateChargedFee("delete-file-txn", 7 + 3)
             );
         }
 

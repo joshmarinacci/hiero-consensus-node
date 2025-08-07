@@ -136,6 +136,14 @@
             { "name": "Keys", "includedCount": 1},
             { "name": "Bytes", "includedCount": 1000}
           ]
+        },
+        {
+          "name": "FileDelete",
+          "baseFee": 7,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1},
+            { "name": "Keys", "includedCount": 1}
+          ]
         }
       ]
     }
