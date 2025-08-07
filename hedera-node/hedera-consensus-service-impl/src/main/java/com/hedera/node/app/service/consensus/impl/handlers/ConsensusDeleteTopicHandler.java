@@ -13,10 +13,9 @@ import com.hedera.hapi.node.base.TopicID;
 import com.hedera.hapi.node.consensus.ConsensusDeleteTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.TransactionBody;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
-import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
+import com.hedera.node.app.hapi.fees.apis.common.NoParametersAPI;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.ConsensusServiceFeeBuilder;
@@ -119,16 +118,13 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            final var schedule = BaseFeeRegistry.getFeeSchedule();
-            final var service_name = "Crypto";
-            final var api_name = FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_DELETE_TOPIC);
-            EntityCreate entity = new EntityCreate(service_name, api_name, "Delete a topic", 0, false );
-            entity.setNumFreeSignatures(schedule.getNetworkBaseExtrasIncluded(api_name, AbstractFeesSchedule.SignatureVerifications));
+            final var schedule = JsonFeesSchedule.fromJson();
+            NoParametersAPI entity = new NoParametersAPI("Consensus", "ConsensusDeleteTopic", "Delete an existing topic");
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 0);
+            params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
+            params.put(Extras.Keys.name(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
-            return entity.computeFee(params, feeContext.activeRate());
+            return entity.computeFee(params, feeContext.activeRate(), schedule);
         }
         final var op = feeContext.body();
         return feeContext

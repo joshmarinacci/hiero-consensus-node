@@ -221,7 +221,7 @@ public class SimpleFeesSuite {
                     validateChargedFee("create-topic-txn", 19 + 1 + 2),
                     deleteTopic("testTopic").payingWith(PAYER)
                             .fee(ONE_HBAR).via("delete-topic-txn"),
-                    validateChargedFee("delete-topic-txn", 19 + 1 + 2)
+                    validateChargedFee("delete-topic-txn", 5 + 1 + 2)
             );
         }
 

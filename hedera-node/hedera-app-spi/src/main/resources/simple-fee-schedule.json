@@ -81,6 +81,13 @@
             {  "name": "Keys", "includedCount": 1      },
             { "name": "Bytes", "includedCount": 1024   }
           ]
+        },
+        {
+          "name": "ConsensusDeleteTopic",
+          "baseFee": 5,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1 }
+          ]
         }
       ]
     }
