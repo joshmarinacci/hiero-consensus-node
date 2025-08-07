@@ -41,7 +41,7 @@
         },
         {
           "name": "CryptoTransfer",
-          "baseFee": 22,
+          "baseFee": 18,
           "extras": [
             {  "name": "Signatures", "includedCount": 1 },
             {  "name": "Keys",       "includedCount": 1 }

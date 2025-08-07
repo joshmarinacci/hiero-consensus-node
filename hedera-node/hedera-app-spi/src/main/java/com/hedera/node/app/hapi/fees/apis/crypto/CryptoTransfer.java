@@ -72,7 +72,7 @@ public class CryptoTransfer extends AbstractFeeModel {
         could have custom fee enabled. The base fee here includes 1 FT/NFT
         token transfer without custom fee
      */
-    protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
+    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
         // Extract values
@@ -98,49 +98,49 @@ public class CryptoTransfer extends AbstractFeeModel {
         // If tokens with custom fees are used, then use the higher base prices
         if (customTokens > 0) {
             if (effectiveApi.equals("TokenTransfer")) {
-                fee.addDetail("Base fee for " + effectiveApi + " (with Custom fee)", 1,  BaseFeeRegistry.getBaseFee("TokenTransferWithCustomFee"));
+                fee.addDetail("Base fee for " + effectiveApi + " (with Custom fee)", 1,  feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
             } else if (effectiveApi.equals("TokenAirdrop")) {
-                fee.addDetail("Base fee for " + effectiveApi + " (with Custom fee)", 1,  BaseFeeRegistry.getBaseFee("TokenAirdropWithCustomFee"));
+                fee.addDetail("Base fee for " + effectiveApi + " (with Custom fee)", 1,  feesSchedule.getServiceBaseFee("TokenAirdropWithCustomFee"));
             }
         } else {
-            fee.addDetail("Base fee for " + effectiveApi, 1, BaseFeeRegistry.getBaseFee(effectiveApi));
+            fee.addDetail("Base fee for " + effectiveApi, 1, feesSchedule.getServiceBaseFee(effectiveApi));
         }
 
         // Overage for the number of accounts that we need to update for handling this transaction
         if (values.get("numAccountsInvolved") instanceof Integer num && num > 2)
-            fee.addDetail("Accounts involved", (num - 2), (num - 2) * BaseFeeRegistry.getBaseFee("PerCryptoTransferAccount"));
+            fee.addDetail("Accounts involved", (num - 2), (num - 2) * feesSchedule.getServiceBaseFee("PerCryptoTransferAccount"));
 
         // Overage for the number of token-types that we need to fetch for handling this transaction
         // Process the tokens with Custom Fee first since we have already increased the base price to accommodate the presence of custom-fee tokens, and the included free token should count against the token with custom fee
         if (ftWithCustom > 0) {
             if ((ftWithCustom - numFreeTokens) > 0) {
-                fee.addDetail("FT with custom fee", (ftWithCustom - numFreeTokens), (ftWithCustom - numFreeTokens) * BaseFeeRegistry.getBaseFee("TokenTransferWithCustomFee"));
+                fee.addDetail("FT with custom fee", (ftWithCustom - numFreeTokens), (ftWithCustom - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
             }
             numFreeTokens = 0;
         }
         if (nftWithCustom > 0) {
             if ((nftWithCustom - numFreeTokens) > 0) {
-                fee.addDetail("NFT with custom fee", (nftWithCustom - numFreeTokens), (nftWithCustom - numFreeTokens) * BaseFeeRegistry.getBaseFee("TokenTransferWithCustomFee"));
+                fee.addDetail("NFT with custom fee", (nftWithCustom - numFreeTokens), (nftWithCustom - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
             }
             numFreeTokens = 0;
         }
         if (ftNoCustom > 0) {
             if ((ftNoCustom - numFreeTokens) > 0) {
-                fee.addDetail("FT no custom fee", (ftNoCustom - numFreeTokens), (ftNoCustom - numFreeTokens) * BaseFeeRegistry.getBaseFee("TokenTransfer"));
+                fee.addDetail("FT no custom fee", (ftNoCustom - numFreeTokens), (ftNoCustom - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransfer"));
             }
             numFreeTokens = 0;
         }
         if (nftNoCustom > 0) {
             if ((nftNoCustom - numFreeTokens) > 0) {
-                fee.addDetail("NFT no custom fee", (nftNoCustom - numFreeTokens), (nftNoCustom - numFreeTokens) * BaseFeeRegistry.getBaseFee("TokenTransfer"));
+                fee.addDetail("NFT no custom fee", (nftNoCustom - numFreeTokens), (nftNoCustom - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransfer"));
             }
         }
 
         // Overage for the number of entities created automatically (associations/accounts) during handling this transaction
         if (values.get("numAutoAssociationsCreated") instanceof Integer num && num > 0)
-            fee.addDetail("Auto token associations", num, num * BaseFeeRegistry.getBaseFee("TokenAssociateToAccount"));
+            fee.addDetail("Auto token associations", num, num * feesSchedule.getServiceBaseFee("TokenAssociateToAccount"));
         if (values.get("numAutoAccountsCreated") instanceof Integer num && num > 0)
-            fee.addDetail("Auto account creations", num, num * BaseFeeRegistry.getBaseFee("CryptoCreate"));
+            fee.addDetail("Auto account creations", num, num * feesSchedule.getServiceBaseFee("CryptoCreate"));
 
         return fee;
     }

@@ -30,6 +30,9 @@ import com.hedera.hapi.node.state.token.Nft;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.token.CryptoTransferTransactionBody;
 import com.hedera.hapi.node.transaction.AssessedCustomFee;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.crypto.CryptoTransfer;
 import com.hedera.node.app.service.token.ReadableAccountStore;
 import com.hedera.node.app.service.token.ReadableNftStore;
@@ -235,14 +238,14 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
             CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
             Map<String, Object> params = new HashMap<>();
             System.out.println("number of txn signatures: " + feeContext.numTxnSignatures());
-            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
             System.out.println("account count " + accounts.size());
             params.put("numAccountsInvolved", accounts.size());
             System.out.println("ft count " + ftCount);
             params.put("numFTNoCustomFeeEntries", ftCount);
             System.out.println("nft count " + nftCount);
             params.put("numNFTNoCustomFeeEntries", nftCount);
-            return transfer.computeFee(params, feeContext.activeRate());
+            return transfer.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var config = feeContext.configuration();
         final var tokenMultiplier = config.getConfigData(FeesConfig.class).tokenTransferUsageMultiplier();

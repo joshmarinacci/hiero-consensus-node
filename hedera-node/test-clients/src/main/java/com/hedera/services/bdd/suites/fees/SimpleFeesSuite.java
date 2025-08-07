@@ -558,9 +558,10 @@ public class SimpleFeesSuite {
                             .payingWith(treasury)
                             .fee(ONE_HBAR)
                             .via("crypto-transfer-txn"),
-                    validateChargedFee("crypto-transfer-txn", 22+2*3)
+                    validateChargedFee("crypto-transfer-txn", 18+1*3)
             );
         }
+
         // multiple hbar transfers at once to go beyond the free number of involved accounts
         @HapiTest
         final Stream<DynamicTest> cryptoTransferMultipleHBarFee() {
