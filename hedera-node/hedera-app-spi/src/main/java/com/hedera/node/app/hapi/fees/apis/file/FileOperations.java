@@ -1,7 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.file;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 
@@ -39,22 +40,22 @@ public class FileOperations extends AbstractFeeModel {
     }
 
     @Override
-    protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
+    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
-        fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee(api));
+        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(api));
 
-        int numKeys = (int) values.get("numKeys");
-        int numFreeKeys = 1;
+        long numKeys = (long) values.get(Extras.Keys.name());
+        long numFreeKeys = 1;
         if (numKeys > numFreeKeys) {
-            fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * BaseFeeRegistry.getBaseFee("PerKey"));
+            fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getServiceBaseFee(Extras.Keys.name()));
         }
 
-        int numBytes = (int) values.get("numBytes");
+        long numBytes = (long) values.get(Extras.Bytes.name());
         if (numBytes > FILE_FREE_BYTES) {
-            fee.addDetail("Additional file size", (numBytes - FILE_FREE_BYTES), (numBytes - FILE_FREE_BYTES) * BaseFeeRegistry.getBaseFee("PerFileByte"));
+            fee.addDetail("Additional file size", (numBytes - FILE_FREE_BYTES), (numBytes - FILE_FREE_BYTES) * feesSchedule.getExtrasFee(Extras.Bytes.name()));
         }
-        System.out.println("total fee is " + fee.toString());
+        System.out.println("total fee is " + fee);
         return fee;
     }
 }

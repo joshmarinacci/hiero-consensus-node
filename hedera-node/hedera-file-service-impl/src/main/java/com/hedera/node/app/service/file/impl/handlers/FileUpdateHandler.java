@@ -22,7 +22,8 @@ import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.base.Timestamp;
 import com.hedera.hapi.node.file.FileUpdateTransactionBody;
 import com.hedera.hapi.node.state.file.File;
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.file.FileOperations;
 import com.hedera.node.app.hapi.fees.usage.SigUsage;
 import com.hedera.node.app.hapi.fees.usage.file.ExtantFileContext;
@@ -182,10 +183,10 @@ public class FileUpdateHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             FileOperations transfer = new FileOperations("FileUpdate", "dummy description");
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 1);
-            params.put("numBytes", (int) op.fileUpdateOrThrow().contents().length());
-            return transfer.computeFee(params, feeContext.activeRate());
+            params.put(Extras.Signatures.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extras.Keys.name(), 1L);
+            params.put(Extras.Bytes.name(), op.fileUpdateOrThrow().contents().length());
+            return transfer.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var file = feeContext
                 .readableStore(ReadableFileStore.class)

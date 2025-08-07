@@ -355,15 +355,12 @@ public class SimpleFeesSuite {
                             .contents(contents)
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-file-txn"),
-                    validateChargedUsd("create-file-txn",
-                            FileCreate + (byte_count - FILE_FREE_BYTES) * PerFileByte)
+                    validateChargedFee("create-file-txn",50 + (byte_count - FILE_FREE_BYTES) * 1 + 4*3)
             );
         }
 
         @HapiTest
         final Stream<DynamicTest> fileUpdateFee() {
-            final var FileUpdate = 0.050_00;
-
             var contents = "0".repeat(1789).getBytes();
 
             final var byte_count = 4567;
@@ -375,12 +372,12 @@ public class SimpleFeesSuite {
                             .contents(contents)
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-file-txn"),
-                    validateChargedUsd("create-file-txn", FileCreate + (1789 - FILE_FREE_BYTES) * PerFileByte),
+                    validateChargedFee("create-file-txn", 50 + (1789 - FILE_FREE_BYTES) * 1 + 4*3),
                     fileUpdate("test")
                             .contents(new_contents)
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("update-file-txn"),
-                    validateChargedUsd("update-file-txn", FileUpdate + (byte_count - FILE_FREE_BYTES) * PerFileByte)
+                    validateChargedFee("update-file-txn", 50 + (byte_count - FILE_FREE_BYTES)* 1 + 4*3)
             );
         }
 

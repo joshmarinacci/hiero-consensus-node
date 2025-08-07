@@ -1,7 +1,10 @@
 package com.hedera.node.app.hapi.fees.apis.file;
 
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.spi.fees.Fees;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -11,22 +14,33 @@ import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FILE_FREE_B
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FileOperationsTest {
+    static MockFeesSchedule schedule;
+
+    @BeforeAll
+    static void setup() {
+        schedule = new MockFeesSchedule();
+        schedule.setExtrasFee(Extras.Keys, 1L);
+        schedule.setExtrasFee(Extras.Signatures, 1L);
+        schedule.setExtrasFee(Extras.Bytes, 11L);
+
+        schedule.setServiceBaseFee("FileCreate",50L);
+    }
 
     @Test
     void testFileOperations() {
         FileOperations transfer = new FileOperations("FileCreate", "dummy description");
         Map<String, Object> params = new HashMap<>();
-        params.put("numSignatures", 1);
-        params.put("numKeys", 1);
+        params.put(Extras.Signatures.name(), 1L);
+        params.put(Extras.Keys.name(), 1L);
 
         for (int numBytes = 10; numBytes < 100000; numBytes += 100) {
-            params.put("numBytes", numBytes);
-            Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate());
+            params.put(Extras.Bytes.name(), (long)numBytes);
+            Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
 
-            double overage = (numBytes <= FILE_FREE_BYTES)
-                    ? 0.05
-                    : ((0.05 + (numBytes - FILE_FREE_BYTES) * 0.000011));
-            overage = Math.round(overage * 1000000000) / 1000000000.0;
+            long overage = (numBytes <= FILE_FREE_BYTES)
+                    ? 50
+                    : ((50 + (numBytes - FILE_FREE_BYTES) * 11));
+//            overage = Math.round(overage * 1000000000) / 1000000000.0;
             assertEquals(overage, fee.usd(), "FILE operation fee - " + numBytes + " bytes");
         }
     }
