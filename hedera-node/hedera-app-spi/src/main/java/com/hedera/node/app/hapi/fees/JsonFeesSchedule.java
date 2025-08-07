@@ -9,6 +9,7 @@ import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -61,7 +62,12 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
 
     @Override
     public long getExtrasFee(String name) {
-        return 0;
+        var res = this.schedule.definedExtras().stream().filter(e -> e.name().equals(name)).findFirst();
+        if (res.isPresent()) {
+            return res.get().fee();
+        } else {
+            throw new Error("extra '"+name+"' not found.");
+        }
     }
 
     @Override
@@ -81,27 +87,36 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
                 return extra.includedCount();
             }
         }
-        return 0;
+        throw new Error("node extra '"+name+"' not found.");
     }
 
     @Override
     public long getNetworkMultiplier() {
-        return 0;
+        return this.schedule.networkFeeRatio().multiplier();
     }
 
     @Override
     public long getServiceBaseFee(String method) {
-        return 0;
+        if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
+        return this.serviceMethods.get(method).baseFee();
     }
 
     @Override
     public List<String> getServiceExtras(String method) {
-        return List.of();
+        if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
+        return this.serviceMethods.get(method).extras().stream().map(e -> e.name()).collect(Collectors.toList());
     }
 
 
     @Override
     public long getServiceExtraIncludedCount(String method, String name) {
-        return 0;
+        if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
+        var m = this.serviceMethods.get(method);
+        for(var extra : m.extras()) {
+            if (extra.name().equals(name)) {
+                return extra.includedCount();
+            }
+        }
+        throw new Error("service extra included count'"+method+"' : " + name + " not found.");
     }
 }

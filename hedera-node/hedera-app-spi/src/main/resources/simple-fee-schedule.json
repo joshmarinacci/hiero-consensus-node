@@ -51,10 +51,26 @@
           "name": "ConsensusUpdateTopic",
           "baseFee": 19,
           "extras": [
-            {
-              "name": "Signatures", "includedCount": 1,
-              "name": "Keys", "includedCount": 1
-            }
+            { "name": "Signatures", "includedCount": 1 },
+            { "name": "Keys",       "includedCount": 1 }
+          ]
+        },
+        {
+          "name": "ConsensusSubmitMessage",
+          "baseFee": 19,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1 },
+            {  "name": "Keys", "includedCount": 1      },
+            { "name": "Bytes", "includedCount": 1024   }
+          ]
+        },
+        {
+          "name": "ConsensusSubmitMessageWithCustomFee",
+          "baseFee": 25,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1 },
+            {  "name": "Keys", "includedCount": 1      },
+            { "name": "Bytes", "includedCount": 1024   }
           ]
         }
       ]

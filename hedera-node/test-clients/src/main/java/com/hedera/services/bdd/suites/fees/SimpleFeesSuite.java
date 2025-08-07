@@ -2,7 +2,6 @@ package com.hedera.services.bdd.suites.fees;
 
 import com.hedera.hapi.block.stream.BlockItem;
 import com.hedera.hapi.node.base.HederaFunctionality;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
@@ -143,8 +142,8 @@ public class SimpleFeesSuite {
         }
 
         @HapiTest
-        @DisplayName("Simple fee for submitting a message")
-        final Stream<DynamicTest> submitMessageFee() {
+        @DisplayName("Simple fee for submitting a message, all bytes included")
+        final Stream<DynamicTest> submitMessageFeeWithIncludedBytes() {
             // 100 is less than the free size, so there's no per byte charge
             final var byte_size = 100;
             final byte[] messageBytes = new byte[byte_size]; // up to 1k
@@ -155,12 +154,12 @@ public class SimpleFeesSuite {
                     // create topic, provide up to 1 hbar to pay for it
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedUsd("create-topic-txn", 0.020_00),
+                    validateChargedFee("create-topic-txn", 19 + 1 + 2),
                     // submit message, provide up to 1 hbar to pay for it
                     submitMessageTo("testTopic").blankMemo().payingWith(PAYER).message(new String(messageBytes))
                             .fee(ONE_HBAR)
                             .via("submit-message-txn"),
-                    validateChargedUsd("submit-message-txn", 0.00033, 1)
+                    validateChargedFee("submit-message-txn", 19 + 1 + 2)
             );
         }
 
@@ -171,21 +170,18 @@ public class SimpleFeesSuite {
             final var byte_size = 800;
             final byte[] messageBytes = new byte[byte_size]; // up to 1k
             Arrays.fill(messageBytes, (byte) 0b1);
-            final var excess_bytes = byte_size - 256;
-            final var base = 0.00033;
-            final var per_byte = JsonFeesSchedule.fromJson().getServiceBaseFee("PerHCSByte");
             return hapiTest(
                     newKeyNamed(PAYER),
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     // create topic, provide up to 1 hbar to pay for it
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedUsd("create-topic-txn", 0.020_00),
+                    validateChargedFee("create-topic-txn", 19 + 1 + 2),
                     // submit message, provide up to 1 hbar to pay for it
                     submitMessageTo("testTopic").blankMemo().payingWith(PAYER).message(new String(messageBytes))
                             .fee(ONE_HBAR)
                             .via("submit-message-txn"),
-                    validateChargedUsd("submit-message-txn", base + excess_bytes * per_byte, 1)
+                    validateChargedFee("submit-message-txn", 19 + 1 + 2)
             );
         }
 
