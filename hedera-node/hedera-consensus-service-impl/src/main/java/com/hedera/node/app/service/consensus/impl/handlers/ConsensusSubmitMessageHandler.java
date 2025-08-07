@@ -40,7 +40,8 @@ import com.hedera.hapi.node.transaction.CustomFeeLimit;
 import com.hedera.hapi.node.transaction.FixedCustomFee;
 import com.hedera.hapi.node.transaction.FixedFee;
 import com.hedera.hapi.node.transaction.TransactionBody;
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.fees.apis.consensus.HCSSubmit;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
@@ -517,14 +518,14 @@ public class ConsensusSubmitMessageHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             HCSSubmit submit = new HCSSubmit();
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 0);
-            params.put("numBytes",(int)op.message().length());
+            params.put(Extras.Signatures.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extras.Keys.name(), 0L);
+            params.put(Extras.Bytes.name(), op.message().length());
             params.put("hasCustomFee", YesOrNo.NO);
             if(topic !=null && !topic.customFees().isEmpty()) {
                 params.put("hasCustomFee", YesOrNo.YES);
             }
-            return submit.computeFee(params, feeContext.activeRate());
+            return submit.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var calculatorFactory = feeContext.feeCalculatorFactory();
         final var msgSize = op.message().length();
