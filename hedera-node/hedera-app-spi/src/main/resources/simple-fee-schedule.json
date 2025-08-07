@@ -48,6 +48,15 @@
           ]
         },
         {
+          "name": "ConsensusCreateTopicWithCustomFee",
+          "baseFee": 25,
+          "extras": [
+            {
+              "name": "Signatures", "includedCount": 1
+            }
+          ]
+        },
+        {
           "name": "ConsensusUpdateTopic",
           "baseFee": 19,
           "extras": [
@@ -61,7 +70,7 @@
           "extras": [
             { "name": "Signatures", "includedCount": 1 },
             {  "name": "Keys", "includedCount": 1      },
-            { "name": "Bytes", "includedCount": 1024   }
+            { "name": "Bytes", "includedCount": 256    }
           ]
         },
         {

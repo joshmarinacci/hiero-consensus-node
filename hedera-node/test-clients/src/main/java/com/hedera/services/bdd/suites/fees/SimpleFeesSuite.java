@@ -97,7 +97,7 @@ public class SimpleFeesSuite {
                             .payingWith(PAYER)
                             .fee(ONE_HUNDRED_HBARS)
                             .via("create-topic-txn"),
-                    validateChargedUsd("create-topic-txn", 3)
+                    validateChargedFee("create-topic-txn", 25 + 1 + 2)
             );
         }
 
@@ -181,7 +181,7 @@ public class SimpleFeesSuite {
                     submitMessageTo("testTopic").blankMemo().payingWith(PAYER).message(new String(messageBytes))
                             .fee(ONE_HBAR)
                             .via("submit-message-txn"),
-                    validateChargedFee("submit-message-txn", 19 + 1 + 2)
+                    validateChargedFee("submit-message-txn", (800-256) + 19 + 1 + 2)
             );
         }
 
@@ -218,10 +218,10 @@ public class SimpleFeesSuite {
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedUsd("create-topic-txn", 0.020_00),
+                    validateChargedFee("create-topic-txn", 19 + 1 + 2),
                     deleteTopic("testTopic").payingWith(PAYER)
                             .fee(ONE_HBAR).via("delete-topic-txn"),
-                    validateChargedUsd("delete-topic-txn", 0.005_00)
+                    validateChargedFee("delete-topic-txn", 19 + 1 + 2)
             );
         }
 
