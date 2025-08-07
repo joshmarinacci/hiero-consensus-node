@@ -59,9 +59,9 @@ public class EntityCreate extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult result = new FeeResult();
         if (customFeeCapable && values.get("hasCustomFee") == YesOrNo.YES) {
-            result.addDetail("Base result", 1, feesSchedule.getServiceBaseFee(api + "WithCustomFee"));
+            result.addDetail("Base fee to create with custom fee " + this.api, 1, feesSchedule.getServiceBaseFee(api + "WithCustomFee"));
         } else {
-            result.addDetail("Base result", 1, feesSchedule.getServiceBaseFee(api));
+            result.addDetail("Base fee to create " + this.api, 1, feesSchedule.getServiceBaseFee(api));
         }
 
         final List<String> extras = feesSchedule.getServiceExtras(api);

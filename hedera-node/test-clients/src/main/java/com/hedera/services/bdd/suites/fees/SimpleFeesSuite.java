@@ -514,8 +514,6 @@ public class SimpleFeesSuite {
 
         @HapiTest
         final Stream<DynamicTest> cryptoCreateFee() {
-            // TODO: CryptoCreate, create account
-            final var CryptoCreateFee_USD =  0.05000;
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
                     cryptoCreate("alice")
@@ -523,13 +521,12 @@ public class SimpleFeesSuite {
                             .fee(ONE_HBAR)
                             .balance(ONE_HBAR)
                             .via("crypto-create-txn"),
-                    validateChargedUsd("crypto-create-txn", CryptoCreateFee_USD)
+                    validateChargedFee("crypto-create-txn",22  + 1*3)
             );
         }
 
         @HapiTest
         final Stream<DynamicTest> cryptoUpdateFee() {
-            final var CryptoUpdateFee_USD =  0.000_22;
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_HUNDRED_HBARS),
                     cryptoCreate("alice")
@@ -541,7 +538,7 @@ public class SimpleFeesSuite {
                             .payingWith(treasury)
                             .fee(ONE_HBAR)
                             .via("crypto-update-txn"),
-                    validateChargedUsd("crypto-update-txn", CryptoUpdateFee_USD)
+                    validateChargedFee("crypto-update-txn", 22+2*3)
             );
         }
 
@@ -561,7 +558,7 @@ public class SimpleFeesSuite {
                             .payingWith(treasury)
                             .fee(ONE_HBAR)
                             .via("crypto-transfer-txn"),
-                    validateChargedUsd("crypto-transfer-txn", CryptoTransferFee_USD)
+                    validateChargedFee("crypto-transfer-txn", 22+2*3)
             );
         }
         // multiple hbar transfers at once to go beyond the free number of involved accounts

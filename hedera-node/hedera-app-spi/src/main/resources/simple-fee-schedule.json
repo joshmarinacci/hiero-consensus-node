@@ -26,11 +26,25 @@
       "transactions": [
         {
           "name": "CryptoCreate",
-          "base_fee": 22,
+          "baseFee": 22,
           "extras": [
-            {
-              "name": "Signatures", "includedCount": 1
-            }
+            { "name": "Signatures", "includedCount": 1 }
+          ]
+        },
+        {
+          "name": "CryptoUpdate",
+          "baseFee": 22,
+          "extras": [
+            {  "name": "Signatures", "includedCount": 1 },
+            {  "name": "Keys",       "includedCount": 1 }
+          ]
+        },
+        {
+          "name": "CryptoTransfer",
+          "baseFee": 22,
+          "extras": [
+            {  "name": "Signatures", "includedCount": 1 },
+            {  "name": "Keys",       "includedCount": 1 }
           ]
         }
       ]
@@ -42,9 +56,7 @@
           "name": "ConsensusCreateTopic",
           "baseFee": 19,
           "extras": [
-            {
-              "name": "Signatures", "includedCount": 1
-            }
+            { "name": "Signatures", "includedCount": 1 }
           ]
         },
         {

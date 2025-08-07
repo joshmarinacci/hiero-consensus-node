@@ -36,8 +36,9 @@ import com.hedera.hapi.node.base.Timestamp;
 import com.hedera.hapi.node.state.token.Account;
 import com.hedera.hapi.node.token.CryptoUpdateTransactionBody;
 import com.hedera.hapi.node.transaction.TransactionBody;
-import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
+import com.hedera.node.app.hapi.fees.apis.common.EntityUpdate;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.EntityType;
 import com.hedera.node.app.service.token.CryptoSignatureWaivers;
@@ -322,11 +323,11 @@ public class CryptoUpdateHandler extends BaseCryptoHandler implements Transactio
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CRYPTO_UPDATE, "Update an account", 2, false);
+            EntityUpdate entity = new EntityUpdate("Crypto", "CryptoUpdate", "Updates an existing account");
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
-            params.put("numKeys", 1);
-            return entity.computeFee(params, feeContext.activeRate());
+            params.put(Extras.Signatures.toString(),(long)feeContext.numTxnSignatures());
+            params.put(Extras.Keys.toString(), 1L);
+            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         // Variable bytes plus two additional longs for balance and auto-renew period; plus a boolean for receiver sig
         // required.
