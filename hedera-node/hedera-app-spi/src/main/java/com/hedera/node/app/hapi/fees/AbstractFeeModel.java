@@ -59,6 +59,7 @@ public abstract class AbstractFeeModel {
 
     // Compute the fee. There are 2 parts to the fee. There's the API specific fee (e.g. cryptoCreate price is based on the number of keys), and there's fee for parameters that are common across all APIs (e.g. number of signatures)
     public Fees computeFee(Map<String, Object> values, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule) {
+        checkParameters(values);
         System.out.println("params are " + values);
         preprocessEnumValues(values);
         //  get base fee for the service

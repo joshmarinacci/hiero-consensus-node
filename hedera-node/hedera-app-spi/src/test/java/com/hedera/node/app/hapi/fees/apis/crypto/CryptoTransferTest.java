@@ -19,11 +19,19 @@ class CryptoTransferTest {
     @BeforeAll
     static void setup() {
         schedule = new MockFeesSchedule();
+        schedule.setExtrasFee(Extras.Signatures,1L);
         schedule.setExtrasFee(Extras.Keys,1L);
+        schedule.setExtrasFee(Extras.Accounts,2L);
+        schedule.setExtrasFee(Extras.StandardFungibleTokens, 5L);
 
         schedule.setServiceBaseFee("CryptoTransfer",10L);
         schedule.setServiceExtraIncludedCount("CryptoTransfer", Extras.Keys,2L);
+        schedule.setServiceExtraIncludedCount("CryptoTransfer", Extras.StandardFungibleTokens,2L);
+
         schedule.setServiceBaseFee("TokenTransfer",15L);
+        schedule.setServiceExtraIncludedCount("TokenTransfer", Extras.Keys,1L);
+        schedule.setServiceExtraIncludedCount("TokenTransfer", Extras.Accounts,2L);
+        schedule.setServiceExtraIncludedCount("TokenTransfer", Extras.StandardFungibleTokens,2L);
     }
 
     @Test
@@ -41,9 +49,9 @@ class CryptoTransferTest {
         CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.name(), 1L);
-        params.put("numAccountsInvolved", 5);
+        params.put(Extras.Accounts.name(), 5L);
         Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
-        assertEquals(13 /* 0.0001 + (3 * 0.00001) */, fee.usd(), "Multiple hbar transfer");
+        assertEquals(10 + 3*2 /* 0.0001 + (3 * 0.00001) */, fee.usd(), "Multiple hbar transfer");
     }
 
     @Test
@@ -51,10 +59,10 @@ class CryptoTransferTest {
         CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.name(), 1L);
-        params.put("numAccountsInvolved", 5);
-        params.put("numFTNoCustomFeeEntries", 1);
+        params.put(Extras.Accounts.name(), 5L);
+        params.put(Extras.StandardFungibleTokens.name(), 1L);
         Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
-        assertEquals(   (3 * 1) + 10, fee.usd(), "Simple token transfer");
+        assertEquals(15 +  (5-2)*2, fee.usd(), "Simple token transfer");
     }
 
     @Test
@@ -62,11 +70,11 @@ class CryptoTransferTest {
         CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.name(), 1L);
-        params.put("numAccountsInvolved", 10);
-        params.put("numFTNoCustomFeeEntries", 5);
+        params.put(Extras.Accounts.name(), 10L);
+        params.put(Extras.StandardFungibleTokens.name(), 5L);
 
         Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
-        assertEquals( (8 * 0.00001) + (5 * 0.001), fee.usd(),"Multiple token transfers");
+        assertEquals(15 + ((10-2) * 2) + ((5-2) * 5), fee.usd(),"Multiple token transfers");
     }
 
     @Test
@@ -74,19 +82,19 @@ class CryptoTransferTest {
         CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.name(), 1L);
-        params.put("numAccountsInvolved", 10);
-        params.put("numFTNoCustomFeeEntries", 5);
+        params.put(Extras.Accounts.name(), 10L);
+        params.put(Extras.StandardFungibleTokens.name(), 5L);
 
         Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
-        assertEquals((8 * 0.00001) + (5 * 0.001), fee.usd(),"Multiple hbar and token transfers");
+        assertEquals((8 * 1) + (5 * 5), fee.usd(),"Multiple hbar and token transfers");
     }
 
     @Test
     void testInvalidParamsFailCheck() {
         CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
         Map<String, Object> params = new HashMap<>();
-        params.put("numAccountsInvolved", 0);
-        params.put("numFTNoCustomFeeEntries", 0);
+        params.put(Extras.Accounts.name(), 0L);
+        params.put(Extras.StandardFungibleTokens.name(), 0L);
         params.put("numNFTNoCustomFeeEntries", 0);
         params.put("numFTWithCustomFeeEntries", 0);
         params.put("numNFTWithCustomFeeEntries", 0);

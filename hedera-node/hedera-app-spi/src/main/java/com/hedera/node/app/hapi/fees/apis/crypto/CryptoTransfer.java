@@ -1,19 +1,19 @@
 package com.hedera.node.app.hapi.fees.apis.crypto;
 
 import com.hedera.node.app.hapi.fees.*;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.TOKEN_FREE_TOKENS;
 
 public class CryptoTransfer extends AbstractFeeModel {
     String service;
     String api;
 
     private final List<ParameterDefinition> params = List.of(
-            new ParameterDefinition("numAccountsInvolved", "number", null, 2, 0, 20, "Number of Accounts involved"),
-            new ParameterDefinition("numFTNoCustomFeeEntries", "number", null, 0, 0, 10, "Fungible token entries without custom fee"),
+            new ParameterDefinition(Extras.Accounts.name(), "number", null, 2, 0, 20, "Number of Accounts involved"),
+            new ParameterDefinition(Extras.StandardFungibleTokens.name(), "number", null, 0, 0, 10, "Fungible token entries without custom fee"),
             new ParameterDefinition("numNFTNoCustomFeeEntries", "number", null, 0, 0, 10, "NFT entries without custom fee"),
             new ParameterDefinition("numFTWithCustomFeeEntries", "number", null, 0, 0, 10, "Fungible token entries with custom fee"),
             new ParameterDefinition("numNFTWithCustomFeeEntries", "number", null, 0, 0, 10, "NFT entries with custom fee"),
@@ -56,8 +56,8 @@ public class CryptoTransfer extends AbstractFeeModel {
         return FeeCheckResult.success();
     }
 
-    private int getInt(Object value) {
-        return (value instanceof Integer) ? (Integer) value : 0;
+    private long getLong(Object value) {
+        return (value instanceof Long) ? (Long) value : 0;
     }
 
     /*
@@ -76,14 +76,13 @@ public class CryptoTransfer extends AbstractFeeModel {
         FeeResult fee = new FeeResult();
 
         // Extract values
-        int ftNoCustom = getInt(values.get("numFTNoCustomFeeEntries"));
-        int nftNoCustom = getInt(values.get("numNFTNoCustomFeeEntries"));
-        int ftWithCustom = getInt(values.get("numFTWithCustomFeeEntries"));
-        int nftWithCustom = getInt(values.get("numNFTWithCustomFeeEntries"));
-        int customTokens = ftWithCustom + nftWithCustom;
+        long ftNoCustom = getLong(values.get(Extras.StandardFungibleTokens.name()));
+        long nftNoCustom = getLong(values.get("numNFTNoCustomFeeEntries"));
+        long ftWithCustom = getLong(values.get("numFTWithCustomFeeEntries"));
+        long nftWithCustom = getLong(values.get("numNFTWithCustomFeeEntries"));
+        long customTokens = ftWithCustom + nftWithCustom;
         boolean tokenTransfersPresent = (ftNoCustom + nftNoCustom + ftWithCustom + nftWithCustom) > 0;
 
-        int numFreeTokens = TOKEN_FREE_TOKENS;
         String effectiveApi = api;
 
         // If no token transfers are present, then treat it as CryptoTransfer (hbar transfer). Otherwise, treat it as a TokenTransfer
@@ -95,6 +94,7 @@ public class CryptoTransfer extends AbstractFeeModel {
             effectiveApi = "CryptoTransfer";
         }
 
+        long numFreeTokens = feesSchedule.getServiceExtraIncludedCount(effectiveApi,Extras.StandardFungibleTokens.name());//TOKEN_FREE_TOKENS;
         // If tokens with custom fees are used, then use the higher base prices
         if (customTokens > 0) {
             if (effectiveApi.equals("TokenTransfer")) {
@@ -107,8 +107,8 @@ public class CryptoTransfer extends AbstractFeeModel {
         }
 
         // Overage for the number of accounts that we need to update for handling this transaction
-        if (values.get("numAccountsInvolved") instanceof Integer num && num > 2)
-            fee.addDetail("Accounts involved", (num - 2), (num - 2) * feesSchedule.getServiceBaseFee("PerCryptoTransferAccount"));
+        if (values.get(Extras.Accounts.name()) instanceof Long num && num > 2)
+            fee.addDetail("Accounts involved", (num - 2), (num - 2) * feesSchedule.getExtrasFee(Extras.Accounts.name()));
 
         // Overage for the number of token-types that we need to fetch for handling this transaction
         // Process the tokens with Custom Fee first since we have already increased the base price to accommodate the presence of custom-fee tokens, and the included free token should count against the token with custom fee

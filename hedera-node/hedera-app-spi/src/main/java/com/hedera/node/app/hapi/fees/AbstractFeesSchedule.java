@@ -9,8 +9,10 @@ public interface AbstractFeesSchedule {
         Bytes,
         Keys,
         TokenTypes,
+        Accounts,
+        StandardFungibleTokens,
+        StandardNonFungibleTokens
     }
-    String SIGNATURES = "Signatures";
 
     List<String> getDefinedExtraNames();
     long getExtrasFee(String name);
