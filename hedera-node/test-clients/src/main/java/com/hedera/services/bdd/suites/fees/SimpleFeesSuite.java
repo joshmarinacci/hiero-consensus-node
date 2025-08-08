@@ -341,8 +341,6 @@ public class SimpleFeesSuite {
 
     @Nested
     class FileFees {
-        final double FileCreate = 0.050_00;
-        final double PerFileByte = 0.000_011;
 
         @HapiTest
         final Stream<DynamicTest> fileCreateFee() {
@@ -403,8 +401,6 @@ public class SimpleFeesSuite {
 
         @HapiTest
         final Stream<DynamicTest> fileAppendFee() {
-            final var FileAppend = 0.050_00;
-
             final var byte_count = 4567;
             var new_contents = "0".repeat(byte_count).getBytes();
             return hapiTest(
@@ -414,20 +410,19 @@ public class SimpleFeesSuite {
                             .contents("0".repeat(byte_count).getBytes())
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-file-txn"),
-                    validateChargedUsd("create-file-txn", FileCreate + (byte_count - FILE_FREE_BYTES) * PerFileByte),
+                    validateChargedFee("create-file-txn", 50 + (byte_count - FILE_FREE_BYTES) * 1 + 4*3),
                     fileAppend("test")
                             .content(new_contents)
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("append-file-txn"),
-                    validateChargedUsd("append-file-txn", FileAppend + (byte_count - FILE_FREE_BYTES) * PerFileByte)
+                    validateChargedFee("append-file-txn", 50 + (byte_count - FILE_FREE_BYTES)*1 + 4*3)
             );
         }
 
         @HapiTest
         final Stream<DynamicTest> fileGetContents() {
-            final var FileGetContents = 0.000_66;
             final var byte_count = 3764;
-            final var create_price = FileCreate + (byte_count - FILE_FREE_BYTES) * PerFileByte;
+            final var create_price = 50 + (byte_count - FILE_FREE_BYTES) * 1 + 4*3;
 //            System.out.println("create price is "+create_price);
             /*
             file create total fees: 67253300
@@ -442,7 +437,7 @@ public class SimpleFeesSuite {
 //            final var create_price_hbar2 = 67253300;
 //            System.out.println("create price hbar is "+create_price_hbar);
 //            System.out.println("create price hbar is "+create_price_hbar2);
-            final var correct = Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
+            final var correct = Math.max(byte_count - FILE_FREE_BYTES, 0) * 1 + 33;
             return hapiTest(
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     getAccountBalance(PAYER).hasTinyBars(100 * ONE_HBAR),
@@ -476,9 +471,8 @@ public class SimpleFeesSuite {
 
         @HapiTest
         final Stream<DynamicTest> fileGetInfo() {
-            final var FileGetContents = 0.000_66;
             final var byte_count = 3764;
-            final var correct = Math.max(byte_count - FILE_FREE_BYTES, 0) * PerFileByte + FileGetContents;
+            final var correct = Math.max(byte_count - FILE_FREE_BYTES, 0) * 1 + 25;
             return hapiTest(
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     fileCreate("test")
@@ -486,7 +480,7 @@ public class SimpleFeesSuite {
                             .contents("0".repeat(byte_count).getBytes())
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-file-txn"),
-                    validateChargedUsd("create-file-txn", FileCreate + (byte_count - FILE_FREE_BYTES) * PerFileByte),
+                    validateChargedUsd("create-file-txn", 50 + (byte_count - FILE_FREE_BYTES) * 1),
                     getFileInfo("test")
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("get-file-info-txn"),
