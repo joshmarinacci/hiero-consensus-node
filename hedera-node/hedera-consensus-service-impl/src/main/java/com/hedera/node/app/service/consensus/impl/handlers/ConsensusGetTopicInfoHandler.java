@@ -33,6 +33,8 @@ import com.hedera.hapi.node.consensus.ConsensusTopicInfo;
 import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.Query;
 import com.hedera.hapi.node.transaction.Response;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
@@ -170,12 +172,12 @@ public class ConsensusGetTopicInfoHandler extends PaidQueryHandler {
     @Override
     public Fees computeFees(@NonNull QueryContext queryContext) {
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_GET_TOPIC_INFO, "Query topic info", 0, false);
+            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_GET_TOPIC_INFO, "Query topic info", false);
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", 0);
-            params.put("numKeys", 0);
+            params.put(Extras.Signatures.name(),0L);
+            params.put(Extras.Keys.name(),0L);
             params.put("hasCustomFee", YesOrNo.NO);
-            return entity.computeFee(params, queryContext.activeRate());
+            return entity.computeFee(params, queryContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var query = queryContext.query();
         final var topicStore = queryContext.createStore(ReadableTopicStore.class);

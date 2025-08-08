@@ -1,7 +1,7 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 
@@ -29,10 +29,10 @@ public class TokenWipe extends AbstractFeeModel {
     }
 
     @Override
-    protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
+    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
-        double baseFeeForWipe = BaseFeeRegistry.getBaseFee("TokenAccountWipe");
+        long baseFeeForWipe = feesSchedule.getServiceBaseFee("TokenAccountWipe");
         fee.addDetail("Base fee", 1, baseFeeForWipe);
 
         int numTokens = (int) values.get("numTokens");

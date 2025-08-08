@@ -13,7 +13,8 @@ import com.hedera.hapi.node.base.ResponseCodeEnum;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.base.TokenID;
 import com.hedera.hapi.node.state.token.Token;
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.fees.usage.SigUsage;
@@ -123,12 +124,12 @@ public class TokenDeleteHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = new EntityCreate("Token", "TokenDelete", "Delete a token type", 0, false);
+            EntityCreate entity = new EntityCreate("Token", "TokenDelete", "Delete a token type", false);
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", 0);
-            params.put("numKeys", 0);
+            params.put(Extras.Signatures.name(), 0L);
+            params.put(Extras.Keys.name(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
-            return entity.computeFee(params, feeContext.activeRate());
+            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var op = feeContext.body();
         return feeContext

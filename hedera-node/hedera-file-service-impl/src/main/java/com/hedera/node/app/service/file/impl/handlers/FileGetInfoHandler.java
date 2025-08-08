@@ -18,6 +18,8 @@ import com.hedera.hapi.node.file.FileGetInfoResponse.FileInfo;
 import com.hedera.hapi.node.state.file.File;
 import com.hedera.hapi.node.transaction.Query;
 import com.hedera.hapi.node.transaction.Response;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.file.FileOperations;
 import com.hedera.node.app.hapi.fees.usage.file.ExtantFileContext;
 import com.hedera.node.app.hapi.fees.usage.file.FileOpsUsage;
@@ -96,10 +98,10 @@ public class FileGetInfoHandler extends FileQueryBase {
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             FileOperations transfer = new FileOperations("FileGetInfo", "get file information");
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", 0);
-            params.put("numKeys", 0);
-            params.put("numBytes", (int)file.contents().length());
-            return transfer.computeFee(params, queryContext.activeRate());
+            params.put(Extras.Signatures.name(),0L);
+            params.put(Extras.Keys.name(),0L);
+            params.put(Extras.Bytes.name(), file.contents().length());
+            return transfer.computeFee(params, queryContext.activeRate(), JsonFeesSchedule.fromJson());
         }
 
         return queryContext

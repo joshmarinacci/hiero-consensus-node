@@ -22,7 +22,9 @@ import com.hedera.hapi.node.base.TokenID;
 import com.hedera.hapi.node.base.TokenType;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.state.token.TokenRelation;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
@@ -179,11 +181,11 @@ public final class TokenBurnHandler extends BaseTokenHandler implements Transact
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             EntityCreate entity = new EntityCreate("Token", "TokenBurn", "Create a token type", 0, false);
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", 0);
-            params.put("numKeys", 0);
+            params.put(Extras.Signatures.name(), 0L);
+            params.put(Extras.Keys.name(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
 
-            return entity.computeFee(params, feeContext.activeRate());
+            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         return feeContext
                 .feeCalculatorFactory()

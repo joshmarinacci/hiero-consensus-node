@@ -17,6 +17,8 @@ import com.hedera.hapi.node.file.FileGetContentsResponse;
 import com.hedera.hapi.node.file.FileGetContentsResponse.FileContents;
 import com.hedera.hapi.node.transaction.Query;
 import com.hedera.hapi.node.transaction.Response;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.file.FileOperations;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.FileFeeBuilder;
@@ -95,10 +97,10 @@ public class FileGetContentsHandler extends FileQueryBase {
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             FileOperations entity = new FileOperations("FileGetContents", "get file contents");
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", 0);
-            params.put("numKeys", 0);
-            params.put("numBytes", (int)fileContents.contents().length());
-            return entity.computeFee(params, queryContext.activeRate());
+            params.put(Extras.Signatures.name(), 0L);
+            params.put(Extras.Keys.name(), 0L);
+            params.put(Extras.Bytes.name(), fileContents.contents().length());
+            return entity.computeFee(params, queryContext.activeRate(), JsonFeesSchedule.fromJson());
         }
 
         return queryContext

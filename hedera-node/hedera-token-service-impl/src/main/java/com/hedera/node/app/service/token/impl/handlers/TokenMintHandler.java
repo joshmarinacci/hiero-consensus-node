@@ -30,6 +30,8 @@ import com.hedera.hapi.node.base.TokenType;
 import com.hedera.hapi.node.state.token.Nft;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.state.token.TokenRelation;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.FTOrNFT;
 import com.hedera.node.app.hapi.fees.apis.token.TokenMint;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
@@ -289,12 +291,11 @@ public class TokenMintHandler extends BaseTokenHandler implements TransactionHan
         final var op = feeContext.body().tokenMintOrThrow();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             TokenMint entity = new TokenMint();
-            entity.setNumFreeSignatures(1);
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", feeContext.numTxnSignatures());
+            params.put(Extras.Signatures.name(), feeContext.numTxnSignatures());
             params.put("fungibleOrNonFungible", op.amount() > 0 ? FTOrNFT.Fungible : FTOrNFT.NonFungible);
             params.put("numTokens", (int) op.amount());
-            return entity.computeFee(params, feeContext.activeRate());
+            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
 
         final var subType = op.amount() > 0 ? SubType.TOKEN_FUNGIBLE_COMMON : SubType.TOKEN_NON_FUNGIBLE_UNIQUE;

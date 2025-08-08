@@ -32,7 +32,8 @@ import com.hedera.hapi.node.state.token.Account;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.state.token.TokenRelation;
 import com.hedera.hapi.node.token.TokenUpdateTransactionBody;
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.fees.usage.SigUsage;
@@ -599,12 +600,12 @@ public class TokenUpdateHandler extends BaseTokenHandler implements TransactionH
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = new EntityCreate("Token", "TokenUpdate", "Update a token type", 0, false);
+            EntityCreate entity = new EntityCreate("Token", "TokenUpdate", "Update a token type", false);
             Map<String, Object> params = new HashMap<>();
-            params.put("numSignatures", 0);
-            params.put("numKeys", 0);
+            params.put(Extras.Signatures.name(), 0L);
+            params.put(Extras.Keys.name(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
-            return entity.computeFee(params, feeContext.activeRate());
+            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var body = feeContext.body();
         final var op = body.tokenUpdateOrThrow();

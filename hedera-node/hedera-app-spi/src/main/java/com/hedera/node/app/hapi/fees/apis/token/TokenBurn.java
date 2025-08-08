@@ -1,7 +1,7 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
-import com.hedera.node.app.hapi.fees.BaseFeeRegistry;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 import com.hedera.node.app.hapi.fees.apis.common.FTOrNFT;
@@ -33,17 +33,17 @@ public class TokenBurn extends AbstractFeeModel {
     }
 
     @Override
-    protected FeeResult computeApiSpecificFee(Map<String, Object> values) {
+    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
-        fee.addDetail("Base fee", 1, BaseFeeRegistry.getBaseFee("TokenBurn"));
+        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee("TokenBurn"));
 
         final FTOrNFT fungibleOrNonFungible = (FTOrNFT) values.get("fungibleOrNonFungible");
         if (fungibleOrNonFungible == NonFungible) {
             int numTokens = (int) values.get("numTokens");
             final int numFreeTokens = 1;
             if (numTokens > numFreeTokens) {
-                fee.addDetail("Additional NFTs", numTokens - numFreeTokens, (numTokens - numFreeTokens) * BaseFeeRegistry.getBaseFee("TokenBurn"));
+                fee.addDetail("Additional NFTs", numTokens - numFreeTokens, (numTokens - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenBurn"));
             }
         }
 

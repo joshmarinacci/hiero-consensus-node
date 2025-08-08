@@ -2,6 +2,7 @@ package com.hedera.services.bdd.suites.fees;
 
 import com.hedera.hapi.block.stream.BlockItem;
 import com.hedera.hapi.node.base.HederaFunctionality;
+import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
@@ -290,8 +291,8 @@ public class SimpleFeesSuite {
 
                                 EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", true);
                                 Map<String, Object> params = new HashMap<>();
-                                params.put("numSignatures", 0);
-                                params.put("numKeys", 0);
+                                params.put(Extras.Signatures.name(), 0L);
+                                params.put(Extras.Keys.name(), 0L);
                                 params.put("hasCustomFee", YesOrNo.NO);
                                 var fee = entity.computeFee(params, current_rate, JsonFeesSchedule.fromJson());
                                 System.out.println("recomputed fee is " + fee);
