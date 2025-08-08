@@ -130,7 +130,7 @@ public class FileDeleteHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull FeeContext feeContext) {
         final var txnBody = feeContext.body();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            FileOperations transfer = new FileOperations("FileDelete", "dummy description");
+            FileOperations transfer = new FileOperations("FileDelete", "delete file");
             Map<String, Object> params = new HashMap<>();
             params.put(Extras.Signatures.name(), 0L);
             params.put(Extras.Keys.name(), 0L);

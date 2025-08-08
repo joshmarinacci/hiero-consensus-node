@@ -61,6 +61,13 @@ public abstract class AbstractFeeModel {
     public Fees computeFee(Map<String, Object> values, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule) {
         checkParameters(values);
         System.out.println("params are " + values);
+        final List<String> serviceExtras = feesSchedule.getServiceExtras(this.getMethodName());
+        for (String key : serviceExtras) {
+            if (!values.containsKey(key)) {
+                System.err.println("input params missing " + key + " required by method " + this.getMethodName());
+            }
+        }
+
         preprocessEnumValues(values);
         //  get base fee for the service
         var result = computeApiSpecificFee(values, feesSchedule);

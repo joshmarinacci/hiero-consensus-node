@@ -35,6 +35,11 @@ public class FileOperations extends AbstractFeeModel {
     }
 
     @Override
+    public String getMethodName() {
+        return this.api;
+    }
+
+    @Override
     protected List<ParameterDefinition> apiSpecificParams() {
         return params;
     }

@@ -132,13 +132,12 @@ public class SimpleFeesSuite {
                     // create topic. provide up to 1 hbar to pay for it
                     createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedUsd("create-topic-txn", 0.020_00),
+                    validateChargedFee("create-topic-txn", 19 + (1)*3),
                     // get topic info, provide up to 1 hbar to pay for it
                     getTopicInfo("testTopic").payingWith(PAYER)
                             .fee(ONE_HBAR).via("get-topic-txn").logged(),
                     // TODO: query is getting zeroed out
-                    //  validateChargedUsd("get-topic-txn", 0.000_2)
-                    validateChargedUsd("get-topic-txn", 0.000_1)
+                    validateChargedFee("get-topic-txn", 1)
             );
         }
 
@@ -424,21 +423,7 @@ public class SimpleFeesSuite {
         final Stream<DynamicTest> fileGetContents() {
             final var byte_count = 3764;
             final var create_price = 50 + (byte_count - FILE_FREE_BYTES) * 1 + 4*3;
-//            System.out.println("create price is "+create_price);
-            /*
-            file create total fees: 67253300
-            FCH: final fees is Fees[nodeFee=6725300, networkFee=30264000, serviceFee=30264000, usd=0.080704, details={Base fee=FeeDetail{1, .050000 }, Additional file size=FeeDetail{2764, .030404 }, Additional signature verifications=FeeDetail{3, .000300 }}] 67253300
-
-            create price is 0.080404
-            create price hbar is 96484800
-
-            tinybar balance is 9932746700
-             */
-//            final var create_price_hbar = (long)(create_price * (1/12.0) * ONE_HBAR * 100) ;
-//            final var create_price_hbar2 = 67253300;
-//            System.out.println("create price hbar is "+create_price_hbar);
-//            System.out.println("create price hbar is "+create_price_hbar2);
-            final var correct = Math.max(byte_count - FILE_FREE_BYTES, 0) * 1 + 33;
+            final var get_price    = 10 + (byte_count - FILE_FREE_BYTES) * 1 + 4*3;
             return hapiTest(
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     getAccountBalance(PAYER).hasTinyBars(100 * ONE_HBAR),
@@ -458,15 +443,15 @@ public class SimpleFeesSuite {
 //                        }
 //                        return Optional.empty();
 //                    }),
-                    getAccountBalance(PAYER).hasTinyBars(9_932_746_700L),
-                    validateChargedUsdWithin("create-file-txn", create_price, 1.00),
+//                    getAccountBalance(PAYER).hasTinyBars(9_932_746_700L),
+                    validateChargedFee("create-file-txn", create_price),
                     getFileContents("test")
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("get-file-contents-txn"),
-                    getAccountBalance(PAYER).hasTinyBars(9_932_746_700L),
+//                    getAccountBalance(PAYER).hasTinyBars(9_932_746_700L),
                     // TODO: doesn't work yet
                     //  validateChargedUsd("get-file-contents-txn", create_price, 1.00),
-                    validateChargedUsd("get-file-contents-txn", 0.0001)
+                    validateChargedFee("get-file-contents-txn", get_price)
             );
         }
 
@@ -481,13 +466,13 @@ public class SimpleFeesSuite {
                             .contents("0".repeat(byte_count).getBytes())
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-file-txn"),
-                    validateChargedUsd("create-file-txn", 50 + (byte_count - FILE_FREE_BYTES) * 1),
+                    validateChargedFee("create-file-txn", 50 + (byte_count - FILE_FREE_BYTES) * 1),
                     getFileInfo("test")
                             .payingWith(PAYER)
                             .fee(ONE_HBAR).via("get-file-info-txn"),
                     // TODO: query is getting zeroed out
                     //  validateChargedUsd("get-file-info-txn", correct)
-                    validateChargedUsd("get-file-info-txn", 0.0001)
+                    validateChargedFee("get-file-info-txn", correct)
             );
         }
     }

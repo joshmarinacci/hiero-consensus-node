@@ -179,7 +179,7 @@ public final class TokenBurnHandler extends BaseTokenHandler implements Transact
         final var op = feeContext.body();
         final var meta = TOKEN_OPS_USAGE_UTILS.tokenBurnUsageFrom(CommonPbjConverters.fromPbj(op));
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = new EntityCreate("Token", "TokenBurn", "Create a token type", 0, false);
+            EntityCreate entity = new EntityCreate("Token", "TokenBurn", "Create a token type", false);
             Map<String, Object> params = new HashMap<>();
             params.put(Extras.Signatures.name(), 0L);
             params.put(Extras.Keys.name(), 0L);

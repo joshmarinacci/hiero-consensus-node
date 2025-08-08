@@ -159,7 +159,7 @@ public class FileAppendHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull FeeContext feeContext) {
         final var body = feeContext.body();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            FileOperations transfer = new FileOperations("FileAppend", "dummy description");
+            FileOperations transfer = new FileOperations("FileAppend", "append to file");
             Map<String, Object> params = new HashMap<>();
             params.put(Extras.Signatures.name(),(long) feeContext.numTxnSignatures());
             params.put(Extras.Keys.name(),1L);

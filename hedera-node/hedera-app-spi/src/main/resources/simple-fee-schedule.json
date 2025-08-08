@@ -113,6 +113,14 @@
           "extras": [
             { "name": "Signatures", "includedCount": 1 }
           ]
+        },
+        {
+          "name": "ConsensusGetTopicInfo",
+          "baseFee": 1,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1      },
+            { "name": "Keys",       "includedCount": 1      }
+          ]
         }
       ]
     },
@@ -152,6 +160,15 @@
           "extras": [
             { "name": "Signatures", "includedCount": 1},
             { "name": "Keys", "includedCount": 1}
+          ]
+        },
+        {
+          "name": "FileGetContents",
+          "baseFee": 10,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1},
+            { "name": "Keys", "includedCount": 1},
+            { "name": "Bytes", "includedCount": 1000}
           ]
         }
       ]

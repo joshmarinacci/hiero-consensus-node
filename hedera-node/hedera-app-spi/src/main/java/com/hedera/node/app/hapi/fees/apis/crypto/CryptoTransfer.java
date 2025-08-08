@@ -46,10 +46,10 @@ public class CryptoTransfer extends AbstractFeeModel {
         FeeCheckResult base = super.checkParameters(values);
         if (!base.result) return base;
 
-        if ( (int) values.get("numAccountsInvolved") < 2 ||
-                ((int) values.get("numFTNoCustomFeeEntries") < 2 &&
-                (int) values.get("numNFTNoCustomFeeEntries") < 2 &&
-                (int) values.get("numNFTWithCustomFeeEntries") < 2)) {
+        if ( (long) values.get(Extras.Accounts.name()) < 2 ||
+                ((long) values.get("numFTNoCustomFeeEntries") < 2 &&
+                (long) values.get("numNFTNoCustomFeeEntries") < 2 &&
+                (long) values.get("numNFTWithCustomFeeEntries") < 2)) {
             return FeeCheckResult.failure("There must be at least 2 entries of hbar or token transfers.");
         }
 
