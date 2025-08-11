@@ -10,7 +10,6 @@ from JSON and the other one for unit testing using in-memory fees.
 title: Fees Schedule
 ---
 classDiagram
-namespace FeesSchedule {
     AbstractFeesSchedule <|-- JsonFeesSchedule : implements
     AbstractFeesSchedule <|-- MockFeesSchedule : implements
     
@@ -42,6 +41,5 @@ namespace FeesSchedule {
         + setServiceExtraIncludedCount(String method, String signatures, long value)
         + setServiceExtraIncludedCount(String method, Extras extra, long value)
     }
-}
 
 ```
