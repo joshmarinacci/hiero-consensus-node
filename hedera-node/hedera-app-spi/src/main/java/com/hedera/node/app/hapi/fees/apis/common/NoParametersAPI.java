@@ -23,6 +23,11 @@ public class NoParametersAPI extends AbstractFeeModel {
     public String getService() { return service; }
 
     @Override
+    public String getMethodName() {
+        return this.api;
+    }
+
+    @Override
     public String getDescription() {
         return description;
     }

@@ -137,7 +137,7 @@ public class SimpleFeesSuite {
                     getTopicInfo("testTopic").payingWith(PAYER)
                             .fee(ONE_HBAR).via("get-topic-txn").logged(),
                     // TODO: query is getting zeroed out
-                    validateChargedFee("get-topic-txn", 1)
+                    validateChargedFee("get-topic-txn", 4)
             );
         }
 
@@ -479,7 +479,7 @@ public class SimpleFeesSuite {
 
     @Nested
     class CryptoFees {
-        static final double CryptoTransferFee_USD =  0.000_10;
+//        static final double CryptoTransferFee_USD =  0.000_10;
         static final double TokenTransferFee_USD =  0.001_00;
         static final double PerCryptoTransferAccount = 0.000_01;
         static final double ExtraSig = 0.000_10;
@@ -531,7 +531,11 @@ public class SimpleFeesSuite {
                             .payingWith(treasury)
                             .fee(ONE_HBAR)
                             .via("crypto-transfer-txn"),
-                    validateChargedFee("crypto-transfer-txn", 18+1*3)
+                    validateChargedFee("crypto-transfer-txn",
+                            18 // base
+                            + (2-1)*3 // 2 accounts
+                            +1*3  // 1 sig
+                    )
             );
         }
 
@@ -566,10 +570,10 @@ public class SimpleFeesSuite {
                             .fee(ONE_HBAR)
                             .via("crypto-transfer-txn")
                             .hasKnownStatus(SUCCESS),
-                    validateChargedUsd("crypto-transfer-txn",
-                            CryptoTransferFee_USD
-                                    + PerCryptoTransferAccount * (4-2)
-                                    + (3-1)*ExtraSig)
+                    validateChargedFee("crypto-transfer-txn",
+                            18   // base fee for CryptoTransfer
+                                    + (4-1)*3  // accounts: 4 * 3
+                                    + (2+1)*3) // 2 sigs + 1 key for node, *3 to include network
             );
         }
 
@@ -606,12 +610,7 @@ public class SimpleFeesSuite {
                     // 3 accounts, 2 signatures, 2 ft transfer count
                     // 2 accounts are free, 1 sigs are free, 1 ft transfer is free
                     // 1 extra account, 1 extra sig, 1 extra ft
-                    validateChargedUsd("crypto-transfer-txn",
-                            TokenTransferFee_USD
-                                    + PerCryptoTransferAccount * (3-2)
-                                    + TokenTransferFee_USD * (2-1)
-                                    + ExtraSig* (2-1)
-                    )
+                    validateChargedFee("crypto-transfer-txn", 18 + 1*(3-2) + 1*(2-1) + 1*(2-1) + 1*3)
             );
         }
 

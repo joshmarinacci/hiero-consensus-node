@@ -29,6 +29,11 @@ public class CryptoAllowance extends AbstractFeeModel {
     }
 
     @Override
+    public String getMethodName() {
+        return this.api;
+    }
+
+    @Override
     public String getDescription() {
         return description;
     }

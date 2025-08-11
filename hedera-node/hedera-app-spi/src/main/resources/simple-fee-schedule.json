@@ -56,7 +56,9 @@
           "baseFee": 18,
           "extras": [
             {  "name": "Signatures", "includedCount": 1 },
-            {  "name": "Keys",       "includedCount": 1 }
+            {  "name": "Keys",       "includedCount": 1 },
+            {  "name": "Accounts",       "includedCount": 1 },
+            {  "name": "StandardFungibleTokens", "includedCount": 1}
           ]
         },
         {
@@ -64,6 +66,14 @@
           "baseFee": 22,
           "extras": [
             { "name": "Signatures", "includedCount": 1 }
+          ]
+        },
+        {
+          "name": "TokenTransfer",
+          "baseFee": 33,
+          "extras": [
+            {  "name": "StandardFungibleTokens", "includedCount": 1},
+            {  "name": "Accounts",               "includedCount": 1}
           ]
         }
       ]

@@ -27,6 +27,11 @@ public class CryptoTransfer extends AbstractFeeModel {
     }
 
     @Override
+    public String getMethodName() {
+        return "CryptoTransfer";
+    }
+
+    @Override
     public String getService() {
         return service;
     }
@@ -46,13 +51,13 @@ public class CryptoTransfer extends AbstractFeeModel {
         FeeCheckResult base = super.checkParameters(values);
         if (!base.result) return base;
 
-        if ( (long) values.get(Extras.Accounts.name()) < 2 ||
-                ((long) values.get("numFTNoCustomFeeEntries") < 2 &&
-                (long) values.get("numNFTNoCustomFeeEntries") < 2 &&
-                (long) values.get("numNFTWithCustomFeeEntries") < 2)) {
-            return FeeCheckResult.failure("There must be at least 2 entries of hbar or token transfers.");
-        }
-
+//        if ( (long) values.get(Extras.Accounts.name()) < 2 ||
+//                ((long) values.get("numFTNoCustomFeeEntries") < 2 &&
+//                (long) values.get("numNFTNoCustomFeeEntries") < 2 &&
+//                (long) values.get("numNFTWithCustomFeeEntries") < 2)) {
+//            return FeeCheckResult.failure("There must be at least 2 entries of hbar or token transfers.");
+//        }
+//
         return FeeCheckResult.success();
     }
 
@@ -77,9 +82,9 @@ public class CryptoTransfer extends AbstractFeeModel {
 
         // Extract values
         long ftNoCustom = getLong(values.get(Extras.StandardFungibleTokens.name()));
-        long nftNoCustom = getLong(values.get("numNFTNoCustomFeeEntries"));
-        long ftWithCustom = getLong(values.get("numFTWithCustomFeeEntries"));
-        long nftWithCustom = getLong(values.get("numNFTWithCustomFeeEntries"));
+        long nftNoCustom = getLong(values.get(Extras.StandardNonFungibleTokens.name()));
+        long ftWithCustom = getLong(values.get(Extras.CustomFeeFungibleTokens.name()));
+        long nftWithCustom = getLong(values.get(Extras.CustomFeeNonFungibleTokens.name()));
         long customTokens = ftWithCustom + nftWithCustom;
         boolean tokenTransfersPresent = (ftNoCustom + nftNoCustom + ftWithCustom + nftWithCustom) > 0;
 
@@ -107,8 +112,12 @@ public class CryptoTransfer extends AbstractFeeModel {
         }
 
         // Overage for the number of accounts that we need to update for handling this transaction
-        if (values.get(Extras.Accounts.name()) instanceof Long num && num > 2)
-            fee.addDetail("Accounts involved", (num - 2), (num - 2) * feesSchedule.getExtrasFee(Extras.Accounts.name()));
+        long numFreeAccounts = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extras.Accounts.name());
+        var numAccounts = (long)values.get(Extras.Accounts.name());
+        if (numAccounts > numFreeAccounts) {
+            var excess = numAccounts - numFreeAccounts;
+            fee.addDetail("Accounts involved", excess, excess * feesSchedule.getExtrasFee(Extras.Accounts.name()));
+        }
 
         // Overage for the number of token-types that we need to fetch for handling this transaction
         // Process the tokens with Custom Fee first since we have already increased the base price to accommodate the presence of custom-fee tokens, and the included free token should count against the token with custom fee

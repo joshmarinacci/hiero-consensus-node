@@ -21,6 +21,11 @@ public class TokenMint extends AbstractFeeModel {
     }
 
     @Override
+    public String getMethodName() {
+        return "TokenMint";
+    }
+
+    @Override
     public String getDescription() {
         return "Mint tokens";
     }

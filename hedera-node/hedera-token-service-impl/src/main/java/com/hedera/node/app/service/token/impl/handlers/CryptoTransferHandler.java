@@ -217,8 +217,8 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
             for (final var amount : op.transfersOrElse(TransferList.DEFAULT).accountAmounts()) {
                 accounts.add(amount.accountID());
             }
-            var ftCount = 0;
-            var nftCount = 0;
+            long ftCount = 0;
+            long nftCount = 0;
             for (final var tokenTransfers : op.tokenTransfers()) {
                 System.out.println("  token transfer: " + tokenTransfers);
                 System.out.println("  token is " + tokenTransfers.token());
@@ -237,14 +237,15 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
 
             CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
             Map<String, Object> params = new HashMap<>();
-            System.out.println("number of txn signatures: " + feeContext.numTxnSignatures());
+            System.out.println("Signatures: number of txn signatures: " + feeContext.numTxnSignatures());
             params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
             System.out.println("account count " + accounts.size());
-            params.put("numAccountsInvolved", accounts.size());
-            System.out.println("ft count " + ftCount);
-            params.put("numFTNoCustomFeeEntries", ftCount);
+            params.put(Extras.Accounts.name(), (long)accounts.size());
+            System.out.println("fungible tokens count " + ftCount);
+            params.put(Extras.StandardFungibleTokens.name(), ftCount);
             System.out.println("nft count " + nftCount);
-            params.put("numNFTNoCustomFeeEntries", nftCount);
+            params.put(Extras.StandardNonFungibleTokens.name(), nftCount);
+            params.put(Extras.Keys.toString(), 0L);
             return transfer.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var config = feeContext.configuration();

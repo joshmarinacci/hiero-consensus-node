@@ -20,9 +20,7 @@ public abstract class AbstractFeeModel {
     // Returns the service name of the API
     public abstract String getService();
 
-    public String getMethodName() {
-        throw  new UnsupportedOperationException("Not supported yet.");
-    }
+    public abstract String getMethodName();
 
     // Returns the description of the API
     public abstract String getDescription();
@@ -95,7 +93,7 @@ public abstract class AbstractFeeModel {
         final long total_network_fee = total_node_fee * feesSchedule.getNetworkMultiplier();
         System.out.println("total node fee: " + total_node_fee);
         System.out.println("total network fee: " + total_network_fee);
-        System.out.println("total node fee: " + result.service);
+        System.out.println("total service fee: " + result.service);
         result.details.put("Network Fee ", new FeeResult.FeeDetail(1, total_network_fee));
 
         //TODO: I'm pretty sure these calculations are wrong

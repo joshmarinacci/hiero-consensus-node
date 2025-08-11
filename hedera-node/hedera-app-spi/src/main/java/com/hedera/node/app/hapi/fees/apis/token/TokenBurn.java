@@ -23,6 +23,11 @@ public class TokenBurn extends AbstractFeeModel {
     }
 
     @Override
+    public String getMethodName() {
+        return "TokenBurn";
+    }
+
+    @Override
     public String getDescription() {
         return "Burn tokens";
     }

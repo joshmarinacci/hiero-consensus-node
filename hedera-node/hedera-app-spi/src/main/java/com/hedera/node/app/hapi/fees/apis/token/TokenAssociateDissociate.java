@@ -26,6 +26,11 @@ public class TokenAssociateDissociate extends AbstractFeeModel {
     }
 
     @Override
+    public String getMethodName() {
+        return "TokenAssociateDissociate";
+    }
+
+    @Override
     public String getDescription() {
         return (this.associateOrDissociate == AssociateOrDissociate.Associate) ? "Associate tokens-types to accounts" : "Dissociate tokens-types from accounts";
     }

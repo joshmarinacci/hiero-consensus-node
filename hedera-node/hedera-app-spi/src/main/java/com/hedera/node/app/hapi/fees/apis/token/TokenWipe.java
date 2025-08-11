@@ -19,6 +19,11 @@ public class TokenWipe extends AbstractFeeModel {
     }
 
     @Override
+    public String getMethodName() {
+        return "TokenAccountWipe";
+    }
+
+    @Override
     public String getDescription() {
         return "Wipe tokens";
     }
