@@ -15,7 +15,7 @@
   },
 
   "definedExtras": [
-    { "name":  "Signatures",    "fee": 1 },
+    { "name":  "Signatures",    "fee":  1 },
     { "name":  "Bytes",         "fee":  1},
     { "name":  "Keys",          "fee":  1},
     { "name":  "TokenTypes",    "fee":  3},
@@ -24,7 +24,13 @@
     { "name":  "StandardFungibleTokens",       "fee": 3 },
     { "name":  "StandardNonFungibleTokens",    "fee": 3 },
     { "name":  "CustomFeeFungibleTokens",      "fee": 3 },
-    { "name":  "CustomFeeNonFungibleTokens",   "fee": 3 }
+    { "name":  "CustomFeeNonFungibleTokens",   "fee": 3 },
+    { "name":  "CreatedAutoAssociations",      "fee": 3 },
+    { "name":  "CreatedAccounts",              "fee": 3 },
+    { "name":  "CustomFee",                    "fee": 30 },
+    { "name":  "Gas",                          "fee": 1 },
+    { "name":  "Allowances",                   "fee": 2000 },
+    { "name":  "Airdrops",                     "fee": 8800 }
   ],
   "serviceFees": [
     {

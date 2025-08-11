@@ -9,9 +9,18 @@ public interface AbstractFeesSchedule {
         Bytes,
         Keys,
         TokenTypes,
+        NFTSerials,
         Accounts,
         StandardFungibleTokens,
-        StandardNonFungibleTokens
+        StandardNonFungibleTokens,
+        CustomFeeFungibleTokens,
+        CustomFeeNonFungibleTokens,
+        CreatedAutoAssociations,
+        CreatedAccounts,
+        CustomFee,
+        Gas,
+        Allowances,
+        Airdrops,
     }
 
     List<String> getDefinedExtraNames();
