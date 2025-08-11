@@ -41,15 +41,15 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
         this.serviceMethods = new HashMap<>();
         for (var service : buf.serviceFees()) {
             this.services.put(service.name(), service);
-            System.out.println("service " + service.name());
+//            System.out.println("service " + service.name());
             for (var txn : service.transactions()) {
                 this.serviceMethods.put(txn.name(),txn);
-                System.out.println("transaction " + txn.name());
-                System.out.println("txn " + txn);
+//                System.out.println("transaction " + txn.name());
+//                System.out.println("txn " + txn);
             }
             for (var txn : service.queries()) {
                 this.serviceMethods.put(txn.name(),txn);
-                System.out.println("query " + txn.name());
+//                System.out.println("query " + txn.name());
             }
         }
     }

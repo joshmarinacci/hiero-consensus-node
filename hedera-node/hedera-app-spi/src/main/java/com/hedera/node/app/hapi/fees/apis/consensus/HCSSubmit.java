@@ -30,6 +30,11 @@ public class HCSSubmit extends AbstractFeeModel {
     }
 
     @Override
+    public String getMethodName() {
+        return "ConsensusSubmitMessage";
+    }
+
+    @Override
     protected List<ParameterDefinition> apiSpecificParams() {
         return params;
     }
