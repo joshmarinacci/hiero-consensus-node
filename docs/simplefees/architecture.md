@@ -15,15 +15,15 @@ classDiagram
     
     class AbstractFeesSchedule {
         + List getDefinedExtrasNames()
-        + List<String> getDefinedExtraNames()
+        + List~String~ getDefinedExtraNames()
         + long getExtrasFee(String name)
         + long getNodeBaseFee()
-        + List<String> getNodeExtraNames()
+        + List~String~ getNodeExtraNames()
         + long getNodeExtraIncludedCount(String name)
         + long getNetworkMultiplier()
-        + List<String> getServiceNames()
+        + List~String~ getServiceNames()
         + long getServiceBaseFee(String method)
-        + List<String> getServiceExtras(String method)
+        + List~String~ getServiceExtras(String method)
         + long getServiceExtraIncludedCount(String method, String name)
     }
     
