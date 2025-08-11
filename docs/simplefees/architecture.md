@@ -34,7 +34,7 @@ classDiagram
     }
     
     class JsonFeesSchedule {
-        + static JsonFeesSchedule fromJson();
+        + static JsonFeesSchedule fromJson()
     }
     
     class MockFeesSchedule {
