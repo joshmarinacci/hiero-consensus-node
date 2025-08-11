@@ -2,7 +2,7 @@
 
 This is the architecture for simple fees aka. *Fees 2.0*.
 
-The Fees schedule is defined by the AbstractFeesSchedule class with two concrete implementations, one to load the schedule
+The Fees schedule is defined by the AbstractFeesSchedule interface with two implementations, one to load the schedule
 from JSON and the other one for unit testing using in-memory fees.
 
 ```mermaid
@@ -10,8 +10,9 @@ from JSON and the other one for unit testing using in-memory fees.
 title: Fees Schedule
 ---
 classDiagram
-    AbstractFeesSchedule <|-- JsonFeesSchedule
-    AbstractFeesSchedule <|-- MockFeesSchedule
+namespace FeesSchedule {
+    AbstractFeesSchedule <|-- JsonFeesSchedule : implements
+    AbstractFeesSchedule <|-- MockFeesSchedule : implements
     
     class AbstractFeesSchedule {
         + List getDefinedExtrasNames()
@@ -41,5 +42,6 @@ classDiagram
         + setServiceExtraIncludedCount(String method, String signatures, long value)
         + setServiceExtraIncludedCount(String method, Extras extra, long value)
     }
+}
 
 ```
