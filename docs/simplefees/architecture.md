@@ -80,7 +80,7 @@ classDiagram
         + String getMethodName()
         + String getDescription()
         + List~ParameterDefinition~ getParameters()
-        + FeeCheckResult checkParameters(Map<params)
+        + FeeCheckResult checkParameters(params)
         + Fees computeFee(params, exchangeRate, feesSchedule)
     }
 
