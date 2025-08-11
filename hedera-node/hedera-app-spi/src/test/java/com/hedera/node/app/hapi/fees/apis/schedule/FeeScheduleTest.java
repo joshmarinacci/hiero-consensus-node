@@ -58,7 +58,6 @@ public class FeeScheduleTest {
             // check that all extras referenced in services are in the actual json
             for (String methodName : feeSchedule.getServiceNames()) {
                 for (String extraName : feeSchedule.getServiceExtras(methodName)) {
-                    System.out.println("checking " + extraName + " in method " + methodName);
                     assertDoesNotThrow(() -> feeSchedule.getServiceExtraIncludedCount(methodName, extraName));
                     assertDoesNotThrow(() -> feeSchedule.getExtrasFee(extraName));
                 }
