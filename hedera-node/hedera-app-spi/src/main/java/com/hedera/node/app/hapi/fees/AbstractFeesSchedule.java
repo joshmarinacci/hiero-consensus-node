@@ -32,6 +32,7 @@ public interface AbstractFeesSchedule {
 
     long getNetworkMultiplier();
 
+    List<String> getServiceNames();
     long getServiceBaseFee(String method);
     List<String> getServiceExtras(String method);
     long getServiceExtraIncludedCount(String method, String name);

@@ -82,6 +82,12 @@ public class MockFeesSchedule implements AbstractFeesSchedule {
     public long getNetworkMultiplier() {
         return this.networkMultiplier;
     }
+
+    @Override
+    public List<String> getServiceNames() {
+        return List.of();
+    }
+
     public void setNetworkMultiplier(long multiplier) {
         this.networkMultiplier = multiplier;
     }

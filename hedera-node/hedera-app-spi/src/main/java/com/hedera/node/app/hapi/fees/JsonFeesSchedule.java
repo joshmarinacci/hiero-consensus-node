@@ -96,6 +96,11 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     }
 
     @Override
+    public List<String> getServiceNames() {
+        return this.serviceMethods.keySet().stream().collect(Collectors.toList());
+    }
+
+    @Override
     public long getServiceBaseFee(String method) {
         if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
         return this.serviceMethods.get(method).baseFee();

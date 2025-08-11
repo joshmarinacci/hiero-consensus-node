@@ -50,6 +50,19 @@ public class FeeScheduleTest {
             for (String extra : definedExtras) {
                 assertDoesNotThrow(() -> feeSchedule.getExtrasFee(extra));
             }
+            // check that there are no extra Extras in the JSON
+            for (String name : feeSchedule.getDefinedExtraNames()) {
+                assertDoesNotThrow(() ->Extras.valueOf(name));
+            }
+
+            // check that all extras referenced in services are in the actual json
+            for (String methodName : feeSchedule.getServiceNames()) {
+                for (String extraName : feeSchedule.getServiceExtras(methodName)) {
+                    System.out.println("checking " + extraName + " in method " + methodName);
+                    assertDoesNotThrow(() -> feeSchedule.getServiceExtraIncludedCount(methodName, extraName));
+                    assertDoesNotThrow(() -> feeSchedule.getExtrasFee(extraName));
+                }
+            }
         });
     }
 //    @Test
