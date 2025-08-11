@@ -23,7 +23,7 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     public static JsonFeesSchedule fromJson() {
         try (final var fin = JsonFeesSchedule.class.getClassLoader().getResourceAsStream("simple-fee-schedule.json")) {
             final var buf = SimpleFeeSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
-            System.out.println("parsed simple fees schedule: " + buf);
+//            System.out.println("parsed simple fees schedule: " + buf);
             return new JsonFeesSchedule(buf);
         } catch (Exception e) {
             System.out.println("exception loading fees schedule " + e.getMessage());
