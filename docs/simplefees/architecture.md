@@ -10,24 +10,21 @@ from JSON and the other one for unit testing using in-memory fees.
 title: Fees Schedule
 ---
 classDiagram
-    note "From Duck till Zebra"
     AbstractFeesSchedule <|-- JsonFeesSchedule
-    note for Duck "can fly\ncan swim\ncan dive\ncan help in debugging"
     AbstractFeesSchedule <|-- MockFeesSchedule
     
     class AbstractFeesSchedule {
             +List getDefinedExtrasNames()
             +List<String> getDefinedExtraNames()
             +long getExtrasFee(String name)
-            +long getNodeBaseFee();
-    +List<String> getNodeExtraNames();
-    +long getNodeExtraIncludedCount(String name);
-    +long getNetworkMultiplier();
-    +List<String> getServiceNames();
-    +long getServiceBaseFee(String method);
-    +List<String> getServiceExtras(String method)
-    +long getServiceExtraIncludedCount(String method, String name)
-    
+            + long getNodeBaseFee()
+            +List<String> getNodeExtraNames()
+            +long getNodeExtraIncludedCount(String name)
+            +long getNetworkMultiplier()
+            +List<String> getServiceNames()
+            +long getServiceBaseFee(String method)
+            +List<String> getServiceExtras(String method)
+            +long getServiceExtraIncludedCount(String method, String name)
     }
 
 ```
