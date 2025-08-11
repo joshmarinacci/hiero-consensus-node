@@ -13,7 +13,8 @@ classDiagram
     AbstractFeesSchedule <|-- JsonFeesSchedule : implements
     AbstractFeesSchedule <|-- MockFeesSchedule : implements
     
-    class AbstractFeesSchedule <<interface>> {
+    class AbstractFeesSchedule {
+         <<interface>>
         + List getDefinedExtrasNames()
         + List~String~ getDefinedExtraNames()
         + long getExtrasFee(String name)
