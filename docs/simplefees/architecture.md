@@ -85,6 +85,7 @@ classDiagram
     }
     
     class Fees {
+         <<record>>
         + long usd
         + long nodeFee
         + long networkFee
