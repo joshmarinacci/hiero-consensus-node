@@ -14,17 +14,32 @@ classDiagram
     AbstractFeesSchedule <|-- MockFeesSchedule
     
     class AbstractFeesSchedule {
-            +List getDefinedExtrasNames()
-            +List<String> getDefinedExtraNames()
-            +long getExtrasFee(String name)
-            + long getNodeBaseFee()
-            +List<String> getNodeExtraNames()
-            +long getNodeExtraIncludedCount(String name)
-            +long getNetworkMultiplier()
-            +List<String> getServiceNames()
-            +long getServiceBaseFee(String method)
-            +List<String> getServiceExtras(String method)
-            +long getServiceExtraIncludedCount(String method, String name)
+        + List getDefinedExtrasNames()
+        + List<String> getDefinedExtraNames()
+        + long getExtrasFee(String name)
+        + long getNodeBaseFee()
+        + List<String> getNodeExtraNames()
+        + long getNodeExtraIncludedCount(String name)
+        + long getNetworkMultiplier()
+        + List<String> getServiceNames()
+        + long getServiceBaseFee(String method)
+        + List<String> getServiceExtras(String method)
+        + long getServiceExtraIncludedCount(String method, String name)
+    }
+    
+    class JsonFeesSchedule {
+        + static JsonFeesSchedule fromJson();
+    }
+    
+    class MockFeesSchedule {
+        + setExtrasFee(String name, long value)
+        + setExtrasFee(Extras name, long value)
+        + setNodeBaseFee(long value)
+        + setNodeExtraIncludedCount(String signatures, long value)
+        + setNetworkMultiplier(long multiplier)
+        + setServiceBaseFee(String method, long value)
+        + setServiceExtraIncludedCount(String method, String signatures, long value)
+        + setServiceExtraIncludedCount(String method, Extras extra, long value)
     }
 
 ```
