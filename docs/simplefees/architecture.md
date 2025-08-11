@@ -80,8 +80,8 @@ classDiagram
         + String getMethodName()
         + String getDescription()
         + List~ParameterDefinition~ getParameters()
-        + FeeCheckResult checkParameters(Map<String, Object> values)
-        + Fees computeFee(Map<String, Object> values, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule)
+        + FeeCheckResult checkParameters(Map<params)
+        + Fees computeFee(params, exchangeRate, feesSchedule)
     }
 
 ```
