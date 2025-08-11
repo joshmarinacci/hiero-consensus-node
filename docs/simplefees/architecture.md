@@ -73,7 +73,7 @@ node, network, and service.
 title: Fees Schedule
 ---
 classDiagram
-    AbstractFeeModel {
+    class AbstractFeeModel {
          <<interface>>
         + String getService()
         + String getMethodName()
