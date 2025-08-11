@@ -2,34 +2,32 @@
 
 This is the architecture for simple fees aka. *Fees 2.0*.
 
-This is a class diagram
+The Fees schedule is defined by the AbstractFeesSchedule class with two concrete implementations, one to load the schedule
+from JSON and the other one for unit testing using in-memory fees.
 
 ```mermaid
 ---
-title: Animal example
+title: Fees Schedule
 ---
 classDiagram
     note "From Duck till Zebra"
-    Animal <|-- Duck
+    AbstractFeesSchedule <|-- JsonFeesSchedule
     note for Duck "can fly\ncan swim\ncan dive\ncan help in debugging"
-    Animal <|-- Fish
-    Animal <|-- Zebra
-    Animal : +int age
-    Animal : +String gender
-    Animal: +isMammal()
-    Animal: +mate()
-    class Duck{
-        +String beakColor
-        +swim()
-        +quack()
-    }
-    class Fish{
-        -int sizeInFeet
-        -canEat()
-    }
-    class Zebra{
-        +bool is_wild
-        +run()
+    AbstractFeesSchedule <|-- MockFeesSchedule
+    
+    class AbstractFeesSchedule {
+            +List getDefinedExtrasNames()
+            +List<String> getDefinedExtraNames()
+            +long getExtrasFee(String name)
+            +long getNodeBaseFee();
+    +List<String> getNodeExtraNames();
+    +long getNodeExtraIncludedCount(String name);
+    +long getNetworkMultiplier();
+    +List<String> getServiceNames();
+    +long getServiceBaseFee(String method);
+    +List<String> getServiceExtras(String method)
+    +long getServiceExtraIncludedCount(String method, String name)
+    
     }
 
 ```
