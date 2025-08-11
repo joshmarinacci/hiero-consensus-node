@@ -13,6 +13,10 @@ classDiagram
     AbstractFeesSchedule <|-- JsonFeesSchedule : implements
     AbstractFeesSchedule <|-- MockFeesSchedule : implements
     
+    note for AbstractFeesSchedule "This is a note for a class"
+    link AbstractFeesSchedule "https://github.com/joshmarinacci/hiero-consensus-node/blob/simple-fees-research/hedera-node/hedera-app-spi/src/main/java/com/hedera/node/app/hapi/fees/AbstractFeesSchedule.java" "source"
+    link JsonFeesSchedule "../../hedera-node/hedera-app-spi/src/main/java/com/hedera/node/app/hapi/fees/AbstractFeesSchedule.java" "source"
+
     class AbstractFeesSchedule {
          <<interface>>
         + List getDefinedExtrasNames()
