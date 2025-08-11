@@ -83,5 +83,13 @@ classDiagram
         + FeeCheckResult checkParameters(params)
         + Fees computeFee(params, exchangeRate, feesSchedule)
     }
+    
+    class Fees {
+        + long usd
+        + long nodeFee
+        + long networkFee
+        + long serviceFee
+        + Map~String,FeeResult.FeeDetail~ details
+    }
 
 ```
