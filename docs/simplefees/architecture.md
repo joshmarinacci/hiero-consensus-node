@@ -2,6 +2,9 @@
 
 This is the architecture for simple fees aka. *Fees 2.0*.
 
+
+## Fees Schedule
+
 The Fees schedule is defined by the AbstractFeesSchedule interface with two implementations, one to load the schedule
 from JSON and the other one for unit testing using in-memory fees.
 
@@ -49,6 +52,35 @@ classDiagram
         + setServiceBaseFee(String method, long value)
         + setServiceExtraIncludedCount(String method, String signatures, long value)
         + setServiceExtraIncludedCount(String method, Extras extra, long value)
+    }
+
+```
+
+
+## Fee Models
+
+Every service transaction handler needs to calculate the fees for that service. To make these calculations easy to use outside of the actual Hedera Node
+project (ex: online fees estimator) the calculation logic is inside of a *fee model* and the fees given service are calculated using this model.  
+For example the Consensus Service Submit Message fee is calculated using the *HCSSubmit* fee model. 
+
+The *AbstractFeeModel* abstract class defines the methods that all fee models must have.  The most important method
+is `computeFee()` which computes the actual fee given a map of parameters, the current exchange rate, and a fee schedule.
+It returns a `Fees` record which contains details of the fees plus the total in USD (tinycents), and the hbar split into
+node, network, and service.
+
+```mermaid
+---
+title: Fees Schedule
+---
+classDiagram
+    AbstractFeeModel {
+         <<interface>>
+        + String getService()
+        + String getMethodName()
+        + String getDescription()
+        + List~ParameterDefinition~ getParameters()
+        + FeeCheckResult checkParameters(Map<String, Object> values)
+        + Fees computeFee(Map<String, Object> values, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule)
     }
 
 ```
