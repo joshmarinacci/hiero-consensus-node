@@ -611,7 +611,12 @@ public class SimpleFeesSuite {
                     // 3 accounts, 2 signatures, 2 ft transfer count
                     // 2 accounts are free, 1 sigs are free, 1 ft transfer is free
                     // 1 extra account, 1 extra sig, 1 extra ft
-                    validateChargedFee("crypto-transfer-txn", 18 + 1*(3-2) + 1*(2-1) + 1*(2-1) + 1*3)
+                    validateChargedFee("crypto-transfer-txn",
+                            33 // base fee for a crypto transfer
+                            + (3-1)*3 // 3-1 accounts involved
+                            + 33 // for the token transfer
+                            + 2*3 // std node and network fee
+                         )
             );
         }
 
@@ -657,10 +662,10 @@ public class SimpleFeesSuite {
                     // 3 accounts, 2 signatures, 0 ft transfer count, 2 nft transfer count
                     // 2 accounts are free, 1 sigs are free
                     // so 1 extra account, 1 extra sig
-                    validateChargedUsd("crypto-transfer-txn",
-                            TokenTransferFee_USD
-                                    + PerCryptoTransferAccount * (3-2)
-                                    + ExtraSig* (2-1)
+                    validateChargedFee("crypto-transfer-txn",
+                        33 // base fee for nft transfer
+                            + (3-1)*3 // 3-1 accounts involved
+                            + 2*3 // std node and network fees
                     )
             );
         }
@@ -678,10 +683,7 @@ public class SimpleFeesSuite {
     @Nested
     class TokenFees {
         static final String treasury = "treasury";
-        static final double TokenCreateFee_USD =  1.0;
-        static final double TokenMintNonFungible = 0.020_00;
-        static final double TokenMintFungible = 0.001_00;
-        static final double ExtraSig = 0.000_10;
+        static final String supplyKey = "SUPPLY_KEY";
         @HapiTest
         final Stream<DynamicTest> createFT() {
             final var fungibleToken = "fungibleToken";
@@ -692,39 +694,41 @@ public class SimpleFeesSuite {
                             .initialSupply(4)
                             .fee(ONE_MILLION_HBARS)
                             .via("token-create-txn"),
-                    validateChargedFee("token-create-txn", 22 + 2*3 + 1)
+                    validateChargedFee("token-create-txn", 25 + 2*3 + 1)
             );
         }
         @HapiTest
         final Stream<DynamicTest> createNFT() {
             final var nonFungibleToken = "nonFungibleToken";
-            final var NFT_KEY = "NFT_KEY";
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
-                    newKeyNamed(NFT_KEY),
+                    newKeyNamed(supplyKey),
                     tokenCreate(nonFungibleToken)
                             .payingWith(treasury)
                             .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
                             .initialSupply(0)
-                            .supplyKey(NFT_KEY)
+                            .supplyKey(supplyKey)
                             .supplyType(TokenSupplyType.INFINITE)
                             .fee(ONE_MILLION_HBARS)
                             .via("token-create-txn"),
-                    validateChargedUsd("token-create-txn",TokenCreateFee_USD)
+                    validateChargedFee("token-create-txn",
+                            25 // base
+                                    + (2-1)*1 // one extra sig
+                                    + 2*3 // std node + network fee
+                                    )
             );
         }
         @HapiTest
         final Stream<DynamicTest> mintFungibleFee() {
             final var fungibleToken = "fungibleToken";
-            final var NFT_KEY = "NFT_KEY";
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
-                    newKeyNamed(NFT_KEY),
+                    newKeyNamed(supplyKey),
                     tokenCreate(fungibleToken)
                             .payingWith(treasury)
                             .tokenType(TokenType.FUNGIBLE_COMMON)
                             .initialSupply(0)
-                            .supplyKey(NFT_KEY)
+                            .supplyKey(supplyKey)
                             .supplyType(TokenSupplyType.INFINITE)
                             .fee(ONE_MILLION_HBARS)
                             .via("token-create-txn"),
@@ -732,21 +736,24 @@ public class SimpleFeesSuite {
                             .payingWith(treasury)
                             .fee(ONE_MILLION_HBARS)
                             .via("token-mint-txn"),
-                    validateChargedUsd("token-mint-txn",TokenMintFungible + ExtraSig*1)
+                    validateChargedFee("token-mint-txn"
+                            , 33 // base
+                                    + (20-1)*3 // 20 FT
+                                    + 2*3// node and network fees
+                    )
             );
         }
         @HapiTest
         final Stream<DynamicTest> mintNftFee() {
             final var nonFungibleToken = "nonFungibleToken";
-            final var NFT_KEY = "NFT_KEY";
             return hapiTest(
                     cryptoCreate(treasury).balance(ONE_MILLION_HBARS),
-                    newKeyNamed(NFT_KEY),
+                    newKeyNamed(supplyKey),
                     tokenCreate(nonFungibleToken)
                             .payingWith(treasury)
                             .tokenType(TokenType.NON_FUNGIBLE_UNIQUE)
                             .initialSupply(0)
-                            .supplyKey(NFT_KEY)
+                            .supplyKey(supplyKey)
                             .supplyType(TokenSupplyType.INFINITE)
                             .fee(ONE_MILLION_HBARS)
                             .via("token-create-txn"),
@@ -754,7 +761,10 @@ public class SimpleFeesSuite {
                             .payingWith(treasury)
                             .fee(ONE_MILLION_HBARS)
                             .via("token-mint-txn"),
-                    validateChargedUsd("token-mint-txn",TokenMintNonFungible + ExtraSig*1)
+                    validateChargedFee("token-mint-txn",
+                            33 // base fee
+                            + 2*3 // std node + network fee
+                    )
             );
         }
     }

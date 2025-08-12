@@ -30,10 +30,10 @@ import com.hedera.hapi.node.base.TokenType;
 import com.hedera.hapi.node.state.token.Nft;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.state.token.TokenRelation;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.common.FTOrNFT;
-import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
-import com.hedera.node.app.hapi.fees.apis.token.TokenMint;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.service.token.ReadableTokenStore;
 import com.hedera.node.app.service.token.impl.WritableAccountStore;
@@ -290,12 +290,17 @@ public class TokenMintHandler extends BaseTokenHandler implements TransactionHan
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         final var op = feeContext.body().tokenMintOrThrow();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            TokenMint entity = new TokenMint();
+            AbstractFeeModel model = FeeModelRegistry.registry.get("TokenMint");
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.name(), feeContext.numTxnSignatures());
-            params.put("fungibleOrNonFungible", op.amount() > 0 ? FTOrNFT.Fungible : FTOrNFT.NonFungible);
-            params.put("numTokens", (int) op.amount());
-            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
+            params.put(Extras.Signatures.name(), (long) feeContext.numTxnSignatures());
+            if (op.amount() > 0) {
+                params.put(Extras.StandardFungibleTokens.name(), op.amount());
+                params.put(Extras.StandardNonFungibleTokens.name(), 0L);
+            } else {
+                params.put(Extras.StandardFungibleTokens.name(), 0L);
+                params.put(Extras.StandardNonFungibleTokens.name(), 1);
+            }
+            return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
 
         final var subType = op.amount() > 0 ? SubType.TOKEN_FUNGIBLE_COMMON : SubType.TOKEN_NON_FUNGIBLE_UNIQUE;

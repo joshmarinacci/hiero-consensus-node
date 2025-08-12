@@ -81,12 +81,12 @@ public class CryptoTransfer extends AbstractFeeModel {
         FeeResult fee = new FeeResult();
 
         // Extract values
-        long ftNoCustom = getLong(values.get(Extras.StandardFungibleTokens.name()));
-        long nftNoCustom = getLong(values.get(Extras.StandardNonFungibleTokens.name()));
-        long ftWithCustom = getLong(values.get(Extras.CustomFeeFungibleTokens.name()));
-        long nftWithCustom = getLong(values.get(Extras.CustomFeeNonFungibleTokens.name()));
-        long customTokens = ftWithCustom + nftWithCustom;
-        boolean tokenTransfersPresent = (ftNoCustom + nftNoCustom + ftWithCustom + nftWithCustom) > 0;
+        long standardFT = getLong(values.get(Extras.StandardFungibleTokens.name()));
+        long standardNFT = getLong(values.get(Extras.StandardNonFungibleTokens.name()));
+        long customFT = getLong(values.get(Extras.CustomFeeFungibleTokens.name()));
+        long customNFT = getLong(values.get(Extras.CustomFeeNonFungibleTokens.name()));
+        long customTokens = customFT + customNFT;
+        boolean tokenTransfersPresent = (standardFT + standardNFT + customFT + customNFT) > 0;
 
         String effectiveApi = api;
 
@@ -121,27 +121,27 @@ public class CryptoTransfer extends AbstractFeeModel {
 
         // Overage for the number of token-types that we need to fetch for handling this transaction
         // Process the tokens with Custom Fee first since we have already increased the base price to accommodate the presence of custom-fee tokens, and the included free token should count against the token with custom fee
-        if (ftWithCustom > 0) {
-            if ((ftWithCustom - numFreeTokens) > 0) {
-                fee.addDetail("FT with custom fee", (ftWithCustom - numFreeTokens), (ftWithCustom - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
+        if (customFT > 0) {
+            if ((customFT - numFreeTokens) > 0) {
+                fee.addDetail("FT with custom fee", (customFT - numFreeTokens), (customFT - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
             }
             numFreeTokens = 0;
         }
-        if (nftWithCustom > 0) {
-            if ((nftWithCustom - numFreeTokens) > 0) {
-                fee.addDetail("NFT with custom fee", (nftWithCustom - numFreeTokens), (nftWithCustom - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
+        if (customNFT > 0) {
+            if ((customNFT - numFreeTokens) > 0) {
+                fee.addDetail("NFT with custom fee", (customNFT - numFreeTokens), (customNFT - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
             }
             numFreeTokens = 0;
         }
-        if (ftNoCustom > 0) {
-            if ((ftNoCustom - numFreeTokens) > 0) {
-                fee.addDetail("FT no custom fee", (ftNoCustom - numFreeTokens), (ftNoCustom - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransfer"));
+        if (standardFT > 0) {
+            if ((standardFT - numFreeTokens) > 0) {
+                fee.addDetail("FT no custom fee", (standardFT - numFreeTokens), (standardFT - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransfer"));
             }
             numFreeTokens = 0;
         }
-        if (nftNoCustom > 0) {
-            if ((nftNoCustom - numFreeTokens) > 0) {
-                fee.addDetail("NFT no custom fee", (nftNoCustom - numFreeTokens), (nftNoCustom - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransfer"));
+        if (standardNFT > 0) {
+            if ((standardNFT - numFreeTokens) > 0) {
+                fee.addDetail("NFT no custom fee", (standardNFT - numFreeTokens), (standardNFT - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransfer"));
             }
         }
 

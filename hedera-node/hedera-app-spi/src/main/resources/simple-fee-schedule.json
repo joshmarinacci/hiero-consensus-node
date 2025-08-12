@@ -60,21 +60,6 @@
             {  "name": "Accounts",       "includedCount": 1 },
             {  "name": "StandardFungibleTokens", "includedCount": 1}
           ]
-        },
-        {
-          "name": "TokenCreate",
-          "baseFee": 22,
-          "extras": [
-            { "name": "Signatures", "includedCount": 1 }
-          ]
-        },
-        {
-          "name": "TokenTransfer",
-          "baseFee": 33,
-          "extras": [
-            {  "name": "StandardFungibleTokens", "includedCount": 1},
-            {  "name": "Accounts",               "includedCount": 1}
-          ]
         }
       ]
     },
@@ -185,6 +170,35 @@
             { "name": "Signatures", "includedCount": 1},
             { "name": "Keys", "includedCount": 1},
             { "name": "Bytes", "includedCount": 1000}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Token",
+      "transactions": [
+        {
+          "name": "TokenCreate",
+          "baseFee": 25,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1 }
+          ]
+        },
+        {
+          "name": "TokenMint",
+          "baseFee": 33,
+          "extras": [
+            { "name": "Signatures", "includedCount": 1 },
+            { "name": "StandardFungibleTokens", "includedCount": 1 },
+            { "name": "StandardNonFungibleTokens", "includedCount": 1 }
+          ]
+        },
+        {
+          "name": "TokenTransfer",
+          "baseFee": 33,
+          "extras": [
+            {  "name": "StandardFungibleTokens", "includedCount": 1},
+            {  "name": "Accounts",               "includedCount": 1}
           ]
         }
       ]

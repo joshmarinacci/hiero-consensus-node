@@ -59,21 +59,20 @@ public class EntityCreate extends AbstractFeeModel {
     @Override
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult result = new FeeResult();
-        if (customFeeCapable && values.get(Params.HasCustomFee.toString()) == YesOrNo.YES) {
-            result.addDetail("Base fee to create with custom fee " + this.api, 1, feesSchedule.getServiceBaseFee(api + "WithCustomFee"));
+        if (customFeeCapable && values.get(Params.HasCustomFee.name()) == YesOrNo.YES) {
+            result.addDetail("Base fee for " + this.api + " with custom fee ", 1, feesSchedule.getServiceBaseFee(api + "WithCustomFee"));
         } else {
-            result.addDetail("Base fee to create " + this.api, 1, feesSchedule.getServiceBaseFee(api));
+            result.addDetail("Base fee for " + this.api, 1, feesSchedule.getServiceBaseFee(api));
         }
 
         final List<String> extras = feesSchedule.getServiceExtras(api);
         for(var extra : extras) {
-            final long node_bytes_fee = feesSchedule.getExtrasFee(extra);
-            final long node_bytes_included = feesSchedule.getServiceExtraIncludedCount(api,extra);
-            final long used = (long) values.get(extra);
-            if (used > node_bytes_included) {
-                final long additional_bytes = used - node_bytes_included;
-                final long more_fee = additional_bytes * node_bytes_fee;
-                result.addDetail("Node Bytes Overage", additional_bytes, more_fee);
+            final long extraFee = feesSchedule.getExtrasFee(extra);
+            final long extraIncludedCount = feesSchedule.getServiceExtraIncludedCount(api,extra);
+            final long extraUsed = (long) values.get(extra);
+            if (extraUsed > extraIncludedCount) {
+                final long overage = extraUsed - extraIncludedCount;
+                result.addDetail( extra +" Overage", overage, overage * extraFee);
             }
         }
         return result;

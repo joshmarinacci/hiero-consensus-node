@@ -22,10 +22,11 @@ import com.hedera.hapi.node.base.TokenType;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.token.TokenCreateTransactionBody;
 import com.hedera.hapi.node.transaction.CustomFee;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
-import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.service.token.ReadableAccountStore;
@@ -431,16 +432,16 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
         final var type = op.tokenType();
 
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.TOKEN_CREATE, "Create a token", true);
+            AbstractFeeModel model = FeeModelRegistry.registry.get("TokenCreate");
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            params.put(FeeConstants.Extras.Keys.toString(), 0L);
-            params.put("hasCustomFee", YesOrNo.NO);
-            params.put("numFTWithCustomFeeEntries",0);
+            params.put(Extras.Signatures.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extras.Keys.name(), 0L);
+            params.put(Params.HasCustomFee.name(), YesOrNo.NO);
+            params.put(Extras.CustomFeeFungibleTokens.name(), 0L);
             if(op.hasFeeScheduleKey()) {
-                params.put("hasCustomFee", YesOrNo.YES);
+                params.put(Params.HasCustomFee.name(), YesOrNo.YES);
             }
-            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
+            return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
 
         final long tokenSizes = TOKEN_ENTITY_SIZES.bytesUsedToRecordTokenTransfers(
