@@ -3,6 +3,7 @@ package com.hedera.node.app.hapi.fees.apis.common;
 import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -60,7 +61,7 @@ class EntityCreateTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.toString(), 1L);
         params.put(Extras.Keys.toString(), 10L);
-        params.put("hasCustomFee", YesOrNo.NO);
+        params.put(Params.HasCustomFee.name(), YesOrNo.NO);
 
         Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(schedule.getServiceBaseFee("TokenCreate") + 3 * schedule.getExtrasFee("Keys"), fee.usd(), "Token Create - no custom fee");
@@ -72,7 +73,7 @@ class EntityCreateTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.toString(), 1L);
         params.put(Extras.Keys.toString(), 10L);
-        params.put("hasCustomFee", YesOrNo.YES);
+        params.put(Params.HasCustomFee.name(), YesOrNo.YES);
 
         Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(schedule.getServiceBaseFee("TokenCreateWithCustomFee") + 3 * schedule.getExtrasFee("Keys"), fee.usd(), "Token Create - has custom fee");
@@ -84,7 +85,7 @@ class EntityCreateTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.toString(), 1L);
         params.put(Extras.Keys.toString(), 5L);
-        params.put("hasCustomFee", YesOrNo.NO);
+        params.put(Params.HasCustomFee.name(), YesOrNo.NO);
 
         Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(0 + schedule.getServiceBaseFee("ConsensusCreateTopic") + 4 * schedule.getExtrasFee("Keys"), fee.usd(), "Topic Create - no custom fee");
@@ -96,7 +97,7 @@ class EntityCreateTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.toString(), 1L);
         params.put(Extras.Keys.toString(), 5L);
-        params.put("hasCustomFee", YesOrNo.YES);
+        params.put(Params.HasCustomFee.name(), YesOrNo.YES);
 
         Fees fee = entity.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(0 + schedule.getServiceBaseFee("ConsensusCreateTopicWithCustomFee") + 4 * schedule.getExtrasFee("Keys"), fee.usd(), "Topic Create - with custom fee");

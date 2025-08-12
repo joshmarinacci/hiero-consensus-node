@@ -5,6 +5,7 @@ import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.fees.apis.consensus.HCSSubmit;
 import org.junit.jupiter.api.Test;
@@ -146,7 +147,7 @@ public class FeeScheduleTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.toString(), 8L);
         params.put(Extras.Keys.toString(), 0);
-        params.put("hasCustomFee", YesOrNo.NO);
+        params.put(Params.HasCustomFee.name(), YesOrNo.NO);
 
                 /*
          fee should be
@@ -173,7 +174,7 @@ public class FeeScheduleTest {
         schedule.setExtrasFee(Extras.Bytes,1L);
         var exchangeRate = new MockExchangeRate().activeRate(); // 1/12
         Map<String, Object> params = new HashMap<>();
-        params.put("hasCustomFee", YesOrNo.NO);
+        params.put(Params.HasCustomFee.name(), YesOrNo.NO);
         params.put(Extras.Bytes.toString(), 1600L);
         params.put(Extras.Signatures.toString(), 1L);
         var model = createModel("Consensus","ConsensusSubmitMessage");

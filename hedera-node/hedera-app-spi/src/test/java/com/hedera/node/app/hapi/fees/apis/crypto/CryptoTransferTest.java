@@ -27,6 +27,7 @@ class CryptoTransferTest {
         schedule.setServiceBaseFee("CryptoTransfer",10L);
         schedule.setServiceExtraIncludedCount("CryptoTransfer", Extras.Keys,2L);
         schedule.setServiceExtraIncludedCount("CryptoTransfer", Extras.StandardFungibleTokens,2L);
+        schedule.setServiceExtraIncludedCount("CryptoTransfer", Extras.Accounts,1L);
 
         schedule.setServiceBaseFee("TokenTransfer",15L);
         schedule.setServiceExtraIncludedCount("TokenTransfer", Extras.Keys,1L);
@@ -39,9 +40,9 @@ class CryptoTransferTest {
         CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.name(), 1L);
-        params.put("numAccountsInvolved", 2L);
+        params.put(Extras.Accounts.name(), 2L);
         Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
-        assertEquals(10, fee.usd(), "Simple hbar transfer");
+        assertEquals(10+2, fee.usd(), "Simple hbar transfer");
     }
 
     @Test
@@ -51,7 +52,7 @@ class CryptoTransferTest {
         params.put(Extras.Signatures.name(), 1L);
         params.put(Extras.Accounts.name(), 5L);
         Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
-        assertEquals(10 + 3*2 /* 0.0001 + (3 * 0.00001) */, fee.usd(), "Multiple hbar transfer");
+        assertEquals(10 + (5-1)*2, fee.usd(), "Multiple hbar transfer");
     }
 
     @Test
@@ -74,7 +75,7 @@ class CryptoTransferTest {
         params.put(Extras.StandardFungibleTokens.name(), 5L);
 
         Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
-        assertEquals(15 + ((10-2) * 2) + ((5-2) * 5), fee.usd(),"Multiple token transfers");
+        assertEquals(15 + ((10-2) * 2) + ((5-2) * 15), fee.usd(),"Multiple token transfers");
     }
 
     @Test
@@ -86,7 +87,7 @@ class CryptoTransferTest {
         params.put(Extras.StandardFungibleTokens.name(), 5L);
 
         Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
-        assertEquals((8 * 1) + (5 * 5), fee.usd(),"Multiple hbar and token transfers");
+        assertEquals(15  + (10-2)*2 + (5-2) * 15, fee.usd(),"Multiple hbar and token transfers");
     }
 
     @Test
