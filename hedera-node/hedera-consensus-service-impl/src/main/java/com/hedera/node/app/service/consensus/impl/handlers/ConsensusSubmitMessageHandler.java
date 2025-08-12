@@ -40,10 +40,11 @@ import com.hedera.hapi.node.transaction.CustomFeeLimit;
 import com.hedera.hapi.node.transaction.FixedCustomFee;
 import com.hedera.hapi.node.transaction.FixedFee;
 import com.hedera.hapi.node.transaction.TransactionBody;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
-import com.hedera.node.app.hapi.fees.apis.consensus.HCSSubmit;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.service.consensus.ReadableTopicStore;
 import com.hedera.node.app.service.consensus.impl.WritableTopicStore;
@@ -516,16 +517,16 @@ public class ConsensusSubmitMessageHandler implements TransactionHandler {
                 feeContext.readableStore(ReadableTopicStore.class).getTopic(op.topicIDOrElse(TopicID.DEFAULT));
 
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            HCSSubmit submit = new HCSSubmit();
+            AbstractFeeModel entity = FeeModelRegistry.registry.get("ConsensusSubmitMessage");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(), (long)feeContext.numTxnSignatures());
-            params.put(Extras.Keys.name(), 0L);
-            params.put(Extras.Bytes.name(), op.message().length());
-            params.put("hasCustomFee", YesOrNo.NO);
+            params.put(FeeConstants.Extras.Signatures.name(), (long)feeContext.numTxnSignatures());
+            params.put(FeeConstants.Extras.Keys.name(), 0L);
+            params.put(FeeConstants.Extras.Bytes.name(), op.message().length());
+            params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.NO);
             if(topic !=null && !topic.customFees().isEmpty()) {
-                params.put("hasCustomFee", YesOrNo.YES);
+                params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.YES);
             }
-            return submit.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
+            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var calculatorFactory = feeContext.feeCalculatorFactory();
         final var msgSize = op.message().length();

@@ -2,9 +2,11 @@ package com.hedera.services.bdd.suites.fees;
 
 import com.hedera.hapi.block.stream.BlockItem;
 import com.hedera.hapi.node.base.HederaFunctionality;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.ByteStringUtils;
@@ -57,7 +59,6 @@ import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedFee;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
-import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsdWithin;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HBAR;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_HUNDRED_HBARS;
 import static com.hedera.services.bdd.suites.HapiSuite.ONE_MILLION_HBARS;
@@ -292,7 +293,7 @@ public class SimpleFeesSuite {
                                 Map<String, Object> params = new HashMap<>();
                                 params.put(Extras.Signatures.name(), 0L);
                                 params.put(Extras.Keys.name(), 0L);
-                                params.put("hasCustomFee", YesOrNo.NO);
+                                params.put(Params.HasCustomFee.name(), YesOrNo.NO);
                                 var fee = entity.computeFee(params, current_rate, JsonFeesSchedule.fromJson());
                                 System.out.println("recomputed fee is " + fee);
                                 // recomputed fee is Fees[nodeFee=1652800, networkFee=7438000, serviceFee=7438000, usd=0.02, details={Base fee=FeeDetail{1, .020000 }}]

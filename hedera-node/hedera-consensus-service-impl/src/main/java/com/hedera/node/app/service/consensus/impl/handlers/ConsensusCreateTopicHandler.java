@@ -23,10 +23,10 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.consensus.ConsensusCreateTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.SigValueObj;
@@ -230,13 +230,13 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
                 !body.consensusCreateTopicOrThrow().customFees().isEmpty();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             final var feeSchedule = JsonFeesSchedule.fromJson();
-            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", true);
+            AbstractFeeModel entity = FeeModelRegistry.registry.get("ConsensusCreateTopic");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            params.put(Extras.Keys.toString(), 0L);
-            params.put("hasCustomFee", YesOrNo.NO);
+            params.put(FeeConstants.Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
+            params.put(FeeConstants.Extras.Keys.toString(), 0L);
+            params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.NO);
             if(hasCustomFees){
-                params.put("hasCustomFee", YesOrNo.YES);
+                params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.YES);
             }
             return entity.computeFee(params, feeContext.activeRate(), feeSchedule);
         }

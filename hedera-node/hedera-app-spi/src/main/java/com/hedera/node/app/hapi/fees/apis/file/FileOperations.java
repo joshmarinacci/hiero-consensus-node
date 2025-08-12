@@ -2,7 +2,7 @@ package com.hedera.node.app.hapi.fees.apis.file;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
 import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 

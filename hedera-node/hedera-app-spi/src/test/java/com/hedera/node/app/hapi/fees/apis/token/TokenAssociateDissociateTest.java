@@ -1,6 +1,5 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.AssociateOrDissociate;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TokenAssociateDissociateTest {

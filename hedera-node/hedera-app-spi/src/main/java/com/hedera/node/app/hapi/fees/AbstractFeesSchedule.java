@@ -4,25 +4,6 @@ import java.util.List;
 
 public interface AbstractFeesSchedule {
 
-    enum Extras {
-        Signatures,
-        Bytes,
-        Keys,
-        TokenTypes,
-        NFTSerials,
-        Accounts,
-        StandardFungibleTokens,
-        StandardNonFungibleTokens,
-        CustomFeeFungibleTokens,
-        CustomFeeNonFungibleTokens,
-        CreatedAutoAssociations,
-        CreatedAccounts,
-        CustomFee,
-        Gas,
-        Allowances,
-        Airdrops,
-    }
-
     List<String> getDefinedExtraNames();
     long getExtrasFee(String name);
 

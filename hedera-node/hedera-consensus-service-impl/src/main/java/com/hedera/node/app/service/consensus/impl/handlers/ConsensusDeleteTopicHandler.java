@@ -13,9 +13,10 @@ import com.hedera.hapi.node.base.TopicID;
 import com.hedera.hapi.node.consensus.ConsensusDeleteTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.TransactionBody;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.common.NoParametersAPI;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.ConsensusServiceFeeBuilder;
@@ -119,11 +120,11 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             final var schedule = JsonFeesSchedule.fromJson();
-            NoParametersAPI entity = new NoParametersAPI("Consensus", "ConsensusDeleteTopic", "Delete an existing topic");
+            AbstractFeeModel entity = FeeModelRegistry.registry.get("ConsensusDeleteTopic");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            params.put(Extras.Keys.name(), 0L);
-            params.put("hasCustomFee", YesOrNo.NO);
+            params.put(FeeConstants.Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
+            params.put(FeeConstants.Extras.Keys.name(), 0L);
+            params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.NO);
             return entity.computeFee(params, feeContext.activeRate(), schedule);
         }
         final var op = feeContext.body();

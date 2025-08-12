@@ -16,9 +16,11 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.file.FileAppendTransactionBody;
 import com.hedera.hapi.node.state.file.File;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.file.FileOperations;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.service.file.FileSignatureWaivers;
 import com.hedera.node.app.service.file.ReadableFileStore;
@@ -159,12 +161,12 @@ public class FileAppendHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull FeeContext feeContext) {
         final var body = feeContext.body();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            FileOperations transfer = new FileOperations("FileAppend", "append to file");
+            AbstractFeeModel model = FeeModelRegistry.registry.get("FileAppend");
             Map<String, Object> params = new HashMap<>();
             params.put(Extras.Signatures.name(),(long) feeContext.numTxnSignatures());
             params.put(Extras.Keys.name(),1L);
             params.put(Extras.Bytes.name(), body.fileAppendOrThrow().contents().length());
-            return transfer.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
+            return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var op = body.fileAppendOrThrow();
         final var fileID = op.fileIDOrThrow();

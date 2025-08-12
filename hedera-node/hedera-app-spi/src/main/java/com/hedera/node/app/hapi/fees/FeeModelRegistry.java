@@ -15,8 +15,6 @@ import com.hedera.node.app.hapi.fees.apis.token.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FREE_KEYS_DEFAULT;
-import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FREE_KEYS_TOKEN;
 
 public class FeeModelRegistry {
     public static final Map<String, AbstractFeeModel> registry = new LinkedHashMap<>();

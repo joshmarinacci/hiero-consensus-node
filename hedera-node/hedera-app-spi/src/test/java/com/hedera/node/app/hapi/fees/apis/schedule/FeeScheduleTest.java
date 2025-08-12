@@ -1,10 +1,10 @@
 package com.hedera.node.app.hapi.fees.apis.schedule;
 
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.fees.apis.consensus.HCSSubmit;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ public class FeeScheduleTest {
             }
             // check that there are no extra Extras in the JSON
             for (String name : feeSchedule.getDefinedExtraNames()) {
-                assertDoesNotThrow(() ->Extras.valueOf(name));
+                assertDoesNotThrow(() -> Extras.valueOf(name));
             }
 
             // check that all extras referenced in services are in the actual json
@@ -99,7 +99,7 @@ public class FeeScheduleTest {
         schedule.setNodeExtraIncludedCount(Extras.Signatures.toString(),2L);
         schedule.setNetworkMultiplier(3);
         schedule.setServiceBaseFee("ConsensusCreateTopic",10L);
-        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic",Extras.Signatures.name(),1L);
+        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extras.Signatures.name(),1L);
 
         var model = createModel("Consensus","ConsensusCreateTopic");
         assertInstanceOf(EntityCreate.class, model);
@@ -139,7 +139,7 @@ public class FeeScheduleTest {
 //        schedule.setNetworkExtrasIncluded("ConsensusCreateTopic","SignatureVerifications",1);
         schedule.setNetworkMultiplier(3);
         schedule.setServiceBaseFee("ConsensusCreateTopic",10L);
-        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic",Extras.Signatures.toString(),2);
+        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extras.Signatures.toString(),2);
 
         var model = createModel("Consensus","ConsensusCreateTopic");
         assertInstanceOf(EntityCreate.class, model);
@@ -168,7 +168,7 @@ public class FeeScheduleTest {
         // submit a message with 1600 bytes and 1 sig
         var schedule = new MockFeesSchedule();
         schedule.setServiceBaseFee("ConsensusSubmitMessage",10L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage",Extras.Bytes,0);
+        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extras.Bytes,0);
         schedule.setExtrasFee(Extras.Signatures,1L);
         schedule.setExtrasFee(Extras.Bytes,1L);
         var exchangeRate = new MockExchangeRate().activeRate(); // 1/12

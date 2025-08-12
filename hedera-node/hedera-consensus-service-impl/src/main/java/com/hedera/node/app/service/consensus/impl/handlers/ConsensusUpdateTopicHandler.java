@@ -35,11 +35,10 @@ import com.hedera.hapi.node.base.TopicID;
 import com.hedera.hapi.node.consensus.ConsensusUpdateTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.TransactionBody;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.fees.apis.common.EntityUpdate;
-import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.SigValueObj;
@@ -203,14 +202,12 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            final var api_name = FeesHelper.lookupAPIName(HederaFunctionality.CONSENSUS_UPDATE_TOPIC);
-            final var service_name = "Crypto";
-            EntityUpdate entity = new EntityUpdate(service_name,api_name, "Update a topic");
+            AbstractFeeModel model = FeeModelRegistry.registry.get("ConsensusUpdateTopic");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.toString(), (long) feeContext.numTxnSignatures());
-            params.put(Extras.Keys.toString(),0L);
-            params.put("hasCustomFee", YesOrNo.NO);
-            return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
+            params.put(FeeConstants.Extras.Signatures.toString(), (long) feeContext.numTxnSignatures());
+            params.put(FeeConstants.Extras.Keys.toString(),0L);
+            params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.NO);
+            return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var op = feeContext.body();
         final var topicUpdate = op.consensusUpdateTopicOrElse(ConsensusUpdateTopicTransactionBody.DEFAULT);

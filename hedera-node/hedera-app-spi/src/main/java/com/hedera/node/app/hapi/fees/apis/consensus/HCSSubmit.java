@@ -2,7 +2,7 @@ package com.hedera.node.app.hapi.fees.apis.consensus;
 
 import com.hedera.node.app.hapi.fees.AbstractFeeModel;
 import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
@@ -15,7 +15,7 @@ import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.*;
 public class HCSSubmit extends AbstractFeeModel {
 
     private final List<ParameterDefinition> params = List.of(
-            new ParameterDefinition("hasCustomFee", "list", new String[] { "Yes", "No" }, "No", 0, 0, "Does this topic have custom fee"),
+            new ParameterDefinition(Params.HasCustomFee.toString(), "list", new String[] { "Yes", "No" }, "No", 0, 0, "Does this topic have custom fee"),
             new ParameterDefinition(Extras.Bytes.toString(), "number", null, null, HCS_MIN_BYTES, HCS_MAX_BYTES, "Size of the message (bytes)")
     );
 
@@ -43,8 +43,8 @@ public class HCSSubmit extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
-        YesOrNo hasCustomFee = (YesOrNo) values.get("hasCustomFee");
-        if (!values.containsKey("hasCustomFee")) {
+        YesOrNo hasCustomFee = (YesOrNo) values.get(Params.HasCustomFee.toString());
+        if (!values.containsKey(Params.HasCustomFee.toString())) {
             throw new Error(" Missing hasCustomFee parameter.");
         }
         if (hasCustomFee == YesOrNo.NO) {

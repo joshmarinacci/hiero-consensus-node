@@ -18,9 +18,10 @@ import com.hedera.hapi.node.file.FileGetInfoResponse.FileInfo;
 import com.hedera.hapi.node.state.file.File;
 import com.hedera.hapi.node.transaction.Query;
 import com.hedera.hapi.node.transaction.Response;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.file.FileOperations;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.fees.usage.file.ExtantFileContext;
 import com.hedera.node.app.hapi.fees.usage.file.FileOpsUsage;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
@@ -96,12 +97,12 @@ public class FileGetInfoHandler extends FileQueryBase {
         final var fileId = op.fileIDOrElse(FileID.DEFAULT);
         final File file = fileStore.getFileLeaf(fileId);
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            FileOperations transfer = new FileOperations("FileGetInfo", "get file information");
+            AbstractFeeModel model = FeeModelRegistry.registry.get("FileGetInfo");
             Map<String, Object> params = new HashMap<>();
             params.put(Extras.Signatures.name(),0L);
             params.put(Extras.Keys.name(),0L);
             params.put(Extras.Bytes.name(), file.contents().length());
-            return transfer.computeFee(params, queryContext.activeRate(), JsonFeesSchedule.fromJson());
+            return model.computeFee(params, queryContext.activeRate(), JsonFeesSchedule.fromJson());
         }
 
         return queryContext

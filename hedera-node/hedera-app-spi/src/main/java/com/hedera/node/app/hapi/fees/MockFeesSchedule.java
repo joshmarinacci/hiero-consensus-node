@@ -2,6 +2,8 @@ package com.hedera.node.app.hapi.fees;
 
 
 
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +55,7 @@ public class MockFeesSchedule implements AbstractFeesSchedule {
     public void setExtrasFee(String name, long value) {
         this.extras.put(name,value);
     }
-    public void setExtrasFee(Extras name, long value) {
+    public void setExtrasFee(FeeConstants.Extras name, long value) {
         this.extras.put(name.name(),value);
     }
 
@@ -119,7 +121,7 @@ public class MockFeesSchedule implements AbstractFeesSchedule {
         if(!methods.containsKey(method)) this.methods.put(method, new MockServiceMethod(0));
         this.methods.get(method).extras.put(signatures,value);
     }
-    public void setServiceExtraIncludedCount(String method, Extras extra, long value) {
+    public void setServiceExtraIncludedCount(String method, FeeConstants.Extras extra, long value) {
         this.setServiceExtraIncludedCount(method, extra.name(), value);
     }
 

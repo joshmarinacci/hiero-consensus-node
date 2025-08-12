@@ -1,7 +1,7 @@
 package com.hedera.node.app.hapi.fees.apis.crypto;
 
 import com.hedera.node.app.hapi.fees.*;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 
 import java.util.List;
 import java.util.Map;
@@ -99,7 +99,7 @@ public class CryptoTransfer extends AbstractFeeModel {
             effectiveApi = "CryptoTransfer";
         }
 
-        long numFreeTokens = feesSchedule.getServiceExtraIncludedCount(effectiveApi,Extras.StandardFungibleTokens.name());//TOKEN_FREE_TOKENS;
+        long numFreeTokens = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extras.StandardFungibleTokens.name());//TOKEN_FREE_TOKENS;
         // If tokens with custom fees are used, then use the higher base prices
         if (customTokens > 0) {
             if (effectiveApi.equals("TokenTransfer")) {

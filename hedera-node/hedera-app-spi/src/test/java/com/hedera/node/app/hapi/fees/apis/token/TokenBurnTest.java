@@ -1,9 +1,9 @@
 package com.hedera.node.app.hapi.fees.apis.token;
 
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.FTOrNFT;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

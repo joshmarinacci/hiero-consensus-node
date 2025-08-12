@@ -1,8 +1,8 @@
 package com.hedera.node.app.hapi.fees.apis.common;
 
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -22,26 +22,26 @@ class EntityCreateTest {
         schedule.setExtrasFee(Extras.Keys,1L);
 
         schedule.setServiceBaseFee("CryptoCreate",22L);
-        schedule.setServiceExtraIncludedCount("CryptoCreate",Extras.Keys,2L);
+        schedule.setServiceExtraIncludedCount("CryptoCreate", Extras.Keys,2L);
 
         schedule.setServiceBaseFee("TokenCreate",33L);
-        schedule.setServiceExtraIncludedCount("TokenCreate",Extras.Keys,7L);
+        schedule.setServiceExtraIncludedCount("TokenCreate", Extras.Keys,7L);
 
         schedule.setServiceBaseFee("TokenCreateWithCustomFee",38L);
-        schedule.setServiceExtraIncludedCount("TokenCreateWithCustomFee",Extras.Keys,7L);
+        schedule.setServiceExtraIncludedCount("TokenCreateWithCustomFee", Extras.Keys,7L);
 
         schedule.setServiceBaseFee("ConsensusCreateTopic",15L);
-        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic",Extras.Keys,1L);
+        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extras.Keys,1L);
 
         schedule.setServiceBaseFee("ConsensusCreateTopicWithCustomFee",30L);
-        schedule.setServiceExtraIncludedCount("ConsensusCreateTopicWithCustomFee",Extras.Keys,1L);
+        schedule.setServiceExtraIncludedCount("ConsensusCreateTopicWithCustomFee", Extras.Keys,1L);
 
 
         schedule.setServiceBaseFee("ContractCreate",15L);
-        schedule.setServiceExtraIncludedCount("ContractCreate",Extras.Keys,1L);
+        schedule.setServiceExtraIncludedCount("ContractCreate", Extras.Keys,1L);
 
         schedule.setServiceBaseFee("ScheduleCreate",15L);
-        schedule.setServiceExtraIncludedCount("ScheduleCreate",Extras.Keys,1L);
+        schedule.setServiceExtraIncludedCount("ScheduleCreate", Extras.Keys,1L);
     }
     @Test
     void testEntityCreateCryptoService() {

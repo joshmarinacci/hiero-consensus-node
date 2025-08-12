@@ -22,9 +22,9 @@ import com.hedera.hapi.node.base.TokenType;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.token.TokenCreateTransactionBody;
 import com.hedera.hapi.node.transaction.CustomFee;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
 import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
@@ -433,8 +433,8 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.TOKEN_CREATE, "Create a token", true);
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            params.put(Extras.Keys.toString(), 0L);
+            params.put(FeeConstants.Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
+            params.put(FeeConstants.Extras.Keys.toString(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
             params.put("numFTWithCustomFeeEntries",0);
             if(op.hasFeeScheduleKey()) {

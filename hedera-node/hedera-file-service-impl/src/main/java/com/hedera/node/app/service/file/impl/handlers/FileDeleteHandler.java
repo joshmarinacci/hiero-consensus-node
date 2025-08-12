@@ -13,10 +13,10 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.file.FileDeleteTransactionBody;
 import com.hedera.hapi.node.state.file.File;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.fees.AbstractFeesSchedule.Extras;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.file.FileOperations;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.FileFeeBuilder;
 import com.hedera.node.app.service.file.ReadableFileStore;
@@ -130,12 +130,12 @@ public class FileDeleteHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull FeeContext feeContext) {
         final var txnBody = feeContext.body();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            FileOperations transfer = new FileOperations("FileDelete", "delete file");
+            AbstractFeeModel model = FeeModelRegistry.registry.get("FileDelete");
             Map<String, Object> params = new HashMap<>();
             params.put(Extras.Signatures.name(), 0L);
             params.put(Extras.Keys.name(), 0L);
             params.put(Extras.Bytes.name(), 0L);
-            return transfer.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
+            return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         return feeContext
                 .feeCalculatorFactory()
