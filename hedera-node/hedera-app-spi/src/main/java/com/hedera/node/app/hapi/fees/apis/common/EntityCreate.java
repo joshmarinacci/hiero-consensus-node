@@ -4,6 +4,8 @@ import com.hedera.node.app.hapi.fees.AbstractFeeModel;
 import com.hedera.node.app.hapi.fees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.fees.FeeResult;
 import com.hedera.node.app.hapi.fees.ParameterDefinition;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Params;
 
 import java.util.List;
 import java.util.Map;
@@ -20,10 +22,10 @@ public class EntityCreate extends AbstractFeeModel {
     private final boolean customFeeCapable;
 
     private final List<ParameterDefinition> params = List.of(
-            new ParameterDefinition(FeeConstants.Extras.Keys.toString(), "number", null, MIN_KEYS, MIN_KEYS, MAX_KEYS, "Number of keys")
+            new ParameterDefinition(Extras.Keys.toString(), "number", null, MIN_KEYS, MIN_KEYS, MAX_KEYS, "Number of keys")
     );
     private final List<ParameterDefinition> customFeeParams = List.of(
-            new ParameterDefinition(FeeConstants.Params.HasCustomFee.toString(), "list", new Object[] {YesOrNo.YES, YesOrNo.NO}, YesOrNo.NO, 0, 0, "Enable custom fee?")
+            new ParameterDefinition(Params.HasCustomFee.toString(), "list", new Object[] {YesOrNo.YES, YesOrNo.NO}, YesOrNo.NO, 0, 0, "Enable custom fee?")
     );
 
     public EntityCreate(String service, String api, String description, boolean customFeeCapable) {
@@ -57,7 +59,7 @@ public class EntityCreate extends AbstractFeeModel {
     @Override
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult result = new FeeResult();
-        if (customFeeCapable && values.get(FeeConstants.Params.HasCustomFee.toString()) == YesOrNo.YES) {
+        if (customFeeCapable && values.get(Params.HasCustomFee.toString()) == YesOrNo.YES) {
             result.addDetail("Base fee to create with custom fee " + this.api, 1, feesSchedule.getServiceBaseFee(api + "WithCustomFee"));
         } else {
             result.addDetail("Base fee to create " + this.api, 1, feesSchedule.getServiceBaseFee(api));

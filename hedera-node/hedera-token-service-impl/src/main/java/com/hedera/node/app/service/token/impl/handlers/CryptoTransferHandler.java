@@ -30,9 +30,10 @@ import com.hedera.hapi.node.state.token.Nft;
 import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.token.CryptoTransferTransactionBody;
 import com.hedera.hapi.node.transaction.AssessedCustomFee;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
-import com.hedera.node.app.hapi.fees.apis.crypto.CryptoTransfer;
 import com.hedera.node.app.service.token.ReadableAccountStore;
 import com.hedera.node.app.service.token.ReadableNftStore;
 import com.hedera.node.app.service.token.ReadableTokenRelationStore;
@@ -210,8 +211,6 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
         final var body = feeContext.body();
         final var op = body.cryptoTransferOrThrow();
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            System.out.println("hbar transfers " + op.transfersOrElse(TransferList.DEFAULT));
-            System.out.println("token transfers" + op.tokenTransfers());
             final var accounts = new HashSet<AccountID>();
             for (final var amount : op.transfersOrElse(TransferList.DEFAULT).accountAmounts()) {
                 accounts.add(amount.accountID());
@@ -219,33 +218,25 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
             long ftCount = 0;
             long nftCount = 0;
             for (final var tokenTransfers : op.tokenTransfers()) {
-                System.out.println("  token transfer: " + tokenTransfers);
-                System.out.println("  token is " + tokenTransfers.token());
                 for(final var tran : tokenTransfers.transfers()) {
-                    System.out.println("   sub FT transfer: " + tran);
                     accounts.add(tran.accountID());
                     ftCount++;
                 }
                 for(final var tran : tokenTransfers.nftTransfers()) {
-                    System.out.println("   sub NFT transfer: " + tran);
                     accounts.add(tran.senderAccountID());
                     accounts.add(tran.receiverAccountID());
                     nftCount++;
                 }
             }
 
-            CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
+            AbstractFeeModel model = FeeModelRegistry.registry.get("CryptoTransfer");
             Map<String, Object> params = new HashMap<>();
-            System.out.println("Signatures: number of txn signatures: " + feeContext.numTxnSignatures());
             params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            System.out.println("account count " + accounts.size());
             params.put(Extras.Accounts.name(), (long)accounts.size());
-            System.out.println("fungible tokens count " + ftCount);
             params.put(Extras.StandardFungibleTokens.name(), ftCount);
-            System.out.println("nft count " + nftCount);
             params.put(Extras.StandardNonFungibleTokens.name(), nftCount);
             params.put(Extras.Keys.toString(), 0L);
-            return transfer.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
+            return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var config = feeContext.configuration();
         final var tokenMultiplier = config.getConfigData(FeesConfig.class).tokenTransferUsageMultiplier();

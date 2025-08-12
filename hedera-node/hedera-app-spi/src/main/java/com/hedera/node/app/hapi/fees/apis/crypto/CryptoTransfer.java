@@ -14,11 +14,11 @@ public class CryptoTransfer extends AbstractFeeModel {
     private final List<ParameterDefinition> params = List.of(
             new ParameterDefinition(Extras.Accounts.name(), "number", null, 2, 0, 20, "Number of Accounts involved"),
             new ParameterDefinition(Extras.StandardFungibleTokens.name(), "number", null, 0, 0, 10, "Fungible token entries without custom fee"),
-            new ParameterDefinition("numNFTNoCustomFeeEntries", "number", null, 0, 0, 10, "NFT entries without custom fee"),
-            new ParameterDefinition("numFTWithCustomFeeEntries", "number", null, 0, 0, 10, "Fungible token entries with custom fee"),
-            new ParameterDefinition("numNFTWithCustomFeeEntries", "number", null, 0, 0, 10, "NFT entries with custom fee"),
-            new ParameterDefinition("numAutoAssociationsCreated", "number", null, 0, 0, 10, "Auto-created token associations"),
-            new ParameterDefinition("numAutoAccountsCreated", "number", null, 0, 0, 20, "Auto-created accounts")
+            new ParameterDefinition(Extras.StandardNonFungibleTokens.name(), "number", null, 0, 0, 10, "NFT entries without custom fee"),
+            new ParameterDefinition(Extras.CustomFeeFungibleTokens.name(), "number", null, 0, 0, 10, "Fungible token entries with custom fee"),
+            new ParameterDefinition(Extras.CustomFeeNonFungibleTokens.name(), "number", null, 0, 0, 10, "NFT entries with custom fee"),
+            new ParameterDefinition(Extras.CreatedAutoAssociations.name(), "number", null, 0, 0, 10, "Auto-created token associations"),
+            new ParameterDefinition(Extras.CreatedAccounts.name(), "number", null, 0, 0, 20, "Auto-created accounts")
     );
 
     public CryptoTransfer(String service, String api) {
@@ -99,7 +99,7 @@ public class CryptoTransfer extends AbstractFeeModel {
             effectiveApi = "CryptoTransfer";
         }
 
-        long numFreeTokens = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extras.StandardFungibleTokens.name());//TOKEN_FREE_TOKENS;
+        long numFreeTokens = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extras.StandardFungibleTokens.name());
         // If tokens with custom fees are used, then use the higher base prices
         if (customTokens > 0) {
             if (effectiveApi.equals("TokenTransfer")) {
@@ -146,9 +146,9 @@ public class CryptoTransfer extends AbstractFeeModel {
         }
 
         // Overage for the number of entities created automatically (associations/accounts) during handling this transaction
-        if (values.get("numAutoAssociationsCreated") instanceof Integer num && num > 0)
+        if (values.get(Extras.CreatedAutoAssociations.name()) instanceof Integer num && num > 0)
             fee.addDetail("Auto token associations", num, num * feesSchedule.getServiceBaseFee("TokenAssociateToAccount"));
-        if (values.get("numAutoAccountsCreated") instanceof Integer num && num > 0)
+        if (values.get(Extras.CreatedAccounts.name()) instanceof Integer num && num > 0)
             fee.addDetail("Auto account creations", num, num * feesSchedule.getServiceBaseFee("CryptoCreate"));
 
         return fee;

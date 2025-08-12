@@ -53,10 +53,10 @@ import com.hedera.hapi.node.state.token.Account;
 import com.hedera.hapi.node.token.CryptoCreateTransactionBody;
 import com.hedera.hapi.node.token.CryptoUpdateTransactionBody;
 import com.hedera.hapi.node.transaction.TransactionBody;
+import com.hedera.node.app.hapi.fees.AbstractFeeModel;
+import com.hedera.node.app.hapi.fees.FeeModelRegistry;
 import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.fees.apis.common.FeeConstants;
-import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.service.token.ReadableAccountStore;
 import com.hedera.node.app.service.token.impl.WritableAccountStore;
@@ -455,10 +455,10 @@ public class CryptoCreateHandler extends BaseCryptoHandler implements Transactio
     @NonNull
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate model = FeesHelper.makeCreateEntity(HederaFunctionality.CRYPTO_CREATE, "Create an account", false);
+            AbstractFeeModel model = FeeModelRegistry.registry.get("CryptoCreate");
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            params.put(FeeConstants.Extras.Keys.toString(), 1L);
+            params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
+            params.put(Extras.Keys.toString(), 1L);
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         // Variable bytes plus two additional longs for balance and auto-renew period; plus a boolean for receiver sig
