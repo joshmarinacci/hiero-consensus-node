@@ -43,8 +43,8 @@ public class HCSSubmit extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
-        YesOrNo hasCustomFee = (YesOrNo) values.get(Params.HasCustomFee.toString());
-        if (!values.containsKey(Params.HasCustomFee.toString())) {
+        YesOrNo hasCustomFee = (YesOrNo) values.get(Params.HasCustomFee.name());
+        if (!values.containsKey(Params.HasCustomFee.name())) {
             throw new Error(" Missing hasCustomFee parameter.");
         }
         if (hasCustomFee == YesOrNo.NO) {

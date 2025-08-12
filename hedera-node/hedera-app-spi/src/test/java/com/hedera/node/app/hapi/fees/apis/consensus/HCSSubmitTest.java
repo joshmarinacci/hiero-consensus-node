@@ -3,6 +3,7 @@ package com.hedera.node.app.hapi.fees.apis.consensus;
 import com.hedera.node.app.hapi.fees.MockFeesSchedule;
 import com.hedera.node.app.hapi.fees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
+import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
 import com.hedera.node.app.spi.fees.Fees;
 import org.junit.jupiter.api.BeforeAll;
@@ -36,8 +37,8 @@ class HCSSubmitTest {
     void testHCSSubmitNoCustomFee() {
         HCSSubmit transfer = new HCSSubmit();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.toString(), 1L);
-        params.put("hasCustomFee", YesOrNo.NO);
+        params.put(Extras.Signatures.name(), 1L);
+        params.put(Params.HasCustomFee.name(), YesOrNo.NO);
 
         for (int numBytes = 10; numBytes < 1000; numBytes += 10) {
             params.put(Extras.Bytes.name(), (long)numBytes);
@@ -54,7 +55,7 @@ class HCSSubmitTest {
         HCSSubmit transfer = new HCSSubmit();
         Map<String, Object> params = new HashMap<>();
         params.put(Extras.Signatures.toString(), 1L);
-        params.put("hasCustomFee", YesOrNo.YES);
+        params.put(Params.HasCustomFee.name(), YesOrNo.YES);
 
         for (int numBytes = 10; numBytes < 1000; numBytes += 10) {
             params.put(Extras.Bytes.name(), (long)numBytes);
@@ -62,7 +63,7 @@ class HCSSubmitTest {
             long overage = (numBytes <= HCS_FREE_BYTES)
                     ? 25
                     : ((25+ (numBytes - HCS_FREE_BYTES) * 1));
-            assertEquals(overage, fee.usd(), "HCS topic Submit without custom fee - " + numBytes + " bytes");
+            assertEquals(overage, fee.usd(), "HCS topic Submit with custom fee - " + numBytes + " bytes");
         }
     }
 }
