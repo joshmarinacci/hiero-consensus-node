@@ -97,6 +97,7 @@ module com.hedera.node.hapi {
             org.assertj.core;
     opens com.hedera.hapi.node.token to
             org.assertj.core;
+    exports org.hiero.hapi.fees.pbj;
 
     requires transitive com.hedera.pbj.runtime;
     requires transitive com.google.common;

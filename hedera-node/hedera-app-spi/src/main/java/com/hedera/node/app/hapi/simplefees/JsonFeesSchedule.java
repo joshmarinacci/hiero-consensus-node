@@ -1,10 +1,11 @@
 package com.hedera.node.app.hapi.simplefees;
 
-import com.hedera.hapi.node.consensus.ExtraFeeDefinition;
-import com.hedera.hapi.node.consensus.Service;
-import com.hedera.hapi.node.consensus.ServiceFee;
-import com.hedera.hapi.node.consensus.SimpleFeeSchedule;
+
 import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
+import org.hiero.hapi.fees.pbj.ExtraFeeDefinition;
+import org.hiero.hapi.fees.pbj.FeeSchedule;
+import org.hiero.hapi.fees.pbj.Service;
+import org.hiero.hapi.fees.pbj.ServiceFee;
 
 
 import java.util.HashMap;
@@ -15,14 +16,14 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 
 public class JsonFeesSchedule implements AbstractFeesSchedule {
-    public final SimpleFeeSchedule schedule;
+    public final FeeSchedule schedule;
     private final HashMap<String, Service> services;
     private final HashMap<String, ServiceFee> serviceMethods;
     public final HashMap<String, ExtraFeeDefinition> extras;
 
     public static JsonFeesSchedule fromJson() {
         try (final var fin = JsonFeesSchedule.class.getClassLoader().getResourceAsStream("simple-fee-schedule.json")) {
-            final var buf = SimpleFeeSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
+            final var buf = FeeSchedule.JSON.parse(new ReadableStreamingData(requireNonNull(fin)));
 //            System.out.println("parsed simple fees schedule: " + buf);
             return new JsonFeesSchedule(buf);
         } catch (Exception e) {
@@ -31,7 +32,7 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
         }
     }
 
-    private JsonFeesSchedule(SimpleFeeSchedule buf) {
+    private JsonFeesSchedule(FeeSchedule buf) {
         this.schedule = buf;
         this.extras = new HashMap<>();
         for(var extra: buf.definedExtras()) {

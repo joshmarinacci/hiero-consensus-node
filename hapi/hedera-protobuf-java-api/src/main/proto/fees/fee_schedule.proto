@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package proto;
+package org.hiero.hapi.support.fees;
 
-option java_package = "com.hederahashgraph.api.proto.java";
-// <<<pbj.java_package = "com.hedera.hapi.node.consensus">>> This comment is special code for setting PBJ Compiler java package
+option java_package = "org.hiero.hapi.fees";
+// <<<pbj.java_package = "org.hiero.hapi.fees.pbj">>> This comment is special code for setting PBJ Compiler java package
 option java_multiple_files = true;
 
-message SimpleFeeSchedule {
+message FeeSchedule {
   NodeFee node_fee = 1;
   NetworkFee network_fee_ratio = 2;
   UnreadableTransactionFee unreadable_transaction_fee = 3;
