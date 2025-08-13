@@ -1,0 +1,59 @@
+package com.hedera.node.app.hapi.simplefees.apis.contract;
+
+import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
+import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
+import com.hedera.node.app.hapi.simplefees.FeeResult;
+import com.hedera.node.app.hapi.simplefees.ParameterDefinition;
+
+import java.util.List;
+import java.util.Map;
+
+import static com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.*;
+
+public class ContractBasedOnGas extends AbstractFeeModel {
+    String api;
+    String description;
+    boolean isMinGasFree;
+
+    public ContractBasedOnGas(String api, String description, boolean isMinGasFree) {
+        this.api = api;
+        this.description = description;
+        this.isMinGasFree = isMinGasFree;
+    }
+
+    private final List<ParameterDefinition> params = List.of(
+            new ParameterDefinition("gas", "number", null, MIN_GAS, MIN_GAS, MAX_GAS, "Gas")
+    );
+
+    @Override
+    public String getService() {
+        return "Smart Contract";
+    }
+
+    @Override
+    public String getMethodName() {
+        return this.api;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    protected List<ParameterDefinition> apiSpecificParams() {
+        return params;
+    }
+
+    @Override
+    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
+        FeeResult fee = new FeeResult();
+        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(api));
+        int gas = (int) values.get("gas");
+        int gasTobeCharged = Math.max((gas - (isMinGasFree ? MIN_GAS : 0)), 0);
+        if (gasTobeCharged > 0) {
+            fee.addDetail("Additional Gas fee", (gasTobeCharged), (gasTobeCharged) * feesSchedule.getExtrasFee("PerGas"));
+        }
+        return fee;
+    }
+}

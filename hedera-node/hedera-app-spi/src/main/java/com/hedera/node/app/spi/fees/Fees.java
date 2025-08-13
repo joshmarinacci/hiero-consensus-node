@@ -3,7 +3,7 @@ package com.hedera.node.app.spi.fees;
 
 import static java.util.Objects.requireNonNull;
 
-import com.hedera.node.app.hapi.fees.FeeResult;
+import com.hedera.node.app.hapi.simplefees.FeeResult;
 import com.hederahashgraph.api.proto.java.FeeComponents;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;

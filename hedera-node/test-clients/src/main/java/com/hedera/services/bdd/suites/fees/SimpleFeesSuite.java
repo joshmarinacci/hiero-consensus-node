@@ -2,12 +2,12 @@ package com.hedera.services.bdd.suites.fees;
 
 import com.hedera.hapi.block.stream.BlockItem;
 import com.hedera.hapi.node.base.HederaFunctionality;
-import com.hedera.node.app.hapi.fees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.fees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Extras;
-import com.hedera.node.app.hapi.fees.apis.common.FeeConstants.Params;
-import com.hedera.node.app.hapi.fees.apis.common.FeesHelper;
-import com.hedera.node.app.hapi.fees.apis.common.YesOrNo;
+import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
+import com.hedera.node.app.hapi.simplefees.apis.common.EntityCreate;
+import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
+import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Params;
+import com.hedera.node.app.hapi.simplefees.apis.common.FeesHelper;
+import com.hedera.node.app.hapi.simplefees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.ByteStringUtils;
 import com.hedera.services.bdd.junit.HapiTest;
 import com.hedera.services.bdd.junit.HapiTestLifecycle;
@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.hedera.node.app.hapi.fees.apis.common.FeeConstants.FILE_FREE_BYTES;
+import static com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.FILE_FREE_BYTES;
 import static com.hedera.services.bdd.junit.support.validators.block.BlockContentsValidator.bodyFrom;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
 import static com.hedera.services.bdd.spec.queries.QueryVerbs.getAccountBalance;
