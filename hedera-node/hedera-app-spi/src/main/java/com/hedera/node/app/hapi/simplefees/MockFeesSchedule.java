@@ -2,14 +2,15 @@ package com.hedera.node.app.hapi.simplefees;
 
 
 
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants;
 import org.hiero.hapi.support.fees.Extra;
+import org.hiero.hapi.support.fees.ExtraFeeDefinition;
 import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.ServiceFee;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 class MockServiceMethod {
@@ -50,6 +51,10 @@ public class MockFeesSchedule implements AbstractFeesSchedule {
     @Override
     public List<Extra> getDefinedExtraNames() {
         return this.extras.keySet().stream().collect(Collectors.toList());
+    }
+
+    public Optional<ExtraFeeDefinition> findExtra(Extra extra) {
+        return this.schedule.definedExtras().stream().filter(efd -> efd.name() == extra).findFirst();
     }
 
     @Override
