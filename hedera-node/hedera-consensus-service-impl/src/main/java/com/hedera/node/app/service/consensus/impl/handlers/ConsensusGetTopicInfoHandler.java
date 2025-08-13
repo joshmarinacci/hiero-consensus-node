@@ -50,6 +50,7 @@ import com.hederahashgraph.api.proto.java.FeeComponents;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -174,8 +175,8 @@ public class ConsensusGetTopicInfoHandler extends PaidQueryHandler {
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_GET_TOPIC_INFO, "Query topic info", false);
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.name(),0L);
-            params.put(FeeConstants.Extras.Keys.name(),0L);
+            params.put(Extra.SIGNATURES.name(),0L);
+            params.put(Extra.KEYS.name(),0L);
             params.put("hasCustomFee", YesOrNo.NO);
             return entity.computeFee(params, queryContext.activeRate(), JsonFeesSchedule.fromJson());
         }

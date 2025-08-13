@@ -69,6 +69,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -204,8 +205,8 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel model = FeeModelRegistry.registry.get("ConsensusUpdateTopic");
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.toString(), (long) feeContext.numTxnSignatures());
-            params.put(FeeConstants.Extras.Keys.toString(),0L);
+            params.put(Extra.SIGNATURES.name(), (long) feeContext.numTxnSignatures());
+            params.put(Extra.KEYS.toString(),0L);
             params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.NO);
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }

@@ -33,7 +33,6 @@ import com.hedera.hapi.node.state.token.TokenRelation;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.FeeModelRegistry;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.service.token.ReadableTokenStore;
 import com.hedera.node.app.service.token.impl.WritableAccountStore;
@@ -56,6 +55,8 @@ import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.TokensConfig;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -292,13 +293,13 @@ public class TokenMintHandler extends BaseTokenHandler implements TransactionHan
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel model = FeeModelRegistry.registry.get("TokenMint");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(), (long) feeContext.numTxnSignatures());
+            params.put(Extra.SIGNATURES.name(), (long) feeContext.numTxnSignatures());
             if (op.amount() > 0) {
-                params.put(Extras.StandardFungibleTokens.name(), op.amount());
-                params.put(Extras.StandardNonFungibleTokens.name(), 0L);
+                params.put(Extra.STANDARD_FUNGIBLE_TOKENS.name(), op.amount());
+                params.put(Extra.STANDARD_NON_FUNGIBLE_TOKENS.name(), 0L);
             } else {
-                params.put(Extras.StandardFungibleTokens.name(), 0L);
-                params.put(Extras.StandardNonFungibleTokens.name(), 1);
+                params.put(Extra.STANDARD_FUNGIBLE_TOKENS.name(), 0L);
+                params.put(Extra.STANDARD_NON_FUNGIBLE_TOKENS.name(), 1);
             }
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }

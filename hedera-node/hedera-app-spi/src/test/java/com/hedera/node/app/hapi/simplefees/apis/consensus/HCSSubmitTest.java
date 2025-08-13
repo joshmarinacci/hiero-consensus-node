@@ -2,10 +2,10 @@ package com.hedera.node.app.hapi.simplefees.apis.consensus;
 
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.hapi.simplefees.apis.common.YesOrNo;
 import com.hedera.node.app.spi.fees.Fees;
+import org.hiero.hapi.support.fees.Extra;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -21,27 +21,27 @@ class HCSSubmitTest {
     @BeforeAll
     static void setup() {
         schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Keys,1L);
-        schedule.setExtrasFee(Extras.Bytes,1L);
+        schedule.setExtrasFee(Extra.KEYS,1L);
+        schedule.setExtrasFee(Extra.BYTES,1L);
 
         schedule.setServiceBaseFee("ConsensusSubmitMessage",15L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extras.Keys,1L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extras.Bytes,(long)HCS_FREE_BYTES);
+        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extra.KEYS,1L);
+        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extra.BYTES,(long)HCS_FREE_BYTES);
 
         schedule.setServiceBaseFee("ConsensusSubmitMessageWithCustomFee",25L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessageWithCustomFee", Extras.Keys,1L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessageWithCustomFee", Extras.Bytes,(long)HCS_FREE_BYTES);
+        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessageWithCustomFee", Extra.KEYS,1L);
+        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessageWithCustomFee", Extra.BYTES,(long)HCS_FREE_BYTES);
     }
 
     @Test
     void testHCSSubmitNoCustomFee() {
         HCSSubmit transfer = new HCSSubmit();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 1L);
+        params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Params.HasCustomFee.name(), YesOrNo.NO);
 
         for (int numBytes = 10; numBytes < 1000; numBytes += 10) {
-            params.put(Extras.Bytes.name(), (long)numBytes);
+            params.put(Extra.BYTES.name(), (long)numBytes);
             Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
             long overage = (numBytes <= HCS_FREE_BYTES)
                     ? 15
@@ -54,11 +54,11 @@ class HCSSubmitTest {
     void testHCSSubmitWithCustomFee() {
         HCSSubmit transfer = new HCSSubmit();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Params.HasCustomFee.name(), YesOrNo.YES);
 
         for (int numBytes = 10; numBytes < 1000; numBytes += 10) {
-            params.put(Extras.Bytes.name(), (long)numBytes);
+            params.put(Extra.BYTES.name(), (long)numBytes);
             Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
             long overage = (numBytes <= HCS_FREE_BYTES)
                     ? 25

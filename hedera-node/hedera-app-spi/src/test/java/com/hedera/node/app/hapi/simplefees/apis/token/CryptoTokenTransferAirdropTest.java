@@ -2,9 +2,9 @@ package com.hedera.node.app.hapi.simplefees.apis.token;
 
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.apis.crypto.CryptoTransfer;
 import com.hedera.node.app.spi.fees.Fees;
+import org.hiero.hapi.support.fees.Extra;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -20,40 +20,40 @@ class CryptoTokenTransferAirdropTest {
     @BeforeAll
     static void setup() {
         feesSchedule = new MockFeesSchedule();
-        feesSchedule.setExtrasFee(Extras.Keys.toString(),1L);
-        feesSchedule.setExtrasFee(Extras.Signatures.toString(),2L);
+        feesSchedule.setExtrasFee(Extra.KEYS,1L);
+        feesSchedule.setExtrasFee(Extra.SIGNATURES,2L);
 
 
         feesSchedule.setServiceBaseFee("CryptoCreate",22L);
-        feesSchedule.setServiceExtraIncludedCount("CryptoCreate", Extras.Keys,2L);
+        feesSchedule.setServiceExtraIncludedCount("CryptoCreate", Extra.KEYS,2L);
 
         feesSchedule.setServiceBaseFee("CryptoTransfer",10L);
-        feesSchedule.setServiceExtraIncludedCount("CryptoTransfer", Extras.Keys,1L);
+        feesSchedule.setServiceExtraIncludedCount("CryptoTransfer", Extra.KEYS,1L);
 
         feesSchedule.setServiceBaseFee("TokenCreate",33L);
-        feesSchedule.setServiceExtraIncludedCount("TokenCreate", Extras.Keys,7L);
+        feesSchedule.setServiceExtraIncludedCount("TokenCreate", Extra.KEYS,7L);
 
         feesSchedule.setServiceBaseFee("TokenTransfer",33L);
-        feesSchedule.setServiceExtraIncludedCount("TokenTransfer", Extras.Keys,2L);
+        feesSchedule.setServiceExtraIncludedCount("TokenTransfer", Extra.KEYS,2L);
         feesSchedule.setServiceBaseFee("TokenTransferWithCustomFee",33L);
-        feesSchedule.setServiceExtraIncludedCount("TokenTransferWithCustomFee", Extras.Keys,2L);
+        feesSchedule.setServiceExtraIncludedCount("TokenTransferWithCustomFee", Extra.KEYS,2L);
 
         feesSchedule.setServiceBaseFee("TokenAirdrop",33L);
-        feesSchedule.setServiceExtraIncludedCount("TokenAirdrop", Extras.Keys,7L);
+        feesSchedule.setServiceExtraIncludedCount("TokenAirdrop", Extra.KEYS,7L);
         feesSchedule.setServiceBaseFee("TokenAirdropWithCustomFee",33L);
-        feesSchedule.setServiceExtraIncludedCount("TokenAirdropWithCustomFee", Extras.Keys,7L);
+        feesSchedule.setServiceExtraIncludedCount("TokenAirdropWithCustomFee", Extra.KEYS,7L);
 
         feesSchedule.setServiceBaseFee("TokenCreateWithCustomFee",38L);
-        feesSchedule.setServiceExtraIncludedCount("TokenCreateWithCustomFee", Extras.Keys,7L);
+        feesSchedule.setServiceExtraIncludedCount("TokenCreateWithCustomFee", Extra.KEYS,7L);
 
         feesSchedule.setServiceBaseFee("ConsensusCreateTopic",15L);
-        feesSchedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extras.Keys,1L);
+        feesSchedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extra.KEYS,1L);
 
         feesSchedule.setServiceBaseFee("ContractCreate",15L);
-        feesSchedule.setServiceExtraIncludedCount("ContractCreate", Extras.Keys,1L);
+        feesSchedule.setServiceExtraIncludedCount("ContractCreate", Extra.KEYS,1L);
 
         feesSchedule.setServiceBaseFee("ScheduleCreate",15L);
-        feesSchedule.setServiceExtraIncludedCount("ScheduleCreate", Extras.Keys,1L);
+        feesSchedule.setServiceExtraIncludedCount("ScheduleCreate", Extra.KEYS,1L);
     }
     List<TransferTestScenario> scenarios = List.of(
             // Either Crypto or TokenTransfer with no tokens should default to CryptoTransfer price
@@ -83,7 +83,7 @@ class CryptoTokenTransferAirdropTest {
             new TransferTestScenario("TokenAirdrop", 1, 2, 1, 1, 2, 4, 0, 0, feesSchedule.getServiceBaseFee("TokenAirdropWithCustomFee") + 2 * feesSchedule.getServiceBaseFee("TokenTransfer") + 5 * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee")),
 
             // Every API should charge overages for signatures, accounts, auto-associations, and auto-account-creations
-            new TransferTestScenario("CryptoTransfer", 5, 6, 1, 0, 0, 0, 3, 4, feesSchedule.getServiceBaseFee("TokenTransfer")  + 4 * feesSchedule.getExtrasFee(Extras.Signatures.toString()) + 4 * feesSchedule.getServiceBaseFee("PerCryptoTransferAccount") + 3 * feesSchedule.getServiceBaseFee("TokenAssociateToAccount") + 4 * feesSchedule.getServiceBaseFee("CryptoCreate")),
+            new TransferTestScenario("CryptoTransfer", 5, 6, 1, 0, 0, 0, 3, 4, feesSchedule.getServiceBaseFee("TokenTransfer")  + 4 * feesSchedule.getExtrasFee(Extra.SIGNATURES) + 4 * feesSchedule.getServiceBaseFee("PerCryptoTransferAccount") + 3 * feesSchedule.getServiceBaseFee("TokenAssociateToAccount") + 4 * feesSchedule.getServiceBaseFee("CryptoCreate")),
             new TransferTestScenario("TokenTransfer", 5, 6, 1, 0, 0, 0, 3, 4, feesSchedule.getServiceBaseFee("TokenTransfer")  + 4 * feesSchedule.getServiceBaseFee("PerSignature") + 4 * feesSchedule.getServiceBaseFee("PerCryptoTransferAccount") + 3 * feesSchedule.getServiceBaseFee("TokenAssociateToAccount") + 4 * feesSchedule.getServiceBaseFee("CryptoCreate")),
             new TransferTestScenario("TokenAirdrop", 5, 6, 1, 0, 0, 0, 3, 4, feesSchedule.getServiceBaseFee("TokenAirdrop") + 4 * feesSchedule.getServiceBaseFee("PerSignature") + 4 * feesSchedule.getServiceBaseFee("PerCryptoTransferAccount") + 3 * feesSchedule.getServiceBaseFee("TokenAssociateToAccount") + 4 * feesSchedule.getServiceBaseFee("CryptoCreate"))
 
@@ -100,7 +100,7 @@ class CryptoTokenTransferAirdropTest {
             };
 
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.toString(), scenario.numSignatures);
+            params.put(Extra.SIGNATURES.name(), scenario.numSignatures);
             params.put("numAccountsInvolved", scenario.numAccountsInvolved);
             params.put("numFTNoCustomFeeEntries", scenario.numFTNoCustomFeeEntries);
             params.put("numNFTNoCustomFeeEntries", scenario.numNFTNoCustomFeeEntries);

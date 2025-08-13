@@ -24,7 +24,6 @@ import com.hedera.hapi.node.state.token.Token;
 import com.hedera.hapi.node.state.token.TokenRelation;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.service.token.ReadableTokenRelationStore;
@@ -47,6 +46,8 @@ import com.hedera.node.app.spi.workflows.TransactionHandler;
 import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.TokensConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -180,8 +181,8 @@ public final class TokenBurnHandler extends BaseTokenHandler implements Transact
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             EntityCreate entity = new EntityCreate("Token", "TokenBurn", "Create a token type", false);
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(), 0L);
-            params.put(Extras.Keys.name(), 0L);
+            params.put(Extra.SIGNATURES.name(), 0L);
+            params.put(Extra.KEYS.name(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
 
             return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());

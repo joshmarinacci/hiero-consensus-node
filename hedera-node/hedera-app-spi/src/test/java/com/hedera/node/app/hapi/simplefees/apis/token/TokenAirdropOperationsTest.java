@@ -2,8 +2,8 @@ package com.hedera.node.app.hapi.simplefees.apis.token;
 
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.spi.fees.Fees;
+import org.hiero.hapi.support.fees.Extra;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -73,8 +73,8 @@ class TokenAirdropOperationsTest {
             };
 
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(), scenario.numSignatures);
-            params.put(Extras.TokenTypes.name(), scenario.numTokenTypes);
+            params.put(Extra.SIGNATURES.name(), scenario.numSignatures);
+            params.put(Extra.TOKEN_TYPES.name(), scenario.numTokenTypes);
             Fees fee = op.computeFee(params, new MockExchangeRate().activeRate(), schedule);
             assertEquals(scenario.expectedFee, fee.usd(), 1e-9, "Airdrop claim,cancel,reject test: " + scenario);
         }

@@ -21,7 +21,6 @@ import com.hedera.hapi.node.transaction.Response;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.FeeModelRegistry;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.fees.usage.file.ExtantFileContext;
 import com.hedera.node.app.hapi.fees.usage.file.FileOpsUsage;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
@@ -48,6 +47,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.hiero.base.crypto.Cryptography;
 import org.hiero.base.crypto.CryptographyProvider;
+import org.hiero.hapi.support.fees.Extra;
 
 /**
  * This class contains all workflow-related functionality regarding {@link HederaFunctionality#FILE_GET_INFO}.
@@ -99,9 +99,9 @@ public class FileGetInfoHandler extends FileQueryBase {
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel model = FeeModelRegistry.registry.get("FileGetInfo");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(),0L);
-            params.put(Extras.Keys.name(),0L);
-            params.put(Extras.Bytes.name(), file.contents().length());
+            params.put(Extra.SIGNATURES.name(),0L);
+            params.put(Extra.KEYS.name(),0L);
+            params.put(Extra.BYTES.name(), file.contents().length());
             return model.computeFee(params, queryContext.activeRate(), JsonFeesSchedule.fromJson());
         }
 

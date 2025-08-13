@@ -33,7 +33,6 @@ import com.hedera.hapi.node.transaction.AssessedCustomFee;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.FeeModelRegistry;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.service.token.ReadableAccountStore;
 import com.hedera.node.app.service.token.ReadableNftStore;
 import com.hedera.node.app.service.token.ReadableTokenRelationStore;
@@ -56,6 +55,8 @@ import com.hedera.node.config.data.AccountsConfig;
 import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.LedgerConfig;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -231,11 +232,11 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
 
             AbstractFeeModel model = FeeModelRegistry.registry.get("CryptoTransfer");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            params.put(Extras.Accounts.name(), (long)accounts.size());
-            params.put(Extras.StandardFungibleTokens.name(), ftCount);
-            params.put(Extras.StandardNonFungibleTokens.name(), nftCount);
-            params.put(Extras.Keys.toString(), 0L);
+            params.put(Extra.SIGNATURES.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extra.ACCOUNTS.name(), (long)accounts.size());
+            params.put(Extra.STANDARD_FUNGIBLE_TOKENS.name(), ftCount);
+            params.put(Extra.STANDARD_NON_FUNGIBLE_TOKENS.name(), nftCount);
+            params.put(Extra.KEYS.toString(), 0L);
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var config = feeContext.configuration();

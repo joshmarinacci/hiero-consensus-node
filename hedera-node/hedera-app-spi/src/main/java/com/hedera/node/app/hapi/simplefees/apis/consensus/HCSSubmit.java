@@ -2,10 +2,10 @@ package com.hedera.node.app.hapi.simplefees.apis.consensus;
 
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
 import com.hedera.node.app.hapi.simplefees.ParameterDefinition;
 import com.hedera.node.app.hapi.simplefees.apis.common.YesOrNo;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,7 @@ public class HCSSubmit extends AbstractFeeModel {
 
     private final List<ParameterDefinition> params = List.of(
             new ParameterDefinition(Params.HasCustomFee.toString(), "list", new String[] { "Yes", "No" }, "No", 0, 0, "Does this topic have custom fee"),
-            new ParameterDefinition(Extras.Bytes.toString(), "number", null, null, HCS_MIN_BYTES, HCS_MAX_BYTES, "Size of the message (bytes)")
+            new ParameterDefinition(Extra.BYTES.toString(), "number", null, null, HCS_MIN_BYTES, HCS_MAX_BYTES, "Size of the message (bytes)")
     );
 
     @Override
@@ -52,14 +52,14 @@ public class HCSSubmit extends AbstractFeeModel {
         } else {
             fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee("ConsensusSubmitMessageWithCustomFee"));
         }
-        if(!values.containsKey(Extras.Bytes.toString())) {
+        if(!values.containsKey(Extra.BYTES.toString())) {
             throw new Error("Missing Bytes parameter.");
         }
-        long numBytes = (long) values.get(Extras.Bytes.toString());
-        var free = feesSchedule.getServiceExtraIncludedCount("ConsensusSubmitMessage", Extras.Bytes.toString());
+        long numBytes = (long) values.get(Extra.BYTES.toString());
+        var free = feesSchedule.getServiceExtraIncludedCount("ConsensusSubmitMessage", Extra.BYTES);
         var excessBytes = numBytes - free;
         if (excessBytes > 0) {
-            fee.addDetail("Additional message size",  excessBytes, excessBytes * feesSchedule.getExtrasFee(Extras.Bytes.toString()));
+            fee.addDetail("Additional message size",  excessBytes, excessBytes * feesSchedule.getExtrasFee(Extra.BYTES));
         }
         return fee;
     }

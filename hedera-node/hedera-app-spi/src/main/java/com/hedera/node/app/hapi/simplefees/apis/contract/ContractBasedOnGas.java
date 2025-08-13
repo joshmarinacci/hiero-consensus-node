@@ -4,6 +4,7 @@ import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
 import com.hedera.node.app.hapi.simplefees.ParameterDefinition;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.List;
 import java.util.Map;
@@ -52,7 +53,7 @@ public class ContractBasedOnGas extends AbstractFeeModel {
         int gas = (int) values.get("gas");
         int gasTobeCharged = Math.max((gas - (isMinGasFree ? MIN_GAS : 0)), 0);
         if (gasTobeCharged > 0) {
-            fee.addDetail("Additional Gas fee", (gasTobeCharged), (gasTobeCharged) * feesSchedule.getExtrasFee("PerGas"));
+            fee.addDetail("Additional Gas fee", (gasTobeCharged), (gasTobeCharged) * feesSchedule.getExtrasFee(Extra.GAS));
         }
         return fee;
     }

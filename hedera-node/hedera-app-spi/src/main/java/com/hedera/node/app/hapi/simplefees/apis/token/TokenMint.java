@@ -5,7 +5,7 @@ import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
 import com.hedera.node.app.hapi.simplefees.ParameterDefinition;
 import com.hedera.node.app.hapi.simplefees.apis.common.FTOrNFT;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.List;
 import java.util.Map;
@@ -40,10 +40,10 @@ public class TokenMint extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
         fee.addDetail("Base fee for TokenMint", 1, feesSchedule.getServiceBaseFee("TokenMint"));
-        long numTokens = (long) values.get(Extras.StandardFungibleTokens.name());
-        var numFreeTokens = feesSchedule.getServiceExtraIncludedCount("TokenMint", Extras.StandardFungibleTokens.name());
+        long numTokens = (long) values.get(Extra.STANDARD_FUNGIBLE_TOKENS);
+        var numFreeTokens = feesSchedule.getServiceExtraIncludedCount("TokenMint", Extra.STANDARD_FUNGIBLE_TOKENS);
         if (numTokens > numFreeTokens) {
-            fee.addDetail("Additional FTs", numTokens - numFreeTokens, (numTokens - numFreeTokens) * feesSchedule.getExtrasFee(Extras.StandardFungibleTokens.name()));
+            fee.addDetail("Additional FTs", numTokens - numFreeTokens, (numTokens - numFreeTokens) * feesSchedule.getExtrasFee(Extra.STANDARD_FUNGIBLE_TOKENS));
         }
 
         return fee;

@@ -3,24 +3,24 @@ package com.hedera.node.app.hapi.simplefees.apis.common;
 public final class FeeConstants {
     private FeeConstants() {}  // prevent instantiation
 
-    public enum Extras {
-        Signatures,
-        Bytes,
-        Keys,
-        TokenTypes,
-        NFTSerials,
-        Accounts,
-        StandardFungibleTokens,
-        StandardNonFungibleTokens,
-        CustomFeeFungibleTokens,
-        CustomFeeNonFungibleTokens,
-        CreatedAutoAssociations,
-        CreatedAccounts,
-        CustomFee,
-        Gas,
-        Allowances,
-        Airdrops,
-    }
+//    public enum Extras {
+//        Signatures,
+//        Bytes,
+//        Keys,
+//        TokenTypes,
+//        NFTSerials,
+//        Accounts,
+//        StandardFungibleTokens,
+//        StandardNonFungibleTokens,
+//        CustomFeeFungibleTokens,
+//        CustomFeeNonFungibleTokens,
+//        CreatedAutoAssociations,
+//        CreatedAccounts,
+//        CustomFee,
+//        Gas,
+//        Allowances,
+//        Airdrops,
+//    }
 
     public enum Params {
         HasCustomFee

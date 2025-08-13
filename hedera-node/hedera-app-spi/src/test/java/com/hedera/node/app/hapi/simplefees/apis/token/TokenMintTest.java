@@ -2,8 +2,8 @@ package com.hedera.node.app.hapi.simplefees.apis.token;
 
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.spi.fees.Fees;
+import org.hiero.hapi.support.fees.Extra;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -18,22 +18,22 @@ class TokenMintTest {
     @BeforeAll
     static void setup() {
         schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Signatures,1L);
-        schedule.setExtrasFee(Extras.Keys,1L);
-        schedule.setExtrasFee(Extras.Accounts,2L);
-        schedule.setExtrasFee(Extras.StandardFungibleTokens, 5L);
+        schedule.setExtrasFee(Extra.SIGNATURES,1L);
+        schedule.setExtrasFee(Extra.KEYS,1L);
+        schedule.setExtrasFee(Extra.ACCOUNTS,2L);
+        schedule.setExtrasFee(Extra.STANDARD_FUNGIBLE_TOKENS, 5L);
 
         schedule.setServiceBaseFee("TokenMint",10L);
-        schedule.setServiceExtraIncludedCount("TokenMint", Extras.StandardFungibleTokens.name(),1L);
-        schedule.setServiceExtraIncludedCount("TokenMint", Extras.StandardNonFungibleTokens.name(),1L);
+        schedule.setServiceExtraIncludedCount("TokenMint", Extra.STANDARD_FUNGIBLE_TOKENS,1L);
+        schedule.setServiceExtraIncludedCount("TokenMint", Extra.STANDARD_NON_FUNGIBLE_TOKENS,1L);
     }
 
     @Test
     void testTokenFTMint() {
         TokenMint topic = new TokenMint();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 1L);
-        params.put(Extras.StandardFungibleTokens.name(), 10L);
+        params.put(Extra.SIGNATURES.toString(), 1L);
+        params.put(Extra.STANDARD_FUNGIBLE_TOKENS.toString(), 10L);
         Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(10 + (10-1)*5, fee.usd(), "Fungible Token Mint");
     }
@@ -42,9 +42,9 @@ class TokenMintTest {
     void testTokenNFTMintOne() {
         TokenMint topic = new TokenMint();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 1L);
-        params.put(Extras.StandardFungibleTokens.name(), 0L);
-        params.put(Extras.StandardNonFungibleTokens.name(), 10L);
+        params.put(Extra.SIGNATURES.toString(), 1L);
+        params.put(Extra.STANDARD_FUNGIBLE_TOKENS.toString(), 0L);
+        params.put(Extra.STANDARD_NON_FUNGIBLE_TOKENS.toString(), 10L);
         Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(10, fee.usd(), "Non Fungible Token Mint - 1");
     }
@@ -53,9 +53,9 @@ class TokenMintTest {
     void testTokenNFTMintMultiple() {
         TokenMint topic = new TokenMint();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 1L);
-        params.put(Extras.StandardNonFungibleTokens.name(), 10L);
-        params.put(Extras.StandardFungibleTokens.name(), 0L);
+        params.put(Extra.SIGNATURES.toString(), 1L);
+        params.put(Extra.STANDARD_NON_FUNGIBLE_TOKENS.toString(), 10L);
+        params.put(Extra.STANDARD_FUNGIBLE_TOKENS.toString(), 0L);
         Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(10, fee.usd(), "Non Fungible Token Mint - 10");
     }
@@ -65,9 +65,9 @@ class TokenMintTest {
     void testTokenMintWithMultipleSignatures() {
         TokenMint topic = new TokenMint();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 6L);
-        params.put(Extras.StandardFungibleTokens.name(), 0L);
-        params.put(Extras.StandardNonFungibleTokens.name(), 1L);
+        params.put(Extra.SIGNATURES.toString(), 6L);
+        params.put(Extra.STANDARD_FUNGIBLE_TOKENS.toString(), 0L);
+        params.put(Extra.STANDARD_NON_FUNGIBLE_TOKENS.toString(), 1L);
         Fees fee = topic.computeFee(params, new MockExchangeRate().activeRate(), schedule);
         assertEquals(10, fee.usd(), "NFT mint with multiple signatures");
     }

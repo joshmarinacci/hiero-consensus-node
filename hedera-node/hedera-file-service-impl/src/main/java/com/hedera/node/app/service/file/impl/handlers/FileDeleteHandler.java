@@ -16,7 +16,6 @@ import com.hedera.hapi.node.state.file.File;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.FeeModelRegistry;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.FileFeeBuilder;
 import com.hedera.node.app.service.file.ReadableFileStore;
@@ -33,6 +32,8 @@ import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.LedgerConfig;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
@@ -132,9 +133,9 @@ public class FileDeleteHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel model = FeeModelRegistry.registry.get("FileDelete");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(), 0L);
-            params.put(Extras.Keys.name(), 0L);
-            params.put(Extras.Bytes.name(), 0L);
+            params.put(Extra.SIGNATURES.name(), 0L);
+            params.put(Extra.KEYS.name(), 0L);
+            params.put(Extra.BYTES.name(), 0L);
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         return feeContext

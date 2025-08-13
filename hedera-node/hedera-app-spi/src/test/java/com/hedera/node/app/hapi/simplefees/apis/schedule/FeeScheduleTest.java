@@ -4,10 +4,11 @@ import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.simplefees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
+import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants;
 import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.hapi.simplefees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.simplefees.apis.consensus.HCSSubmit;
+import org.hiero.hapi.support.fees.Extra;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -23,13 +24,13 @@ public class FeeScheduleTest {
         assertDoesNotThrow(() -> {
             final var feeSchedule = JsonFeesSchedule.fromJson();
             assertEquals(1,feeSchedule.getNodeBaseFee());
-            assertEquals(1,feeSchedule.getNodeExtraIncludedCount(Extras.Signatures.toString()));
-            String[] nodeExtras = {Extras.Signatures.toString()};
-            assertArrayEquals(nodeExtras,feeSchedule.getNodeExtraNames().toArray(new String[0]));
+            assertEquals(1,feeSchedule.getNodeExtraIncludedCount(Extra.SIGNATURES));
+            Extra[] nodeExtras = {Extra.SIGNATURES};
+            assertArrayEquals(nodeExtras,feeSchedule.getNodeExtraNames().toArray(new Extra[0]));
 //            String[] definedExtras = {
-//                    Extras.Signatures.toString(),
-//                    Extras.Bytes.toString(),
-//                    Extras.Keys.toString(),
+//                    Extra.SIGNATURES.toString(),
+//                    Extra.BYTES.toString(),
+//                    Extra.KEYS.toString(),
 //                    Extras.TokenTypes.toString(),
 //            };
 //            assertArrayEquals(definedExtras, feeSchedule.getDefinedExtraNames().toArray(new String[0]));
@@ -47,18 +48,18 @@ public class FeeScheduleTest {
         assertDoesNotThrow(() -> {
             final var feeSchedule = JsonFeesSchedule.fromJson();
             // check that all extras in the enum are in the actual json
-            String[] definedExtras = Arrays.stream(Extras.values()).map(e -> e.name()).toArray(String[]::new);
-            for (String extra : definedExtras) {
+            var definedExtras = Arrays.stream(Extra.values()).toArray(Extra[]::new);
+            for (Extra extra : definedExtras) {
                 assertDoesNotThrow(() -> feeSchedule.getExtrasFee(extra));
             }
             // check that there are no extra Extras in the JSON
-            for (String name : feeSchedule.getDefinedExtraNames()) {
-                assertDoesNotThrow(() -> Extras.valueOf(name));
+            for (Extra name : feeSchedule.getDefinedExtraNames()) {
+//                assertDoesNotThrow(() -> Extras.valueOf(name));
             }
 
             // check that all extras referenced in services are in the actual json
             for (String methodName : feeSchedule.getServiceNames()) {
-                for (String extraName : feeSchedule.getServiceExtras(methodName)) {
+                for (Extra extraName : feeSchedule.getServiceExtras(methodName)) {
                     assertDoesNotThrow(() -> feeSchedule.getServiceExtraIncludedCount(methodName, extraName));
                     assertDoesNotThrow(() -> feeSchedule.getExtrasFee(extraName));
                 }
@@ -87,27 +88,27 @@ public class FeeScheduleTest {
     //test that we can load the mock fees and use them
     void mockTest() {
         var schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Signatures,8);
-        assertEquals(schedule.getExtrasFee(Extras.Signatures.toString()),8);
+        schedule.setExtrasFee(Extra.SIGNATURES,8);
+        assertEquals(schedule.getExtrasFee(Extra.SIGNATURES),8);
     }
 
     @Test
     //test that we can create a fees model from the service name
     void createModelFromStrings() {
         var schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Signatures,6);
+        schedule.setExtrasFee(Extra.SIGNATURES,6);
         schedule.setNodeBaseFee(2);
-        schedule.setNodeExtraIncludedCount(Extras.Signatures.toString(),2L);
+        schedule.setNodeExtraIncludedCount(Extra.SIGNATURES,2L);
         schedule.setNetworkMultiplier(3);
         schedule.setServiceBaseFee("ConsensusCreateTopic",10L);
-        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extras.Signatures.name(),1L);
+        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extra.SIGNATURES,1L);
 
         var model = createModel("Consensus","ConsensusCreateTopic");
         assertInstanceOf(EntityCreate.class, model);
 
         Map<String, Object> params = new HashMap<>();
         {
-            params.put(Extras.Signatures.name(), 0L);
+            params.put(Extra.SIGNATURES.name(), 0L);
 //        model.checkParameters(params);
             var fees = model.computeFee(params, new MockExchangeRate().activeRate(), schedule);
             // zero sigs, so just method base fee + node base fee + network multiplier * node base fee
@@ -116,7 +117,7 @@ public class FeeScheduleTest {
         }
         {
             // now set the sigs to 3
-            params.put(Extras.Signatures.name(), 3L);
+            params.put(Extra.SIGNATURES.name(), 3L);
             // 6 for each sig, with 2 included for the node and 1 included for the service
             // node = 2 + (3-2)*6 = 8
             // network = 3 * 8 = 24
@@ -133,20 +134,20 @@ public class FeeScheduleTest {
     // account for differences in included signature verifications
     void createModelWithVaryingIncludedSignatures() {
         var schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Signatures,1);
+        schedule.setExtrasFee(Extra.SIGNATURES,1);
         schedule.setNodeBaseFee(2);
 //        schedule.setNetworkBaseFee("ConsensusCreateTopic",8.8);
-        schedule.setNodeExtraIncludedCount(Extras.Signatures.toString(),1L);
+        schedule.setNodeExtraIncludedCount(Extra.SIGNATURES,1L);
 //        schedule.setNetworkExtrasIncluded("ConsensusCreateTopic","SignatureVerifications",1);
         schedule.setNetworkMultiplier(3);
         schedule.setServiceBaseFee("ConsensusCreateTopic",10L);
-        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extras.Signatures.toString(),2);
+        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extra.SIGNATURES,2);
 
         var model = createModel("Consensus","ConsensusCreateTopic");
         assertInstanceOf(EntityCreate.class, model);
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.toString(), 8L);
-        params.put(Extras.Keys.toString(), 0);
+        params.put(Extra.SIGNATURES.toString(), 8L);
+        params.put(Extra.KEYS.toString(), 0);
         params.put(Params.HasCustomFee.name(), YesOrNo.NO);
 
                 /*
@@ -169,14 +170,14 @@ public class FeeScheduleTest {
         // submit a message with 1600 bytes and 1 sig
         var schedule = new MockFeesSchedule();
         schedule.setServiceBaseFee("ConsensusSubmitMessage",10L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extras.Bytes,0);
-        schedule.setExtrasFee(Extras.Signatures,1L);
-        schedule.setExtrasFee(Extras.Bytes,1L);
+        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extra.BYTES,0);
+        schedule.setExtrasFee(Extra.SIGNATURES,1L);
+        schedule.setExtrasFee(Extra.BYTES,1L);
         var exchangeRate = new MockExchangeRate().activeRate(); // 1/12
         Map<String, Object> params = new HashMap<>();
         params.put(Params.HasCustomFee.name(), YesOrNo.NO);
-        params.put(Extras.Bytes.toString(), 1600L);
-        params.put(Extras.Signatures.toString(), 1L);
+        params.put(Extra.BYTES.toString(), 1600L);
+        params.put(Extra.SIGNATURES.toString(), 1L);
         var model = createModel("Consensus","ConsensusSubmitMessage");
         model.checkParameters(params);
         var fees = model.computeFee(params, exchangeRate, schedule);

@@ -25,7 +25,6 @@ import com.hedera.hapi.node.state.file.File;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.FeeModelRegistry;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.fees.usage.SigUsage;
 import com.hedera.node.app.hapi.fees.usage.file.ExtantFileContext;
 import com.hedera.node.app.hapi.fees.usage.file.FileOpsUsage;
@@ -54,6 +53,8 @@ import com.hedera.node.config.types.LongPair;
 import com.hederahashgraph.api.proto.java.FeeData;
 import com.hederahashgraph.api.proto.java.KeyList;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
@@ -184,9 +185,9 @@ public class FileUpdateHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel model = FeeModelRegistry.registry.get("FileUpdate");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(), (long)feeContext.numTxnSignatures());
-            params.put(Extras.Keys.name(), 1L);
-            params.put(Extras.Bytes.name(), op.fileUpdateOrThrow().contents().length());
+            params.put(Extra.SIGNATURES.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extra.KEYS.name(), 1L);
+            params.put(Extra.BYTES.name(), op.fileUpdateOrThrow().contents().length());
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var file = feeContext

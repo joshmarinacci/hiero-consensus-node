@@ -20,7 +20,6 @@ import com.hedera.hapi.node.transaction.Response;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.FeeModelRegistry;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.FileFeeBuilder;
 import com.hedera.node.app.service.addressbook.ReadableNodeStore;
@@ -38,6 +37,7 @@ import com.hederahashgraph.api.proto.java.ResponseType;
 import com.swirlds.config.api.Configuration;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -98,9 +98,9 @@ public class FileGetContentsHandler extends FileQueryBase {
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel model = FeeModelRegistry.registry.get("FileGetContents");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(), 0L);
-            params.put(Extras.Keys.name(), 0L);
-            params.put(Extras.Bytes.name(), fileContents.contents().length());
+            params.put(Extra.SIGNATURES.name(), 0L);
+            params.put(Extra.KEYS.name(), 0L);
+            params.put(Extra.BYTES.name(), fileContents.contents().length());
             return model.computeFee(params, queryContext.activeRate(), JsonFeesSchedule.fromJson());
         }
 

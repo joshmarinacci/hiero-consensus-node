@@ -68,6 +68,8 @@ import com.hedera.node.config.data.FeesConfig;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import org.hiero.hapi.support.fees.Extra;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -519,9 +521,9 @@ public class ConsensusSubmitMessageHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel entity = FeeModelRegistry.registry.get("ConsensusSubmitMessage");
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.name(), (long)feeContext.numTxnSignatures());
-            params.put(FeeConstants.Extras.Keys.name(), 0L);
-            params.put(FeeConstants.Extras.Bytes.name(), op.message().length());
+            params.put(Extra.SIGNATURES.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extra.KEYS.name(), 0L);
+            params.put(Extra.BYTES.name(), op.message().length());
             params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.NO);
             if(topic !=null && !topic.customFees().isEmpty()) {
                 params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.YES);

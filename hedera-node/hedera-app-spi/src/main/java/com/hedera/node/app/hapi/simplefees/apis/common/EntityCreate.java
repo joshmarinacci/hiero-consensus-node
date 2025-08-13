@@ -4,8 +4,8 @@ import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
 import com.hedera.node.app.hapi.simplefees.ParameterDefinition;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Params;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.List;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class EntityCreate extends AbstractFeeModel {
     private final boolean customFeeCapable;
 
     private final List<ParameterDefinition> params = List.of(
-            new ParameterDefinition(Extras.Keys.toString(), "number", null, MIN_KEYS, MIN_KEYS, MAX_KEYS, "Number of keys")
+            new ParameterDefinition(Extra.KEYS.name(), "number", null, MIN_KEYS, MIN_KEYS, MAX_KEYS, "Number of keys")
     );
     private final List<ParameterDefinition> customFeeParams = List.of(
             new ParameterDefinition(Params.HasCustomFee.toString(), "list", new Object[] {YesOrNo.YES, YesOrNo.NO}, YesOrNo.NO, 0, 0, "Enable custom fee?")
@@ -65,11 +65,11 @@ public class EntityCreate extends AbstractFeeModel {
             result.addDetail("Base fee for " + this.api, 1, feesSchedule.getServiceBaseFee(api));
         }
 
-        final List<String> extras = feesSchedule.getServiceExtras(api);
+        final var extras = feesSchedule.getServiceExtras(api);
         for(var extra : extras) {
             final long extraFee = feesSchedule.getExtrasFee(extra);
             final long extraIncludedCount = feesSchedule.getServiceExtraIncludedCount(api,extra);
-            final long extraUsed = (long) values.get(extra);
+            final long extraUsed = (long) values.get(extra.name());
             if (extraUsed > extraIncludedCount) {
                 final long overage = extraUsed - extraIncludedCount;
                 result.addDetail( extra +" Overage", overage, overage * extraFee);

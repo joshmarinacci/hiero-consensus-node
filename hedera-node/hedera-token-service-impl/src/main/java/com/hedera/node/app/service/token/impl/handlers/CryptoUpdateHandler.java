@@ -39,7 +39,6 @@ import com.hedera.hapi.node.transaction.TransactionBody;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.FeeModelRegistry;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.EntityType;
 import com.hedera.node.app.service.token.CryptoSignatureWaivers;
@@ -66,6 +65,8 @@ import com.hedera.node.config.data.TokensConfig;
 import com.swirlds.config.api.Configuration;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import org.hiero.hapi.support.fees.Extra;
+
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -326,8 +327,8 @@ public class CryptoUpdateHandler extends BaseCryptoHandler implements Transactio
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel model = FeeModelRegistry.registry.get("CryptoUpdate");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.toString(),(long)feeContext.numTxnSignatures());
-            params.put(Extras.Keys.toString(), 1L);
+            params.put(Extra.SIGNATURES.name(),(long)feeContext.numTxnSignatures());
+            params.put(Extra.KEYS.name(), 1L);
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         // Variable bytes plus two additional longs for balance and auto-renew period; plus a boolean for receiver sig

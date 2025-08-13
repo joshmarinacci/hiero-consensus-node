@@ -2,10 +2,11 @@ package com.hedera.node.app.hapi.simplefees;
 
 
 import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
-import org.hiero.hapi.fees.pbj.ExtraFeeDefinition;
-import org.hiero.hapi.fees.pbj.FeeSchedule;
-import org.hiero.hapi.fees.pbj.Service;
-import org.hiero.hapi.fees.pbj.ServiceFee;
+import org.hiero.hapi.support.fees.Extra;
+import org.hiero.hapi.support.fees.ExtraFeeDefinition;
+import org.hiero.hapi.support.fees.FeeSchedule;
+import org.hiero.hapi.support.fees.Service;
+import org.hiero.hapi.support.fees.ServiceFee;
 
 
 import java.util.HashMap;
@@ -19,7 +20,7 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     public final FeeSchedule schedule;
     private final HashMap<String, Service> services;
     private final HashMap<String, ServiceFee> serviceMethods;
-    public final HashMap<String, ExtraFeeDefinition> extras;
+    public final HashMap<Extra, ExtraFeeDefinition> extras;
 
     public static JsonFeesSchedule fromJson() {
         try (final var fin = JsonFeesSchedule.class.getClassLoader().getResourceAsStream("simple-fee-schedule.json")) {
@@ -57,12 +58,12 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
 
 
     @Override
-    public List<String> getDefinedExtraNames() {
+    public List<Extra> getDefinedExtraNames() {
         return this.schedule.definedExtras().stream().map(e -> e.name()).collect(Collectors.toList());
     }
 
     @Override
-    public long getExtrasFee(String name) {
+    public long getExtrasFee(Extra name) {
         var res = this.schedule.definedExtras().stream().filter(e -> e.name().equals(name)).findFirst();
         if (res.isPresent()) {
             return res.get().fee();
@@ -77,12 +78,12 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     }
 
     @Override
-    public List<String> getNodeExtraNames() {
+    public List<Extra> getNodeExtraNames() {
         return this.schedule.nodeFee().extras().stream().map(e -> e.name()).collect(Collectors.toList());
     }
 
     @Override
-    public long getNodeExtraIncludedCount(String name) {
+    public long getNodeExtraIncludedCount(Extra name) {
         for(var extra : this.schedule.nodeFee().extras()) {
             if (extra.name().equals(name)) {
                 return extra.includedCount();
@@ -108,14 +109,14 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     }
 
     @Override
-    public List<String> getServiceExtras(String method) {
+    public List<Extra> getServiceExtras(String method) {
         if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
         return this.serviceMethods.get(method).extras().stream().map(e -> e.name()).collect(Collectors.toList());
     }
 
 
     @Override
-    public long getServiceExtraIncludedCount(String method, String name) {
+    public long getServiceExtraIncludedCount(String method, Extra name) {
         if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
         var m = this.serviceMethods.get(method);
         for(var extra : m.extras()) {

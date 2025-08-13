@@ -25,7 +25,6 @@ import com.hedera.hapi.node.transaction.CustomFee;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.FeeModelRegistry;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.hapi.simplefees.apis.common.YesOrNo;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
@@ -51,6 +50,7 @@ import com.hedera.node.config.data.TokensConfig;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import com.swirlds.state.lifecycle.EntityIdFactory;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.HashMap;
 import java.util.List;
@@ -434,10 +434,10 @@ public class TokenCreateHandler extends BaseTokenHandler implements TransactionH
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             AbstractFeeModel model = FeeModelRegistry.registry.get("TokenCreate");
             Map<String, Object> params = new HashMap<>();
-            params.put(Extras.Signatures.name(), (long)feeContext.numTxnSignatures());
-            params.put(Extras.Keys.name(), 0L);
+            params.put(Extra.SIGNATURES.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extra.KEYS.name(), 0L);
             params.put(Params.HasCustomFee.name(), YesOrNo.NO);
-            params.put(Extras.CustomFeeFungibleTokens.name(), 0L);
+            params.put(Extra.CUSTOM_FEE_FUNGIBLE_TOKENS.name(), 0L);
             if(op.hasFeeScheduleKey()) {
                 params.put(Params.HasCustomFee.name(), YesOrNo.YES);
             }

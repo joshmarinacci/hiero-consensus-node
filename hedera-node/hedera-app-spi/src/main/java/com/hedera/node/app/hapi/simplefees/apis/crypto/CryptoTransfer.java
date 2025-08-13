@@ -4,8 +4,8 @@ import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeCheckResult;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
 import com.hedera.node.app.hapi.simplefees.ParameterDefinition;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.List;
 import java.util.Map;
@@ -16,13 +16,13 @@ public class CryptoTransfer extends AbstractFeeModel {
     String api;
 
     private final List<ParameterDefinition> params = List.of(
-            new ParameterDefinition(Extras.Accounts.name(), "number", null, 2, 0, 20, "Number of Accounts involved"),
-            new ParameterDefinition(Extras.StandardFungibleTokens.name(), "number", null, 0, 0, 10, "Fungible token entries without custom fee"),
-            new ParameterDefinition(Extras.StandardNonFungibleTokens.name(), "number", null, 0, 0, 10, "NFT entries without custom fee"),
-            new ParameterDefinition(Extras.CustomFeeFungibleTokens.name(), "number", null, 0, 0, 10, "Fungible token entries with custom fee"),
-            new ParameterDefinition(Extras.CustomFeeNonFungibleTokens.name(), "number", null, 0, 0, 10, "NFT entries with custom fee"),
-            new ParameterDefinition(Extras.CreatedAutoAssociations.name(), "number", null, 0, 0, 10, "Auto-created token associations"),
-            new ParameterDefinition(Extras.CreatedAccounts.name(), "number", null, 0, 0, 20, "Auto-created accounts")
+            new ParameterDefinition(Extra.ACCOUNTS.name(), "number", null, 2, 0, 20, "Number of Accounts involved"),
+            new ParameterDefinition(Extra.STANDARD_FUNGIBLE_TOKENS.name(), "number", null, 0, 0, 10, "Fungible token entries without custom fee"),
+            new ParameterDefinition(Extra.STANDARD_NON_FUNGIBLE_TOKENS.name(), "number", null, 0, 0, 10, "NFT entries without custom fee"),
+            new ParameterDefinition(Extra.CUSTOM_FEE_FUNGIBLE_TOKENS.name(), "number", null, 0, 0, 10, "Fungible token entries with custom fee"),
+            new ParameterDefinition(Extra.CUSTOM_FEE_NON_FUNGIBLE_TOKENS.name(), "number", null, 0, 0, 10, "NFT entries with custom fee"),
+            new ParameterDefinition(Extra.CREATED_AUTO_ASSOCIATIONS.name(), "number", null, 0, 0, 10, "Auto-created token associations"),
+            new ParameterDefinition(Extra.CREATED_ACCOUNTS.name(), "number", null, 0, 0, 20, "Auto-created accounts")
     );
 
     public CryptoTransfer(String service, String api) {
@@ -55,7 +55,7 @@ public class CryptoTransfer extends AbstractFeeModel {
         FeeCheckResult base = super.checkParameters(values);
         if (!base.result) return base;
 
-//        if ( (long) values.get(Extras.Accounts.name()) < 2 ||
+//        if ( (long) values.get(Extra.ACCOUNTS) < 2 ||
 //                ((long) values.get("numFTNoCustomFeeEntries") < 2 &&
 //                (long) values.get("numNFTNoCustomFeeEntries") < 2 &&
 //                (long) values.get("numNFTWithCustomFeeEntries") < 2)) {
@@ -85,10 +85,10 @@ public class CryptoTransfer extends AbstractFeeModel {
         FeeResult fee = new FeeResult();
 
         // Extract values
-        long standardFT = getLong(values.get(Extras.StandardFungibleTokens.name()));
-        long standardNFT = getLong(values.get(Extras.StandardNonFungibleTokens.name()));
-        long customFT = getLong(values.get(Extras.CustomFeeFungibleTokens.name()));
-        long customNFT = getLong(values.get(Extras.CustomFeeNonFungibleTokens.name()));
+        long standardFT = getLong(values.get(Extra.STANDARD_FUNGIBLE_TOKENS.name()));
+        long standardNFT = getLong(values.get(Extra.STANDARD_NON_FUNGIBLE_TOKENS.name()));
+        long customFT = getLong(values.get(Extra.CUSTOM_FEE_FUNGIBLE_TOKENS.name()));
+        long customNFT = getLong(values.get(Extra.CUSTOM_FEE_NON_FUNGIBLE_TOKENS.name()));
         long customTokens = customFT + customNFT;
         boolean tokenTransfersPresent = (standardFT + standardNFT + customFT + customNFT) > 0;
 
@@ -103,7 +103,7 @@ public class CryptoTransfer extends AbstractFeeModel {
             effectiveApi = "CryptoTransfer";
         }
 
-        long numFreeTokens = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extras.StandardFungibleTokens.name());
+        long numFreeTokens = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extra.STANDARD_FUNGIBLE_TOKENS);
         // If tokens with custom fees are used, then use the higher base prices
         if (customTokens > 0) {
             if (effectiveApi.equals("TokenTransfer")) {
@@ -116,11 +116,11 @@ public class CryptoTransfer extends AbstractFeeModel {
         }
 
         // Overage for the number of accounts that we need to update for handling this transaction
-        long numFreeAccounts = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extras.Accounts.name());
-        var numAccounts = (long)values.get(Extras.Accounts.name());
+        long numFreeAccounts = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extra.ACCOUNTS);
+        var numAccounts = (long)values.get(Extra.ACCOUNTS);
         if (numAccounts > numFreeAccounts) {
             var excess = numAccounts - numFreeAccounts;
-            fee.addDetail("Accounts involved", excess, excess * feesSchedule.getExtrasFee(Extras.Accounts.name()));
+            fee.addDetail("Accounts involved", excess, excess * feesSchedule.getExtrasFee(Extra.ACCOUNTS));
         }
 
         // Overage for the number of token-types that we need to fetch for handling this transaction
@@ -150,9 +150,9 @@ public class CryptoTransfer extends AbstractFeeModel {
         }
 
         // Overage for the number of entities created automatically (associations/accounts) during handling this transaction
-        if (values.get(Extras.CreatedAutoAssociations.name()) instanceof Integer num && num > 0)
+        if (values.get(Extra.CREATED_AUTO_ASSOCIATIONS.name()) instanceof Integer num && num > 0)
             fee.addDetail("Auto token associations", num, num * feesSchedule.getServiceBaseFee("TokenAssociateToAccount"));
-        if (values.get(Extras.CreatedAccounts.name()) instanceof Integer num && num > 0)
+        if (values.get(Extra.CREATED_ACCOUNTS.name()) instanceof Integer num && num > 0)
             fee.addDetail("Auto account creations", num, num * feesSchedule.getServiceBaseFee("CryptoCreate"));
 
         return fee;

@@ -3,8 +3,8 @@ package com.hedera.node.app.hapi.simplefees.apis.token;
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.common.FTOrNFT;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.spi.fees.Fees;
+import org.hiero.hapi.support.fees.Extra;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +25,7 @@ class TokenBurnTest {
     void testTokenBurnSingle() {
         TokenBurn topic = new TokenBurn();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 1L);
+        params.put(Extra.SIGNATURES.name(), 1L);
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 1);
 
@@ -37,7 +37,7 @@ class TokenBurnTest {
     void testTokenBurnMultipleFungible() {
         TokenBurn topic = new TokenBurn();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 1L);
+        params.put(Extra.SIGNATURES.name(), 1L);
         params.put("fungibleOrNonFungible", FTOrNFT.Fungible);
         params.put("numTokens", 10);
 
@@ -48,7 +48,7 @@ class TokenBurnTest {
     void testTokenBurnMultipleNonFungible() {
         TokenBurn topic = new TokenBurn();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 1L);
+        params.put(Extra.SIGNATURES.name(), 1L);
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 10);
 
@@ -60,7 +60,7 @@ class TokenBurnTest {
     void testTokenBurnMultipleWithMultipleSignatures() {
         TokenBurn topic = new TokenBurn();
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 5L);
+        params.put(Extra.SIGNATURES.name(), 5L);
         params.put("fungibleOrNonFungible", FTOrNFT.NonFungible);
         params.put("numTokens", 10);
 

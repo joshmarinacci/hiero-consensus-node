@@ -52,6 +52,8 @@ import com.hedera.pbj.runtime.io.buffer.Bytes;
 import com.hederahashgraph.api.proto.java.FeeData;
 import com.swirlds.state.lifecycle.EntityIdFactory;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
@@ -232,8 +234,8 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
             final var feeSchedule = JsonFeesSchedule.fromJson();
             AbstractFeeModel entity = FeeModelRegistry.registry.get("ConsensusCreateTopic");
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            params.put(FeeConstants.Extras.Keys.toString(), 0L);
+            params.put(Extra.SIGNATURES.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extra.KEYS.name(), 0L);
             params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.NO);
             if(hasCustomFees){
                 params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.YES);

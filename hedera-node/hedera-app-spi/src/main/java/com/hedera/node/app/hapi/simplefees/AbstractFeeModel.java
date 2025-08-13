@@ -5,6 +5,7 @@ import com.hedera.node.app.hapi.simplefees.apis.common.AssociateOrDissociate;
 import com.hedera.node.app.hapi.simplefees.apis.common.FTOrNFT;
 import com.hedera.node.app.hapi.simplefees.apis.common.YesOrNo;
 import com.hedera.node.app.spi.fees.Fees;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.*;
 
@@ -56,31 +57,31 @@ public abstract class AbstractFeeModel {
     }
 
     // Compute the fee. There are 2 parts to the fee. There's the API specific fee (e.g. cryptoCreate price is based on the number of keys), and there's fee for parameters that are common across all APIs (e.g. number of signatures)
-    public Fees computeFee(Map<String, Object> values, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule) {
-        checkParameters(values);
-        System.out.println("params are " + values);
-        final List<String> serviceExtras = feesSchedule.getServiceExtras(this.getMethodName());
-        for (String key : serviceExtras) {
-            if (!values.containsKey(key)) {
+    public Fees computeFee(Map<String, Object> params, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule) {
+        checkParameters(params);
+        System.out.println("params are " + params);
+        final List<Extra> serviceExtras = feesSchedule.getServiceExtras(this.getMethodName());
+        for (Extra key : serviceExtras) {
+            if (!params.containsKey(key)) {
                 System.err.println("input params missing " + key + " required by method " + this.getMethodName());
             }
         }
 
-        preprocessEnumValues(values);
+        preprocessEnumValues(params);
         //  get base fee for the service
-        var result = computeApiSpecificFee(values, feesSchedule);
+        var result = computeApiSpecificFee(params, feesSchedule);
 
         //  calculate the node fee
         final var node_base_fee = feesSchedule.getNodeBaseFee();
         long total_node_fee = node_base_fee;
         result.details.put("Node Base Fee", new FeeResult.FeeDetail(1, node_base_fee));
-        final List<String> extras = feesSchedule.getNodeExtraNames();
+        final List<Extra> extras = feesSchedule.getNodeExtraNames();
         for(var extra : extras) {
             final var node_bytes_fee = feesSchedule.getExtrasFee(extra);
             final long node_bytes_included = feesSchedule.getNodeExtraIncludedCount(extra);
             System.out.println("Node Extra: " + extra + " costs " + node_bytes_fee+ " each, included " + node_bytes_included);
-            System.out.println("using " + values.get(extra) + " of " + extra);
-            final long used = (long) values.get(extra);
+            System.out.println("using " + params.get(extra.name()) + " of " + extra);
+            final long used = (long) params.get(extra.name());
             if (used > node_bytes_included) {
                 final long additional_bytes = used - node_bytes_included;
                 System.out.println("overage " + additional_bytes);

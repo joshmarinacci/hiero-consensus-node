@@ -2,8 +2,8 @@ package com.hedera.node.app.hapi.simplefees.apis.file;
 
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.spi.fees.Fees;
+import org.hiero.hapi.support.fees.Extra;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -19,9 +19,9 @@ class FileOperationsTest {
     @BeforeAll
     static void setup() {
         schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extras.Keys, 1L);
-        schedule.setExtrasFee(Extras.Signatures, 1L);
-        schedule.setExtrasFee(Extras.Bytes, 11L);
+        schedule.setExtrasFee(Extra.KEYS, 1L);
+        schedule.setExtrasFee(Extra.SIGNATURES, 1L);
+        schedule.setExtrasFee(Extra.BYTES, 11L);
 
         schedule.setServiceBaseFee("FileCreate",50L);
     }
@@ -30,11 +30,11 @@ class FileOperationsTest {
     void testFileOperations() {
         FileOperations transfer = new FileOperations("FileCreate", "dummy description");
         Map<String, Object> params = new HashMap<>();
-        params.put(Extras.Signatures.name(), 1L);
-        params.put(Extras.Keys.name(), 1L);
+        params.put(Extra.SIGNATURES.name(), 1L);
+        params.put(Extra.KEYS.name(), 1L);
 
         for (int numBytes = 10; numBytes < 100000; numBytes += 100) {
-            params.put(Extras.Bytes.name(), (long)numBytes);
+            params.put(Extra.BYTES.name(), (long)numBytes);
             Fees fee = transfer.computeFee(params, new MockExchangeRate().activeRate(), schedule);
 
             long overage = (numBytes <= FILE_FREE_BYTES)

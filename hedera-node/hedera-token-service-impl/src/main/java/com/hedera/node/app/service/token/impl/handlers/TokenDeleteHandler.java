@@ -37,6 +37,8 @@ import com.hedera.node.app.spi.workflows.TransactionHandler;
 import com.hedera.node.config.data.FeesConfig;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
@@ -126,8 +128,8 @@ public class TokenDeleteHandler implements TransactionHandler {
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             EntityCreate model = new EntityCreate("Token", "TokenDelete", "Delete a token type", false);
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.name(), 0L);
-            params.put(FeeConstants.Extras.Keys.name(), 0L);
+            params.put(Extra.SIGNATURES.name(), 0L);
+            params.put(Extra.KEYS.name(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }

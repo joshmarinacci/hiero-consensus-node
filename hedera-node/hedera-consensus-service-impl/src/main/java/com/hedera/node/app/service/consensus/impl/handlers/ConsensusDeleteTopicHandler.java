@@ -34,6 +34,8 @@ import com.hedera.node.app.spi.workflows.TransactionHandler;
 import com.hedera.node.config.data.FeesConfig;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.HashMap;
@@ -122,8 +124,8 @@ public class ConsensusDeleteTopicHandler implements TransactionHandler {
             final var schedule = JsonFeesSchedule.fromJson();
             AbstractFeeModel entity = FeeModelRegistry.registry.get("ConsensusDeleteTopic");
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.toString(), (long)feeContext.numTxnSignatures());
-            params.put(FeeConstants.Extras.Keys.name(), 0L);
+            params.put(Extra.SIGNATURES.name(), (long)feeContext.numTxnSignatures());
+            params.put(Extra.KEYS.name(), 0L);
             params.put(FeeConstants.Params.HasCustomFee.toString(), YesOrNo.NO);
             return entity.computeFee(params, feeContext.activeRate(), schedule);
         }

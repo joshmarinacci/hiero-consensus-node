@@ -4,7 +4,6 @@ import com.hedera.hapi.block.stream.BlockItem;
 import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.JsonFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.common.EntityCreate;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.hapi.simplefees.apis.common.FeesHelper;
 import com.hedera.node.app.hapi.simplefees.apis.common.YesOrNo;
@@ -17,6 +16,7 @@ import com.hedera.services.bdd.spec.utilops.streams.assertions.BlockStreamAssert
 import com.hederahashgraph.api.proto.java.TokenSupplyType;
 import com.hederahashgraph.api.proto.java.TokenType;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.Extra;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
@@ -290,8 +290,8 @@ public class SimpleFeesSuite {
 
                                 EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", true);
                                 Map<String, Object> params = new HashMap<>();
-                                params.put(Extras.Signatures.name(), 0L);
-                                params.put(Extras.Keys.name(), 0L);
+                                params.put(Extra.SIGNATURES.name(), 0L);
+                                params.put(Extra.KEYS.name(), 0L);
                                 params.put(Params.HasCustomFee.name(), YesOrNo.NO);
                                 var fee = entity.computeFee(params, current_rate, JsonFeesSchedule.fromJson());
                                 System.out.println("recomputed fee is " + fee);

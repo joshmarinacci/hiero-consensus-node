@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package org.hiero.hapi.support.fees;
 
-option java_package = "org.hiero.hapi.fees";
-// <<<pbj.java_package = "org.hiero.hapi.fees.pbj">>> This comment is special code for setting PBJ Compiler java package
+option java_package = "org.hiero.hapi.support.fees.protoc";
+// <<<pbj.java_package = "org.hiero.hapi.support.fees">>> This comment is special code for setting PBJ Compiler java package
 option java_multiple_files = true;
 
 message FeeSchedule {
@@ -13,8 +13,27 @@ message FeeSchedule {
   repeated ExtraFeeDefinition defined_extras = 4;
   repeated Service service_fees = 5;
 }
+
+enum Extra {
+    Signatures=0;
+    Bytes=1;
+    Keys=2;
+    TokenTypes=3;
+    NFTSerials=4;
+    Accounts=5;
+    StandardFungibleTokens=6;
+    StandardNonFungibleTokens=7;
+    CustomFeeFungibleTokens=8;
+    CustomFeeNonFungibleTokens=9;
+    CreatedAutoAssociations=10;
+    CreatedAccounts=11;
+    CustomFee=12;
+    Gas=13;
+    Allowances=14;
+    Airdrops=15;
+}
 message ExtraFeeDefinition {
-  string name = 1;
+  Extra name = 1;
   // USD in thousandths of one cent
   uint64 fee = 2;
 }
@@ -40,7 +59,7 @@ message ServiceFee {
   repeated ExtraFeeReference extras = 3;
 }
 message ExtraFeeReference {
-  string name = 1;
+  Extra name = 1;
   uint32 includedCount = 2;
 }
 message UnreadableTransactionFee {

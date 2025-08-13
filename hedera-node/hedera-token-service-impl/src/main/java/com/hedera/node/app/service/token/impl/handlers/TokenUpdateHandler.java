@@ -60,6 +60,8 @@ import com.hedera.node.config.data.FeesConfig;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import org.hiero.hapi.support.fees.Extra;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -602,8 +604,8 @@ public class TokenUpdateHandler extends BaseTokenHandler implements TransactionH
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             EntityCreate entity = new EntityCreate("Token", "TokenUpdate", "Update a token type", false);
             Map<String, Object> params = new HashMap<>();
-            params.put(FeeConstants.Extras.Signatures.name(), 0L);
-            params.put(FeeConstants.Extras.Keys.name(), 0L);
+            params.put(Extra.SIGNATURES.name(), 0L);
+            params.put(Extra.KEYS.name(), 0L);
             params.put("hasCustomFee", YesOrNo.NO);
             return entity.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }

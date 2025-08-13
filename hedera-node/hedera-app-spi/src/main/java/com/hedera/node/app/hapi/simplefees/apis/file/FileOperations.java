@@ -2,9 +2,9 @@ package com.hedera.node.app.hapi.simplefees.apis.file;
 
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
-import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Extras;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
 import com.hedera.node.app.hapi.simplefees.ParameterDefinition;
+import org.hiero.hapi.support.fees.Extra;
 
 import java.util.List;
 import java.util.Map;
@@ -45,20 +45,20 @@ public class FileOperations extends AbstractFeeModel {
     }
 
     @Override
-    protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
+    protected FeeResult computeApiSpecificFee(Map<String, Object> params, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
         fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(api));
 
-        long numKeys = (long) values.get(Extras.Keys.name());
+        long numKeys = (long) params.get(Extra.KEYS.name());
         long numFreeKeys = 1;
         if (numKeys > numFreeKeys) {
-            fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getServiceBaseFee(Extras.Keys.name()));
+            fee.addDetail("Additional keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getExtrasFee(Extra.KEYS));
         }
 
-        long numBytes = (long) values.get(Extras.Bytes.name());
+        long numBytes = (long) params.get(Extra.BYTES.name());
         if (numBytes > FILE_FREE_BYTES) {
-            fee.addDetail("Additional file size", (numBytes - FILE_FREE_BYTES), (numBytes - FILE_FREE_BYTES) * feesSchedule.getExtrasFee(Extras.Bytes.name()));
+            fee.addDetail("Additional file size", (numBytes - FILE_FREE_BYTES), (numBytes - FILE_FREE_BYTES) * feesSchedule.getExtrasFee(Extra.BYTES));
         }
         System.out.println("total fee is " + fee);
         return fee;
