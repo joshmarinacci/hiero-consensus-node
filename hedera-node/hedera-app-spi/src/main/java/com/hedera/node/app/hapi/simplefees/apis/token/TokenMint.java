@@ -40,7 +40,7 @@ public class TokenMint extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
         fee.addDetail("Base fee for TokenMint", 1, feesSchedule.getServiceBaseFee("TokenMint"));
-        long numTokens = (long) values.get(Extra.STANDARD_FUNGIBLE_TOKENS);
+        long numTokens = (long) values.get(Extra.STANDARD_FUNGIBLE_TOKENS.name());
         var numFreeTokens = feesSchedule.getServiceExtraIncludedCount("TokenMint", Extra.STANDARD_FUNGIBLE_TOKENS);
         if (numTokens > numFreeTokens) {
             fee.addDetail("Additional FTs", numTokens - numFreeTokens, (numTokens - numFreeTokens) * feesSchedule.getExtrasFee(Extra.STANDARD_FUNGIBLE_TOKENS));

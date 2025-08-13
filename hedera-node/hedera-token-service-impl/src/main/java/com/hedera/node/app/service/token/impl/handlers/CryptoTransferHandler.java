@@ -236,7 +236,7 @@ public class CryptoTransferHandler extends TransferExecutor implements Transacti
             params.put(Extra.ACCOUNTS.name(), (long)accounts.size());
             params.put(Extra.STANDARD_FUNGIBLE_TOKENS.name(), ftCount);
             params.put(Extra.STANDARD_NON_FUNGIBLE_TOKENS.name(), nftCount);
-            params.put(Extra.KEYS.toString(), 0L);
+            params.put(Extra.KEYS.name(), 0L);
             return model.computeFee(params, feeContext.activeRate(), JsonFeesSchedule.fromJson());
         }
         final var config = feeContext.configuration();
