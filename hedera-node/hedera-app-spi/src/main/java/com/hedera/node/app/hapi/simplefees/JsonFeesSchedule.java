@@ -58,6 +58,11 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
 
 
     @Override
+    public FeeSchedule getRawSchedule() {
+        return this.schedule;
+    }
+
+    @Override
     public List<Extra> getDefinedExtraNames() {
         return this.schedule.definedExtras().stream().map(e -> e.name()).collect(Collectors.toList());
     }

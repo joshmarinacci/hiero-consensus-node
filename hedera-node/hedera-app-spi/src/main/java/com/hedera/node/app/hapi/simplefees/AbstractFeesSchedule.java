@@ -1,10 +1,12 @@
 package com.hedera.node.app.hapi.simplefees;
 
 import org.hiero.hapi.support.fees.Extra;
+import org.hiero.hapi.support.fees.FeeSchedule;
 
 import java.util.List;
 
 public interface AbstractFeesSchedule {
+    FeeSchedule getRawSchedule();
 
     List<Extra> getDefinedExtraNames();
     long getExtrasFee(Extra name);

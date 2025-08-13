@@ -5,6 +5,11 @@ import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Params;
 import com.hedera.node.app.spi.fees.Fees;
 import org.hiero.hapi.support.fees.Extra;
+import org.hiero.hapi.support.fees.ExtraFeeDefinition;
+import org.hiero.hapi.support.fees.ExtraFeeReference;
+import org.hiero.hapi.support.fees.FeeSchedule;
+import org.hiero.hapi.support.fees.Service;
+import org.hiero.hapi.support.fees.ServiceFee;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -20,13 +25,29 @@ class EntityCreateTest {
     @BeforeAll
     static void setup() {
         schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extra.KEYS,1L);
+        final FeeSchedule raw = FeeSchedule.DEFAULT.copyBuilder().definedExtras(
+                    ExtraFeeDefinition.newBuilder().name(Extra.KEYS).fee(1).build()
+                )
+                .serviceFees(Service.DEFAULT.copyBuilder()
+                        .name("Crypto")
+                            .transactions(
+                                   ServiceFee.DEFAULT.copyBuilder()
+                                           .name("CryptoCreate").baseFee(22)
+                                           .extras(
+                                                   ExtraFeeReference.DEFAULT.copyBuilder()
+                                                           .name(Extra.KEYS).includedCount(2).build()
+                                           ).build(),
+                                    ServiceFee.DEFAULT.copyBuilder()
+                                            .name("TokenCreate").baseFee(33)
+                                            .extras(
+                                                    ExtraFeeReference.DEFAULT.copyBuilder()
+                                                            .name(Extra.KEYS).includedCount(7).build()
+                                            ).build()
 
-        schedule.setServiceBaseFee("CryptoCreate",22L);
-        schedule.setServiceExtraIncludedCount("CryptoCreate", Extra.KEYS,2L);
-
-        schedule.setServiceBaseFee("TokenCreate",33L);
-        schedule.setServiceExtraIncludedCount("TokenCreate", Extra.KEYS,7L);
+                            )
+                        .build())
+                .build();
+        schedule.setRawSchedule(raw);
 
         schedule.setServiceBaseFee("TokenCreateWithCustomFee",38L);
         schedule.setServiceExtraIncludedCount("TokenCreateWithCustomFee", Extra.KEYS,7L);
