@@ -117,7 +117,7 @@ public class CryptoTransfer extends AbstractFeeModel {
 
         // Overage for the number of accounts that we need to update for handling this transaction
         long numFreeAccounts = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extra.ACCOUNTS);
-        var numAccounts = (long)values.get(Extra.ACCOUNTS);
+        var numAccounts = (long)values.get(Extra.ACCOUNTS.name());
         if (numAccounts > numFreeAccounts) {
             var excess = numAccounts - numFreeAccounts;
             fee.addDetail("Accounts involved", excess, excess * feesSchedule.getExtrasFee(Extra.ACCOUNTS));

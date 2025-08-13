@@ -48,7 +48,7 @@ public class EntityUpdate extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult result = new FeeResult();
         result.addDetail("Base Fee", 1, feesSchedule.getServiceBaseFee(api));
-        final long numKeys = (long) values.get(Extra.KEYS);
+        final long numKeys = (long) values.get(Extra.KEYS.name());
         final long numFreeKeys = feesSchedule.getServiceExtraIncludedCount(api, Extra.KEYS);
         if (numKeys > numFreeKeys) {
             result.addDetail("Additional Keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getExtrasFee(Extra.KEYS));
