@@ -126,7 +126,7 @@ public class TokenDeleteHandler implements TransactionHandler {
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate model = new EntityCreate("Token", "TokenDelete", "Delete a token type", false);
+            EntityCreate model = new EntityCreate("Token", HederaFunctionality.TOKEN_DELETE, "Delete a token type", false);
             Map<String, Object> params = new HashMap<>();
             params.put(Extra.SIGNATURES.name(), 0L);
             params.put(Extra.KEYS.name(), 0L);

@@ -16,14 +16,14 @@ import static com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.MIN_K
 
 public class EntityUpdate extends AbstractFeeModel {
     private final String service;
-    private final String api;
+    private final HederaFunctionality api;
     private final String description;
 
     private final List<ParameterDefinition> params = List.of(
             new ParameterDefinition("numKeys", "number", null,MIN_KEYS, MIN_KEYS, MAX_KEYS, "Number of keys")
     );
 
-    public EntityUpdate(String service, String api, String description) {
+    public EntityUpdate(String service, HederaFunctionality api, String description) {
         this.service = service;
         this.api = api;
         this.description = description;
@@ -33,7 +33,7 @@ public class EntityUpdate extends AbstractFeeModel {
     public String getService() { return service; }
 
     @Override
-    public String getMethodName() { return this.api; }
+    public String getMethodName() { return this.api.name(); }
 
     @Override
     public String getDescription() {
@@ -48,9 +48,9 @@ public class EntityUpdate extends AbstractFeeModel {
     @Override
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult result = new FeeResult();
-        result.addDetail("Base Fee", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
+        result.addDetail("Base Fee", 1, feesSchedule.getServiceBaseFee(api));
         final long numKeys = (long) values.get(Extra.KEYS.name());
-        final long numFreeKeys = feesSchedule.getServiceExtraIncludedCount(HederaFunctionality.valueOf(api), Extra.KEYS);
+        final long numFreeKeys = feesSchedule.getServiceExtraIncludedCount(api, Extra.KEYS);
         if (numKeys > numFreeKeys) {
             result.addDetail("Additional Keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getExtrasFee(Extra.KEYS));
         }

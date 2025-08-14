@@ -14,14 +14,14 @@ import static com.hedera.hapi.node.base.HederaFunctionality.*;
 public class FeesHelper {
     public static AbstractFeeModel createModel(String service, String method) {
         return switch (method) {
-            case "ConsensusCreateTopic" -> new EntityCreate(service, CONSENSUS_CREATE_TOPIC.name(), "description",false);
+            case "ConsensusCreateTopic" -> new EntityCreate(service, CONSENSUS_CREATE_TOPIC, "description",false);
             case "ConsensusSubmitMessage" -> new HCSSubmit();
             case "ConsensusSubmitMessageWithCustomFee" -> new HCSSubmit();
             default -> throw new IllegalStateException("Unexpected value: " + method);
         };
     }
     public static EntityCreate makeCreateEntity(HederaFunctionality api, String description, boolean customFeeCapable) {
-        return new EntityCreate(lookupServiceName(api), lookupAPIName(api), description, customFeeCapable);
+        return new EntityCreate(lookupServiceName(api), api, description, customFeeCapable);
     }
 
     private static String lookupServiceName(HederaFunctionality api) {

@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class CryptoTransfer extends AbstractFeeModel {
     String service;
-    String api;
+    HederaFunctionality api;
 
     private final List<ParameterDefinition> params = List.of(
             new ParameterDefinition(Extra.ACCOUNTS.name(), "number", null, 2, 0, 20, "Number of Accounts involved"),
@@ -26,14 +26,14 @@ public class CryptoTransfer extends AbstractFeeModel {
             new ParameterDefinition(Extra.CREATED_ACCOUNTS.name(), "number", null, 0, 0, 20, "Auto-created accounts")
     );
 
-    public CryptoTransfer(String service, String api) {
+    public CryptoTransfer(String service, HederaFunctionality api) {
         this.service = service;
         this.api = api;
     }
 
     @Override
     public String getMethodName() {
-        return "CryptoTransfer";
+        return this.api.name();
     }
 
     @Override
@@ -93,7 +93,7 @@ public class CryptoTransfer extends AbstractFeeModel {
         long customTokens = customFT + customNFT;
         boolean tokenTransfersPresent = (standardFT + standardNFT + customFT + customNFT) > 0;
 
-        HederaFunctionality effectiveApi = HederaFunctionality.valueOf(api);
+        HederaFunctionality effectiveApi = api;
 
         // If no token transfers are present, then treat it as CryptoTransfer (hbar transfer). Otherwise, treat it as a TokenTransfer
         if (tokenTransfersPresent) {

@@ -30,7 +30,7 @@ class FileOperationsTest {
 
     @Test
     void testFileOperations() {
-        FileOperations transfer = new FileOperations("FileCreate", "dummy description");
+        FileOperations transfer = new FileOperations(FILE_CREATE,  "dummy description");
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 1L);

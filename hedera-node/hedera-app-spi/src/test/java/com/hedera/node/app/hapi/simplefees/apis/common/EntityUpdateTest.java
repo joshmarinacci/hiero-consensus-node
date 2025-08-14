@@ -1,6 +1,5 @@
 package com.hedera.node.app.hapi.simplefees.apis.common;
 
-import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
 import com.hedera.node.app.spi.fees.Fees;
@@ -49,7 +48,7 @@ class EntityUpdateTest {
 
     @Test
     void testEntityUpdateCryptoService() {
-        EntityUpdate entity = new EntityUpdate("Crypto", "CryptoUpdate", "Update an account");
+        EntityUpdate entity = new EntityUpdate("Crypto", CRYPTO_UPDATE, "Update an account");
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.toString(), 10L);
@@ -60,7 +59,7 @@ class EntityUpdateTest {
 
     @Test
     void testEntityUpdateTokenService() {
-        EntityUpdate entity = new EntityUpdate("Token", "TokenUpdate", "Update a token type");
+        EntityUpdate entity = new EntityUpdate("Token", TOKEN_UPDATE, "Update a token type");
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.toString(), 10L);
@@ -71,7 +70,7 @@ class EntityUpdateTest {
 
     @Test
     void testEntityUpdateTopicService() {
-        EntityUpdate entity = new EntityUpdate("Topic", "ConsensusUpdateTopic", "Update a topic");
+        EntityUpdate entity = new EntityUpdate("Topic",CONSENSUS_UPDATE_TOPIC, "Update a topic");
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.toString(), 10L);
@@ -82,7 +81,7 @@ class EntityUpdateTest {
 
     @Test
     void testEntityUpdateContractService() {
-        EntityUpdate entity = new EntityUpdate("Smart Contract", "ContractUpdate", "Update a smart contract");
+        EntityUpdate entity = new EntityUpdate("Smart Contract",CONTRACT_UPDATE, "Update a smart contract");
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.toString(), 10L);

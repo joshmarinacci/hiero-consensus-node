@@ -14,7 +14,7 @@ import static com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.*;
 
 
 public class FileOperations extends AbstractFeeModel {
-    String api;
+    HederaFunctionality api;
     String description;
 
     private final List<ParameterDefinition> params = List.of(
@@ -22,7 +22,7 @@ public class FileOperations extends AbstractFeeModel {
             new ParameterDefinition("numBytes", "number", null, FILE_FREE_BYTES, FILE_MIN_BYTES, FILE_MAX_BYTES, "Size of the file (bytes)")
     );
 
-    public FileOperations( String api, String description) {
+    public FileOperations( HederaFunctionality api, String description) {
         this.api = api;
         this.description = description;
     }
@@ -37,7 +37,7 @@ public class FileOperations extends AbstractFeeModel {
 
     @Override
     public String getMethodName() {
-        return this.api;
+        return this.api.name();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class FileOperations extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> params, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
-        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
+        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(api));
 
         long numKeys = (long) params.get(Extra.KEYS.name());
         long numFreeKeys = 1;

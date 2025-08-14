@@ -24,6 +24,7 @@ import static com.hedera.node.app.spi.workflows.PreCheckException.validateTruePr
 import static java.util.Objects.requireNonNull;
 
 import com.hedera.hapi.node.base.AccountID;
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.Key;
 import com.hedera.hapi.node.base.KeyList;
 import com.hedera.hapi.node.base.SubType;
@@ -602,7 +603,7 @@ public class TokenUpdateHandler extends BaseTokenHandler implements TransactionH
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = new EntityCreate("Token", "TokenUpdate", "Update a token type", false);
+            EntityCreate entity = new EntityCreate("Token", HederaFunctionality.TOKEN_UPDATE, "Update a token type", false);
             Map<String, Object> params = new HashMap<>();
             params.put(Extra.SIGNATURES.name(), 0L);
             params.put(Extra.KEYS.name(), 0L);

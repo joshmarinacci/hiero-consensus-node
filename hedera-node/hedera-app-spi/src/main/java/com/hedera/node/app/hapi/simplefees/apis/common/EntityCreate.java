@@ -18,7 +18,7 @@ import static com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.MIN_K
 
 public class EntityCreate extends AbstractFeeModel {
     private final String service;
-    private final String api;
+    private final HederaFunctionality api;
     private final String description;
     private final boolean customFeeCapable;
 
@@ -29,7 +29,7 @@ public class EntityCreate extends AbstractFeeModel {
             new ParameterDefinition(Params.HasCustomFee.toString(), "list", new Object[] {YesOrNo.YES, YesOrNo.NO}, YesOrNo.NO, 0, 0, "Enable custom fee?")
     );
 
-    public EntityCreate(String service, String api, String description, boolean customFeeCapable) {
+    public EntityCreate(String service, HederaFunctionality api, String description, boolean customFeeCapable) {
         this.service = service;
         this.api = api;
         this.description = description;
@@ -42,7 +42,7 @@ public class EntityCreate extends AbstractFeeModel {
     }
 
     @Override
-    public String getMethodName() { return this.api; }
+    public String getMethodName() { return this.api.name(); }
 
     @Override
     public String getDescription() {
@@ -63,13 +63,13 @@ public class EntityCreate extends AbstractFeeModel {
         if (customFeeCapable && values.get(Params.HasCustomFee.name()) == YesOrNo.YES) {
             result.addDetail("Base fee for " + this.api + " with custom fee ", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api + "WithCustomFee")));
         } else {
-            result.addDetail("Base fee for " + this.api, 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
+            result.addDetail("Base fee for " + this.api, 1, feesSchedule.getServiceBaseFee(api));
         }
 
-        final var extras = feesSchedule.getServiceExtras(HederaFunctionality.valueOf(api));
+        final var extras = feesSchedule.getServiceExtras(api);
         for(var extra : extras) {
             final long extraFee = feesSchedule.getExtrasFee(extra);
-            final long extraIncludedCount = feesSchedule.getServiceExtraIncludedCount(HederaFunctionality.valueOf(api),extra);
+            final long extraIncludedCount = feesSchedule.getServiceExtraIncludedCount(api,extra);
             final long extraUsed = (long) values.get(extra.name());
             if (extraUsed > extraIncludedCount) {
                 final long overage = extraUsed - extraIncludedCount;
