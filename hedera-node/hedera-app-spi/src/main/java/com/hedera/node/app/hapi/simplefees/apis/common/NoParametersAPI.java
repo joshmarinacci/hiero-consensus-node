@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.common;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -40,7 +41,7 @@ public class NoParametersAPI extends AbstractFeeModel {
     @Override
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
-        fee.addDetail("Base result", 1, feesSchedule.getServiceBaseFee(api));
+        fee.addDetail("Base result", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
         return fee;
     }
 }

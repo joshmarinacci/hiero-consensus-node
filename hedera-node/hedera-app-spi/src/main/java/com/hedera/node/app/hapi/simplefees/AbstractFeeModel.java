@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.transaction.ExchangeRate;
 import com.hedera.node.app.hapi.simplefees.apis.common.AssociateOrDissociate;
 import com.hedera.node.app.hapi.simplefees.apis.common.FTOrNFT;
@@ -60,7 +61,7 @@ public abstract class AbstractFeeModel {
     public Fees computeFee(Map<String, Object> params, ExchangeRate exchangeRate, AbstractFeesSchedule feesSchedule) {
         checkParameters(params);
         System.out.println("params are " + params);
-        final List<Extra> serviceExtras = feesSchedule.getServiceExtras(this.getMethodName());
+        final List<Extra> serviceExtras = feesSchedule.getServiceExtras(HederaFunctionality.valueOf(this.getMethodName()));
         for (Extra key : serviceExtras) {
             if (!params.containsKey(key)) {
                 System.err.println("input params missing " + key + " required by method " + this.getMethodName());

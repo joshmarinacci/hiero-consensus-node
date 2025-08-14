@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.common;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
 import com.hedera.node.app.spi.fees.Fees;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.hedera.hapi.node.base.HederaFunctionality.*;
 import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeExtraDef;
 import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeExtraIncluded;
 import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeService;
@@ -28,16 +30,16 @@ class EntityUpdateTest {
                 makeExtraDef(Extra.SIGNATURES, 1)
         ).serviceFees(
                         makeService("Crypto",
-                                makeServiceFee("CryptoUpdate",22,
+                                makeServiceFee(CRYPTO_UPDATE,22,
                                         makeExtraIncluded(Extra.KEYS,1))),
                         makeService("Token",
-                                makeServiceFee("TokenUpdate",1,
+                                makeServiceFee(TOKEN_UPDATE,1,
                                         makeExtraIncluded(Extra.KEYS,7))),
                         makeService("Consenus",
-                                makeServiceFee("ConsensusUpdateTopic",22,
+                                makeServiceFee(CONSENSUS_UPDATE_TOPIC,22,
                                         makeExtraIncluded(Extra.KEYS,1))),
                         makeService("Contract",
-                                makeServiceFee("ContractUpdate",26,
+                                makeServiceFee(CONTRACT_UPDATE,26,
                                         makeExtraIncluded(Extra.KEYS,1)))
 
                 )

@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.file;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
 import com.hedera.node.app.spi.fees.Fees;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.hedera.hapi.node.base.HederaFunctionality.*;
 import static com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.FILE_FREE_BYTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,7 +25,7 @@ class FileOperationsTest {
         schedule.setExtrasFee(Extra.SIGNATURES, 1L);
         schedule.setExtrasFee(Extra.BYTES, 11L);
 
-        schedule.setServiceBaseFee("FileCreate",50L);
+        schedule.setServiceBaseFee(FILE_CREATE,50L);
     }
 
     @Test

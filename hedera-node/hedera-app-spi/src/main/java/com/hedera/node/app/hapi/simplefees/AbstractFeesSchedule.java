@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
 
@@ -17,10 +18,10 @@ public interface AbstractFeesSchedule {
 
     long getNetworkMultiplier();
 
-    List<String> getServiceNames();
-    long getServiceBaseFee(String method);
-    List<Extra> getServiceExtras(String method);
-    long getServiceExtraIncludedCount(String method, Extra name);
+    List<HederaFunctionality> getServiceNames();
+    long getServiceBaseFee(HederaFunctionality method);
+    List<Extra> getServiceExtras(HederaFunctionality method);
+    long getServiceExtraIncludedCount(HederaFunctionality method, Extra name);
 
 
 }

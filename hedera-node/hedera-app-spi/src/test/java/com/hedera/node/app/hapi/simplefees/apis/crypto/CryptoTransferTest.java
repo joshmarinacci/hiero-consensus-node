@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.crypto;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.FeeCheckResult;
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.hedera.hapi.node.base.HederaFunctionality.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CryptoTransferTest {
@@ -24,20 +26,20 @@ class CryptoTransferTest {
         schedule.setExtrasFee(Extra.ACCOUNTS,2L);
         schedule.setExtrasFee(Extra.STANDARD_FUNGIBLE_TOKENS, 5L);
 
-        schedule.setServiceBaseFee("CryptoTransfer",10L);
-        schedule.setServiceExtraIncludedCount("CryptoTransfer", Extra.KEYS,2L);
-        schedule.setServiceExtraIncludedCount("CryptoTransfer", Extra.STANDARD_FUNGIBLE_TOKENS,2L);
-        schedule.setServiceExtraIncludedCount("CryptoTransfer", Extra.ACCOUNTS,1L);
+        schedule.setServiceBaseFee(CRYPTO_TRANSFER,10L);
+        schedule.setServiceExtraIncludedCount(CRYPTO_TRANSFER, Extra.KEYS,2L);
+        schedule.setServiceExtraIncludedCount(CRYPTO_TRANSFER, Extra.STANDARD_FUNGIBLE_TOKENS,2L);
+        schedule.setServiceExtraIncludedCount(CRYPTO_TRANSFER, Extra.ACCOUNTS,1L);
 
-        schedule.setServiceBaseFee("TokenTransfer",15L);
-        schedule.setServiceExtraIncludedCount("TokenTransfer", Extra.KEYS,1L);
-        schedule.setServiceExtraIncludedCount("TokenTransfer", Extra.ACCOUNTS,2L);
-        schedule.setServiceExtraIncludedCount("TokenTransfer", Extra.STANDARD_FUNGIBLE_TOKENS,2L);
+//        schedule.setServiceBaseFee("TokenTransfer",15L);
+//        schedule.setServiceExtraIncludedCount("TokenTransfer", Extra.KEYS,1L);
+//        schedule.setServiceExtraIncludedCount("TokenTransfer", Extra.ACCOUNTS,2L);
+//        schedule.setServiceExtraIncludedCount("TokenTransfer", Extra.STANDARD_FUNGIBLE_TOKENS,2L);
     }
 
     @Test
     void testSimpleHbarTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.ACCOUNTS.name(), 2L);
@@ -47,7 +49,7 @@ class CryptoTransferTest {
 
     @Test
     void testMultipleHbarTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.ACCOUNTS.name(), 5L);
@@ -57,7 +59,7 @@ class CryptoTransferTest {
 
     @Test
     void testTokenTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.ACCOUNTS.name(), 5L);
@@ -68,7 +70,7 @@ class CryptoTransferTest {
 
     @Test
     void testMultipleTokenTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.ACCOUNTS.name(), 10L);
@@ -80,7 +82,7 @@ class CryptoTransferTest {
 
     @Test
     void testMultipleHbarAndMultipleTokenTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(),  1L);
         params.put(Extra.ACCOUNTS.name(), 10L);
@@ -92,7 +94,7 @@ class CryptoTransferTest {
 
     @Test
     void testInvalidParamsFailCheck() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", "CryptoTransfer");
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.ACCOUNTS.name(), 0L);
         params.put(Extra.STANDARD_FUNGIBLE_TOKENS.name(), 0L);

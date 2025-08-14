@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.crypto;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeCheckResult;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -92,24 +93,24 @@ public class CryptoTransfer extends AbstractFeeModel {
         long customTokens = customFT + customNFT;
         boolean tokenTransfersPresent = (standardFT + standardNFT + customFT + customNFT) > 0;
 
-        String effectiveApi = api;
+        HederaFunctionality effectiveApi = HederaFunctionality.valueOf(api);
 
         // If no token transfers are present, then treat it as CryptoTransfer (hbar transfer). Otherwise, treat it as a TokenTransfer
         if (tokenTransfersPresent) {
             if (api.equals("CryptoTransfer")) {
-                effectiveApi = "TokenTransfer";
+                effectiveApi = HederaFunctionality.valueOf("TokenTransfer");
             }
         } else {
-            effectiveApi = "CryptoTransfer";
+            effectiveApi = HederaFunctionality.CRYPTO_TRANSFER;
         }
 
         long numFreeTokens = feesSchedule.getServiceExtraIncludedCount(effectiveApi, Extra.STANDARD_FUNGIBLE_TOKENS);
         // If tokens with custom fees are used, then use the higher base prices
         if (customTokens > 0) {
             if (effectiveApi.equals("TokenTransfer")) {
-                fee.addDetail("Base fee for " + effectiveApi + " (with Custom fee)", 1,  feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
+                fee.addDetail("Base fee for " + effectiveApi + " (with Custom fee)", 1,  feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf("TokenTransferWithCustomFee")));
             } else if (effectiveApi.equals("TokenAirdrop")) {
-                fee.addDetail("Base fee for " + effectiveApi + " (with Custom fee)", 1,  feesSchedule.getServiceBaseFee("TokenAirdropWithCustomFee"));
+                fee.addDetail("Base fee for " + effectiveApi + " (with Custom fee)", 1,  feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf("TokenAirdropWithCustomFee")));
             }
         } else {
             fee.addDetail("Base fee for " + effectiveApi, 1, feesSchedule.getServiceBaseFee(effectiveApi));
@@ -127,33 +128,33 @@ public class CryptoTransfer extends AbstractFeeModel {
         // Process the tokens with Custom Fee first since we have already increased the base price to accommodate the presence of custom-fee tokens, and the included free token should count against the token with custom fee
         if (customFT > 0) {
             if ((customFT - numFreeTokens) > 0) {
-                fee.addDetail("FT with custom fee", (customFT - numFreeTokens), (customFT - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
+                fee.addDetail("FT with custom fee", (customFT - numFreeTokens), (customFT - numFreeTokens) * feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf("TokenTransferWithCustomFee")));
             }
             numFreeTokens = 0;
         }
         if (customNFT > 0) {
             if ((customNFT - numFreeTokens) > 0) {
-                fee.addDetail("NFT with custom fee", (customNFT - numFreeTokens), (customNFT - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransferWithCustomFee"));
+                fee.addDetail("NFT with custom fee", (customNFT - numFreeTokens), (customNFT - numFreeTokens) * feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf("TokenTransferWithCustomFee")));
             }
             numFreeTokens = 0;
         }
         if (standardFT > 0) {
             if ((standardFT - numFreeTokens) > 0) {
-                fee.addDetail("FT no custom fee", (standardFT - numFreeTokens), (standardFT - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransfer"));
+                fee.addDetail("FT no custom fee", (standardFT - numFreeTokens), (standardFT - numFreeTokens) * feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf("TokenTransfer")));
             }
             numFreeTokens = 0;
         }
         if (standardNFT > 0) {
             if ((standardNFT - numFreeTokens) > 0) {
-                fee.addDetail("NFT no custom fee", (standardNFT - numFreeTokens), (standardNFT - numFreeTokens) * feesSchedule.getServiceBaseFee("TokenTransfer"));
+                fee.addDetail("NFT no custom fee", (standardNFT - numFreeTokens), (standardNFT - numFreeTokens) * feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf("TokenTransfer")));
             }
         }
 
         // Overage for the number of entities created automatically (associations/accounts) during handling this transaction
         if (values.get(Extra.CREATED_AUTO_ASSOCIATIONS.name()) instanceof Integer num && num > 0)
-            fee.addDetail("Auto token associations", num, num * feesSchedule.getServiceBaseFee("TokenAssociateToAccount"));
+            fee.addDetail("Auto token associations", num, num * feesSchedule.getServiceBaseFee(HederaFunctionality.TOKEN_ASSOCIATE_TO_ACCOUNT));
         if (values.get(Extra.CREATED_ACCOUNTS.name()) instanceof Integer num && num > 0)
-            fee.addDetail("Auto account creations", num, num * feesSchedule.getServiceBaseFee("CryptoCreate"));
+            fee.addDetail("Auto account creations", num, num * feesSchedule.getServiceBaseFee(HederaFunctionality.CRYPTO_CREATE));
 
         return fee;
     }

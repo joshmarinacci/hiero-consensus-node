@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.common;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -60,15 +61,15 @@ public class EntityCreate extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult result = new FeeResult();
         if (customFeeCapable && values.get(Params.HasCustomFee.name()) == YesOrNo.YES) {
-            result.addDetail("Base fee for " + this.api + " with custom fee ", 1, feesSchedule.getServiceBaseFee(api + "WithCustomFee"));
+            result.addDetail("Base fee for " + this.api + " with custom fee ", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api + "WithCustomFee")));
         } else {
-            result.addDetail("Base fee for " + this.api, 1, feesSchedule.getServiceBaseFee(api));
+            result.addDetail("Base fee for " + this.api, 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
         }
 
-        final var extras = feesSchedule.getServiceExtras(api);
+        final var extras = feesSchedule.getServiceExtras(HederaFunctionality.valueOf(api));
         for(var extra : extras) {
             final long extraFee = feesSchedule.getExtrasFee(extra);
-            final long extraIncludedCount = feesSchedule.getServiceExtraIncludedCount(api,extra);
+            final long extraIncludedCount = feesSchedule.getServiceExtraIncludedCount(HederaFunctionality.valueOf(api),extra);
             final long extraUsed = (long) values.get(extra.name());
             if (extraUsed > extraIncludedCount) {
                 final long overage = extraUsed - extraIncludedCount;

@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.contract;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -49,7 +50,7 @@ public class ContractBasedOnGas extends AbstractFeeModel {
     @Override
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
-        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(api));
+        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
         int gas = (int) values.get("gas");
         int gasTobeCharged = Math.max((gas - (isMinGasFree ? MIN_GAS : 0)), 0);
         if (gasTobeCharged > 0) {

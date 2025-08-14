@@ -9,10 +9,12 @@ import com.hedera.node.app.spi.fees.Fees;
 
 import java.util.Map;
 
+import static com.hedera.hapi.node.base.HederaFunctionality.*;
+
 public class FeesHelper {
     public static AbstractFeeModel createModel(String service, String method) {
         return switch (method) {
-            case "ConsensusCreateTopic" -> new EntityCreate(service,method, "description",false);
+            case "ConsensusCreateTopic" -> new EntityCreate(service, CONSENSUS_CREATE_TOPIC.name(), "description",false);
             case "ConsensusSubmitMessage" -> new HCSSubmit();
             case "ConsensusSubmitMessageWithCustomFee" -> new HCSSubmit();
             default -> throw new IllegalStateException("Unexpected value: " + method);

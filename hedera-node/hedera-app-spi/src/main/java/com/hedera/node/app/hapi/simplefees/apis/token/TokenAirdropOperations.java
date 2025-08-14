@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.token;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -45,7 +46,7 @@ public class TokenAirdropOperations extends AbstractFeeModel {
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
 
-        long baseFee = feesSchedule.getServiceBaseFee(api);
+        long baseFee = feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api));
         fee.addDetail("Base fee", 1, baseFee);
 
         int numTokenTypes = (int) values.get("numTokenTypes");

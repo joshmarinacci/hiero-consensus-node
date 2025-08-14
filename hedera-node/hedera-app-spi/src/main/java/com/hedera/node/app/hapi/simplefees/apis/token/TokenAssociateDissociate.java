@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.token;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -45,7 +46,7 @@ public class TokenAssociateDissociate extends AbstractFeeModel {
         FeeResult fee = new FeeResult();
 
         long baseFee = ((AssociateOrDissociate)values.get("associateOrDissociate") == AssociateOrDissociate.Associate) ?
-                feesSchedule.getServiceBaseFee("TokenAssociateToAccount") : feesSchedule.getServiceBaseFee("TokenDissociateFromAccount");
+                feesSchedule.getServiceBaseFee(HederaFunctionality.TOKEN_ASSOCIATE_TO_ACCOUNT) : feesSchedule.getServiceBaseFee(HederaFunctionality.TOKEN_DISSOCIATE_FROM_ACCOUNT);
 
         fee.addDetail("Base fee", 1, baseFee);
 

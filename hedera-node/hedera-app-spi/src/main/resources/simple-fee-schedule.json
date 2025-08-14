@@ -74,15 +74,6 @@
           ]
         },
         {
-          "name": "ConsensusCreateTopicWithCustomFee",
-          "baseFee": 25,
-          "extras": [
-            {
-              "name": "Signatures", "includedCount": 1
-            }
-          ]
-        },
-        {
           "name": "ConsensusUpdateTopic",
           "baseFee": 19,
           "extras": [
@@ -97,15 +88,6 @@
             { "name": "Signatures", "includedCount": 1 },
             {  "name": "Keys", "includedCount": 1      },
             { "name": "Bytes", "includedCount": 256    }
-          ]
-        },
-        {
-          "name": "ConsensusSubmitMessageWithCustomFee",
-          "baseFee": 25,
-          "extras": [
-            { "name": "Signatures", "includedCount": 1 },
-            {  "name": "Keys", "includedCount": 1      },
-            { "name": "Bytes", "includedCount": 1024   }
           ]
         },
         {
@@ -191,14 +173,6 @@
             { "name": "Signatures", "includedCount": 1 },
             { "name": "StandardFungibleTokens", "includedCount": 1 },
             { "name": "StandardNonFungibleTokens", "includedCount": 1 }
-          ]
-        },
-        {
-          "name": "TokenTransfer",
-          "baseFee": 33,
-          "extras": [
-            {  "name": "StandardFungibleTokens", "includedCount": 1},
-            {  "name": "Accounts",               "includedCount": 1}
           ]
         }
       ]

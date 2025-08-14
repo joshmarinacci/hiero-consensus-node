@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.token;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
 import com.hedera.node.app.spi.fees.Fees;
@@ -11,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.hedera.hapi.node.base.HederaFunctionality.*;
+import static org.hiero.hapi.support.fees.Extra.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TokenAirdropOperationsTest {
@@ -47,19 +50,19 @@ class TokenAirdropOperationsTest {
 
     List<TokenAirdropOperationsTestScenario> scenarios = List.of(
             // Base cases - 1 token should be included in the base price
-            new TokenAirdropOperationsTestScenario("TokenClaimAirdrop", 1, 1, schedule.getServiceBaseFee("TokenClaimAirdrop")),
-            new TokenAirdropOperationsTestScenario("TokenCancelAirdrop", 1, 1, schedule.getServiceBaseFee("TokenCancelAirdrop")),
-            new TokenAirdropOperationsTestScenario("TokenRejectAirdrop", 1, 1, schedule.getServiceBaseFee("TokenRejectAirdrop")),
+            new TokenAirdropOperationsTestScenario("TokenClaimAirdrop", 1, 1, schedule.getServiceBaseFee(TOKEN_CLAIM_AIRDROP)),
+            new TokenAirdropOperationsTestScenario("TokenCancelAirdrop", 1, 1, schedule.getServiceBaseFee(TOKEN_CANCEL_AIRDROP)),
+            new TokenAirdropOperationsTestScenario("TokenRejectAirdrop", 1, 1, schedule.getServiceBaseFee(TOKEN_REJECT)),
 
             // Multiple tokens case
-            new TokenAirdropOperationsTestScenario("TokenClaimAirdrop", 1, 10, 10 * schedule.getServiceBaseFee("TokenClaimAirdrop")),
-            new TokenAirdropOperationsTestScenario("TokenCancelAirdrop", 1, 10, 10 * schedule.getServiceBaseFee("TokenCancelAirdrop")),
-            new TokenAirdropOperationsTestScenario("TokenRejectAirdrop", 1, 10, 10 * schedule.getServiceBaseFee("TokenRejectAirdrop")),
+            new TokenAirdropOperationsTestScenario("TokenClaimAirdrop", 1, 10, 10 * schedule.getServiceBaseFee(TOKEN_CLAIM_AIRDROP)),
+            new TokenAirdropOperationsTestScenario("TokenCancelAirdrop", 1, 10, 10 * schedule.getServiceBaseFee(TOKEN_CANCEL_AIRDROP)),
+            new TokenAirdropOperationsTestScenario("TokenRejectAirdrop", 1, 10, 10 * schedule.getServiceBaseFee(TOKEN_REJECT)),
 
             // Additional signatures are charged
-            new TokenAirdropOperationsTestScenario("TokenClaimAirdrop", 5, 10, 10 * schedule.getServiceBaseFee("TokenClaimAirdrop") + 4 * schedule.getServiceBaseFee("PerSignature")),
-            new TokenAirdropOperationsTestScenario("TokenCancelAirdrop", 5, 10, 10 * schedule.getServiceBaseFee("TokenCancelAirdrop") + 4 * schedule.getServiceBaseFee("PerSignature")),
-            new TokenAirdropOperationsTestScenario("TokenRejectAirdrop", 5, 10, 10 * schedule.getServiceBaseFee("TokenRejectAirdrop") + 4 * schedule.getServiceBaseFee("PerSignature"))
+            new TokenAirdropOperationsTestScenario("TokenClaimAirdrop", 5, 10, 10 * schedule.getServiceBaseFee(TOKEN_CLAIM_AIRDROP) + 4 * schedule.getExtrasFee(SIGNATURES)),
+            new TokenAirdropOperationsTestScenario("TokenCancelAirdrop", 5, 10, 10 * schedule.getServiceBaseFee(TOKEN_CANCEL_AIRDROP) + 4 * schedule.getExtrasFee(SIGNATURES)),
+            new TokenAirdropOperationsTestScenario("TokenRejectAirdrop", 5, 10, 10 * schedule.getServiceBaseFee(TOKEN_REJECT) + 4 * schedule.getExtrasFee(SIGNATURES))
     );
 
     @Test
@@ -73,8 +76,8 @@ class TokenAirdropOperationsTest {
             };
 
             Map<String, Object> params = new HashMap<>();
-            params.put(Extra.SIGNATURES.name(), scenario.numSignatures);
-            params.put(Extra.TOKEN_TYPES.name(), scenario.numTokenTypes);
+            params.put(SIGNATURES.name(), scenario.numSignatures);
+            params.put(TOKEN_TYPES.name(), scenario.numTokenTypes);
             Fees fee = op.computeFee(params, new MockExchangeRate().activeRate(), schedule);
             assertEquals(scenario.expectedFee, fee.usd(), 1e-9, "Airdrop claim,cancel,reject test: " + scenario);
         }

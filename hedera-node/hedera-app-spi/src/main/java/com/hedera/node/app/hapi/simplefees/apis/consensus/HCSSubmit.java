@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.consensus;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -31,7 +32,7 @@ public class HCSSubmit extends AbstractFeeModel {
 
     @Override
     public String getMethodName() {
-        return "ConsensusSubmitMessage";
+        return HederaFunctionality.CONSENSUS_SUBMIT_MESSAGE.name();
     }
 
     @Override
@@ -48,15 +49,15 @@ public class HCSSubmit extends AbstractFeeModel {
             throw new Error(" Missing hasCustomFee parameter.");
         }
         if (hasCustomFee == YesOrNo.NO) {
-            fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee("ConsensusSubmitMessage"));
+            fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.CONSENSUS_SUBMIT_MESSAGE));
         } else {
-            fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee("ConsensusSubmitMessageWithCustomFee"));
+            fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf("ConsensusSubmitMessageWithCustomFee")));
         }
         if(!values.containsKey(Extra.BYTES.toString())) {
             throw new Error("Missing Bytes parameter.");
         }
         long numBytes = (long) values.get(Extra.BYTES.toString());
-        var free = feesSchedule.getServiceExtraIncludedCount("ConsensusSubmitMessage", Extra.BYTES);
+        var free = feesSchedule.getServiceExtraIncludedCount(HederaFunctionality.CONSENSUS_SUBMIT_MESSAGE, Extra.BYTES);
         var excessBytes = numBytes - free;
         if (excessBytes > 0) {
             fee.addDetail("Additional message size",  excessBytes, excessBytes * feesSchedule.getExtrasFee(Extra.BYTES));

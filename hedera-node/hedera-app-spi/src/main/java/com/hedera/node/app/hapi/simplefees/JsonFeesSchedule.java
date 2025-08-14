@@ -1,6 +1,7 @@
 package com.hedera.node.app.hapi.simplefees;
 
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.ExtraFeeDefinition;
@@ -19,7 +20,7 @@ import static java.util.Objects.requireNonNull;
 public class JsonFeesSchedule implements AbstractFeesSchedule {
     public final FeeSchedule schedule;
     private final HashMap<String, Service> services;
-    private final HashMap<String, ServiceFee> serviceMethods;
+    private final HashMap<HederaFunctionality, ServiceFee> serviceMethods;
     public final HashMap<Extra, ExtraFeeDefinition> extras;
 
     public static JsonFeesSchedule fromJson() {
@@ -103,25 +104,25 @@ public class JsonFeesSchedule implements AbstractFeesSchedule {
     }
 
     @Override
-    public List<String> getServiceNames() {
+    public List<HederaFunctionality> getServiceNames() {
         return this.serviceMethods.keySet().stream().collect(Collectors.toList());
     }
 
     @Override
-    public long getServiceBaseFee(String method) {
+    public long getServiceBaseFee(HederaFunctionality method) {
         if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
         return this.serviceMethods.get(method).baseFee();
     }
 
     @Override
-    public List<Extra> getServiceExtras(String method) {
+    public List<Extra> getServiceExtras(HederaFunctionality method) {
         if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
         return this.serviceMethods.get(method).extras().stream().map(e -> e.name()).collect(Collectors.toList());
     }
 
 
     @Override
-    public long getServiceExtraIncludedCount(String method, Extra name) {
+    public long getServiceExtraIncludedCount(HederaFunctionality method, Extra name) {
         if(!this.serviceMethods.containsKey(method)) throw new NoSuchElementException("service method '"+method+"' not found.");
         var m = this.serviceMethods.get(method);
         for(var extra : m.extras()) {

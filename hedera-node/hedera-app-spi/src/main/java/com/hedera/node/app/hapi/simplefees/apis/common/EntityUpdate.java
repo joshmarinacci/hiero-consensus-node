@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.common;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -47,9 +48,9 @@ public class EntityUpdate extends AbstractFeeModel {
     @Override
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult result = new FeeResult();
-        result.addDetail("Base Fee", 1, feesSchedule.getServiceBaseFee(api));
+        result.addDetail("Base Fee", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
         final long numKeys = (long) values.get(Extra.KEYS.name());
-        final long numFreeKeys = feesSchedule.getServiceExtraIncludedCount(api, Extra.KEYS);
+        final long numFreeKeys = feesSchedule.getServiceExtraIncludedCount(HederaFunctionality.valueOf(api), Extra.KEYS);
         if (numKeys > numFreeKeys) {
             result.addDetail("Additional Keys", numKeys - numFreeKeys, (numKeys - numFreeKeys) * feesSchedule.getExtrasFee(Extra.KEYS));
         }

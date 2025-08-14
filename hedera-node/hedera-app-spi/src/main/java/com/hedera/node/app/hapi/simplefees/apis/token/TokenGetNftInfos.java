@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.token;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -46,8 +47,8 @@ public class TokenGetNftInfos extends AbstractFeeModel {
         FeeResult fee = new FeeResult();
 
         long baseFee = switch (api) {
-            case "GetTokenNftInfo" -> feesSchedule.getServiceBaseFee("GetTokenNftInfo");
-            case "GetTokenNftInfos" -> feesSchedule.getServiceBaseFee("GetTokenNftInfos");
+            case "GetTokenNftInfo" -> feesSchedule.getServiceBaseFee(HederaFunctionality.TOKEN_GET_NFT_INFO);
+            case "GetTokenNftInfos" -> feesSchedule.getServiceBaseFee(HederaFunctionality.TOKEN_GET_NFT_INFOS);
             default -> throw new IllegalStateException("Unexpected value: " + api);
         };
         fee.addDetail("Base fee", 1, baseFee);

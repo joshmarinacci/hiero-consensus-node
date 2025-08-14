@@ -173,7 +173,7 @@ public class ConsensusGetTopicInfoHandler extends PaidQueryHandler {
     @Override
     public Fees computeFees(@NonNull QueryContext queryContext) {
         if(queryContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
-            EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_GET_TOPIC_INFO, "Query topic info", false);
+            EntityCreate entity = new EntityCreate("Consensus",HederaFunctionality.CONSENSUS_GET_TOPIC_INFO.name(),  "Query topic info", false);
             Map<String, Object> params = new HashMap<>();
             params.put(Extra.SIGNATURES.name(),0L);
             params.put(Extra.KEYS.name(),0L);

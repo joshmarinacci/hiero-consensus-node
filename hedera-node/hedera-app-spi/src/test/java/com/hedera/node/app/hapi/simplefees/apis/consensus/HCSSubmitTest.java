@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.consensus;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
 import com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.Params;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.hedera.hapi.node.base.HederaFunctionality.*;
 import static com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.HCS_FREE_BYTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,13 +26,13 @@ class HCSSubmitTest {
         schedule.setExtrasFee(Extra.KEYS,1L);
         schedule.setExtrasFee(Extra.BYTES,1L);
 
-        schedule.setServiceBaseFee("ConsensusSubmitMessage",15L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extra.KEYS,1L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessage", Extra.BYTES,(long)HCS_FREE_BYTES);
+        schedule.setServiceBaseFee(CONSENSUS_SUBMIT_MESSAGE,15L);
+        schedule.setServiceExtraIncludedCount(CONSENSUS_SUBMIT_MESSAGE, Extra.KEYS,1L);
+        schedule.setServiceExtraIncludedCount(CONSENSUS_SUBMIT_MESSAGE, Extra.BYTES,(long)HCS_FREE_BYTES);
 
-        schedule.setServiceBaseFee("ConsensusSubmitMessageWithCustomFee",25L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessageWithCustomFee", Extra.KEYS,1L);
-        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessageWithCustomFee", Extra.BYTES,(long)HCS_FREE_BYTES);
+//        schedule.setServiceBaseFee("ConsensusSubmitMessageWithCustomFee",25L);
+//        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessageWithCustomFee", Extra.KEYS,1L);
+//        schedule.setServiceExtraIncludedCount("ConsensusSubmitMessageWithCustomFee", Extra.BYTES,(long)HCS_FREE_BYTES);
     }
 
     @Test

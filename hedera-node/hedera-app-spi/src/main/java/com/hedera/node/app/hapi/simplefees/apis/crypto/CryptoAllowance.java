@@ -1,5 +1,6 @@
 package com.hedera.node.app.hapi.simplefees.apis.crypto;
 
+import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.AbstractFeeModel;
 import com.hedera.node.app.hapi.simplefees.AbstractFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.FeeResult;
@@ -46,11 +47,11 @@ public class CryptoAllowance extends AbstractFeeModel {
     @Override
     protected FeeResult computeApiSpecificFee(Map<String, Object> values, AbstractFeesSchedule feesSchedule) {
         FeeResult fee = new FeeResult();
-        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(api));
+        fee.addDetail("Base fee", 1, feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
 
         int numAllowances = (int) values.get("numAllowances");
         if (numAllowances > FREE_ALLOWANCES) {
-            fee.addDetail("Additional allowances", (numAllowances - FREE_ALLOWANCES), (numAllowances - FREE_ALLOWANCES) * feesSchedule.getServiceBaseFee(api));
+            fee.addDetail("Additional allowances", (numAllowances - FREE_ALLOWANCES), (numAllowances - FREE_ALLOWANCES) * feesSchedule.getServiceBaseFee(HederaFunctionality.valueOf(api)));
         }
         return fee;
     }
