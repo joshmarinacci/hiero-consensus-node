@@ -4,12 +4,17 @@ import com.hedera.node.app.hapi.simplefees.MockFeesSchedule;
 import com.hedera.node.app.hapi.simplefees.apis.MockExchangeRate;
 import com.hedera.node.app.spi.fees.Fees;
 import org.hiero.hapi.support.fees.Extra;
+import org.hiero.hapi.support.fees.FeeSchedule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeExtraDef;
+import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeExtraIncluded;
+import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeService;
+import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeServiceFee;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EntityUpdateTest {
@@ -18,19 +23,26 @@ class EntityUpdateTest {
     @BeforeAll
     static void setup() {
         schedule = new MockFeesSchedule();
-        schedule.setExtrasFee(Extra.KEYS,1L);
+        final FeeSchedule raw = FeeSchedule.DEFAULT.copyBuilder().definedExtras(
+                makeExtraDef(Extra.KEYS, 1),
+                makeExtraDef(Extra.SIGNATURES, 1)
+        ).serviceFees(
+                        makeService("Crypto",
+                                makeServiceFee("CryptoUpdate",22,
+                                        makeExtraIncluded(Extra.KEYS,1))),
+                        makeService("Token",
+                                makeServiceFee("TokenUpdate",1,
+                                        makeExtraIncluded(Extra.KEYS,7))),
+                        makeService("Consenus",
+                                makeServiceFee("ConsensusUpdateTopic",22,
+                                        makeExtraIncluded(Extra.KEYS,1))),
+                        makeService("Contract",
+                                makeServiceFee("ContractUpdate",26,
+                                        makeExtraIncluded(Extra.KEYS,1)))
 
-        schedule.setServiceBaseFee("CryptoUpdate",22L);
-        schedule.setServiceExtraIncludedCount("CryptoUpdate", Extra.KEYS,1L);
-
-        schedule.setServiceBaseFee("TokenUpdate",1L);
-        schedule.setServiceExtraIncludedCount("TokenUpdate", Extra.KEYS,7L);
-
-        schedule.setServiceBaseFee("ConsensusUpdateTopic",22L);
-        schedule.setServiceExtraIncludedCount("ConsensusUpdateTopic", Extra.KEYS,1L);
-
-        schedule.setServiceBaseFee("ContractUpdate",26L);
-        schedule.setServiceExtraIncludedCount("ContractUpdate", Extra.KEYS,1L);
+                )
+                .build();
+        schedule.setRawSchedule(raw);
     }
 
     @Test

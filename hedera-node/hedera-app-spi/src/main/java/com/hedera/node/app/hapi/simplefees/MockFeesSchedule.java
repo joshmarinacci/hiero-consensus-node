@@ -4,7 +4,9 @@ package com.hedera.node.app.hapi.simplefees;
 
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.ExtraFeeDefinition;
+import org.hiero.hapi.support.fees.ExtraFeeReference;
 import org.hiero.hapi.support.fees.FeeSchedule;
+import org.hiero.hapi.support.fees.Service;
 import org.hiero.hapi.support.fees.ServiceFee;
 
 import java.util.HashMap;
@@ -28,6 +30,24 @@ class MockServiceMethod {
     }
 }
 public class MockFeesSchedule implements AbstractFeesSchedule {
+    public static ExtraFeeDefinition makeExtraDef(Extra extra, long fee) {
+        return ExtraFeeDefinition.newBuilder().name(extra).fee(fee).build();
+    }
+
+    public static ExtraFeeReference makeExtraIncluded(Extra extra, int included) {
+        return ExtraFeeReference.DEFAULT.copyBuilder()
+                .name(extra).includedCount(included).build();
+    }
+
+    public static ServiceFee makeServiceFee(String name, long baseFee, ExtraFeeReference... reference) {
+        return ServiceFee.DEFAULT.copyBuilder()
+                .name(name).baseFee(baseFee).extras(reference).build();
+    }
+    public static Service makeService(String name, ServiceFee... services) {
+        return Service.DEFAULT.copyBuilder().name(name).transactions(services).build();
+    }
+
+
     final HashMap<String, MockServiceMethod> methods;
     final HashMap<Extra, Long> extras;
     final HashMap<Extra, Long> nodeExtras;

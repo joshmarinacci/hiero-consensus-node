@@ -16,6 +16,10 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeExtraDef;
+import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeExtraIncluded;
+import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeService;
+import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeServiceFee;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EntityCreateTest {
@@ -26,45 +30,45 @@ class EntityCreateTest {
     static void setup() {
         schedule = new MockFeesSchedule();
         final FeeSchedule raw = FeeSchedule.DEFAULT.copyBuilder().definedExtras(
-                    ExtraFeeDefinition.newBuilder().name(Extra.KEYS).fee(1).build()
+                        makeExtraDef(Extra.KEYS, 1),
+                        makeExtraDef(Extra.SIGNATURES, 1)
                 )
-                .serviceFees(Service.DEFAULT.copyBuilder()
-                        .name("Crypto")
-                            .transactions(
-                                   ServiceFee.DEFAULT.copyBuilder()
-                                           .name("CryptoCreate").baseFee(22)
-                                           .extras(
-                                                   ExtraFeeReference.DEFAULT.copyBuilder()
-                                                           .name(Extra.KEYS).includedCount(2).build()
-                                           ).build(),
-                                    ServiceFee.DEFAULT.copyBuilder()
-                                            .name("TokenCreate").baseFee(33)
-                                            .extras(
-                                                    ExtraFeeReference.DEFAULT.copyBuilder()
-                                                            .name(Extra.KEYS).includedCount(7).build()
-                                            ).build()
-
-                            )
-                        .build())
+                .serviceFees(
+                        makeService("Crypto",
+                                makeServiceFee("CryptoCreate", 22,
+                                        makeExtraIncluded(Extra.KEYS, 2)
+                                ),
+                                makeServiceFee("TokenCreate", 33,
+                                        makeExtraIncluded(Extra.KEYS, 7)
+                                )),
+                        makeService("Token",
+                                makeServiceFee("TokenCreateWithCustomFee",38,
+                                        makeExtraIncluded(Extra.KEYS, 7)
+                                )
+                        ),
+                        makeService("Consensus",
+                                makeServiceFee("ConsensusCreateTopic",15,
+                                        makeExtraIncluded(Extra.KEYS, 1)
+                                ),
+                                makeServiceFee("ConsensusCreateTopicWithCustomFee",30,
+                                        makeExtraIncluded(Extra.KEYS, 1)
+                                )
+                        ),
+                        makeService("Contract",
+                                makeServiceFee("ContractCreate",15,
+                                        makeExtraIncluded(Extra.KEYS, 1)
+                                        )
+                                ),
+                        makeService("Schedule",
+                                makeServiceFee("ScheduleCreate",15,
+                                        makeExtraIncluded(Extra.KEYS, 1)
+                                        )
+                                )
+                )
                 .build();
         schedule.setRawSchedule(raw);
-
-        schedule.setServiceBaseFee("TokenCreateWithCustomFee",38L);
-        schedule.setServiceExtraIncludedCount("TokenCreateWithCustomFee", Extra.KEYS,7L);
-
-        schedule.setServiceBaseFee("ConsensusCreateTopic",15L);
-        schedule.setServiceExtraIncludedCount("ConsensusCreateTopic", Extra.KEYS,1L);
-
-        schedule.setServiceBaseFee("ConsensusCreateTopicWithCustomFee",30L);
-        schedule.setServiceExtraIncludedCount("ConsensusCreateTopicWithCustomFee", Extra.KEYS,1L);
-
-
-        schedule.setServiceBaseFee("ContractCreate",15L);
-        schedule.setServiceExtraIncludedCount("ContractCreate", Extra.KEYS,1L);
-
-        schedule.setServiceBaseFee("ScheduleCreate",15L);
-        schedule.setServiceExtraIncludedCount("ScheduleCreate", Extra.KEYS,1L);
     }
+
     @Test
     void testEntityCreateCryptoService() {
         EntityCreate entity = new EntityCreate("Crypto", "CryptoCreate", "Create an account", false);
@@ -102,7 +106,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateCustomFeeCapableTopicServiceNoCustomFee() {
-        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic",  true);
+        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic", true);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 5L);
@@ -114,7 +118,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateCustomFeeCapableTopicServiceWithCustomFee() {
-        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic",  true);
+        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic", true);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 5L);
