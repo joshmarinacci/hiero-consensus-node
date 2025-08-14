@@ -17,8 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.hedera.hapi.node.base.HederaFunctionality.*;
+import static com.hedera.node.app.hapi.simplefees.FeeModelRegistry.createModel;
 import static com.hedera.node.app.hapi.simplefees.MockFeesSchedule.makeExtraDef;
-import static com.hedera.node.app.hapi.simplefees.apis.common.FeesHelper.createModel;
 import static org.hiero.hapi.support.fees.Extra.*;
 import static org.junit.jupiter.api.Assertions.*;
 

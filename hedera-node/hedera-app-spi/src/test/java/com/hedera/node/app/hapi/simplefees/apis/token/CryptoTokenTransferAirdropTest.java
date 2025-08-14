@@ -95,9 +95,9 @@ class CryptoTokenTransferAirdropTest {
     void testPredefinedScenarios() {
         for (var scenario: scenarios) {
             CryptoTransfer transfer = switch (scenario.api) {
-                case "CryptoTransfer" -> new CryptoTransfer("Crypto", "CryptoTransfer");
-                case "TokenTransfer" -> new CryptoTransfer("Token", "TokenTransfer");
-                case "TokenAirdrop" -> new CryptoTransfer("Crypto", "TokenAirdrop");
+                case "CryptoTransfer" -> new CryptoTransfer("Crypto", CRYPTO_TRANSFER);
+//                case "TokenTransfer" -> new CryptoTransfer("Token", "TokenTransfer");
+                case "TokenAirdrop" -> new CryptoTransfer("Crypto", TOKEN_AIRDROP);
                 default -> throw new IllegalStateException("Unexpected value: " + scenario.api);
             };
 

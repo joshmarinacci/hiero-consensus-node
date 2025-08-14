@@ -39,7 +39,7 @@ class CryptoTransferTest {
 
     @Test
     void testSimpleHbarTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.ACCOUNTS.name(), 2L);
@@ -49,7 +49,7 @@ class CryptoTransferTest {
 
     @Test
     void testMultipleHbarTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.ACCOUNTS.name(), 5L);
@@ -59,7 +59,7 @@ class CryptoTransferTest {
 
     @Test
     void testTokenTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.ACCOUNTS.name(), 5L);
@@ -70,7 +70,7 @@ class CryptoTransferTest {
 
     @Test
     void testMultipleTokenTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.ACCOUNTS.name(), 10L);
@@ -82,7 +82,7 @@ class CryptoTransferTest {
 
     @Test
     void testMultipleHbarAndMultipleTokenTransfer() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(),  1L);
         params.put(Extra.ACCOUNTS.name(), 10L);
@@ -94,7 +94,7 @@ class CryptoTransferTest {
 
     @Test
     void testInvalidParamsFailCheck() {
-        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER.name());
+        CryptoTransfer transfer = new CryptoTransfer("Crypto", CRYPTO_TRANSFER);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.ACCOUNTS.name(), 0L);
         params.put(Extra.STANDARD_FUNGIBLE_TOKENS.name(), 0L);

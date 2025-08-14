@@ -1,6 +1,5 @@
 package com.hedera.node.app.hapi.simplefees;
 
-import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.node.app.hapi.simplefees.apis.common.AssociateOrDissociate;
 import com.hedera.node.app.hapi.simplefees.apis.common.EntityCreate;
 import com.hedera.node.app.hapi.simplefees.apis.common.EntityUpdate;
@@ -104,5 +103,14 @@ public class FeeModelRegistry {
         registry.put("DeleteNode", new NoParametersAPI("Miscellaneous", "DeleteNode", "Delete a node from the address book"));
         registry.put("UpdateNode", new NoParametersAPI("Miscellaneous", "UpdateNode", "Modify node attributes"));
         registry.put("BatchTransaction", new NoParametersAPI("Miscellaneous", "BatchTransaction", "Submit outer transaction containing a batch"));
+    }
+
+    public static AbstractFeeModel createModel(String service, String method) {
+        return switch (method) {
+            case "ConsensusCreateTopic" -> new EntityCreate(service, CONSENSUS_CREATE_TOPIC, "description",false);
+            case "ConsensusSubmitMessage" -> new HCSSubmit();
+            case "ConsensusSubmitMessageWithCustomFee" -> new HCSSubmit();
+            default -> throw new IllegalStateException("Unexpected value: " + method);
+        };
     }
 }

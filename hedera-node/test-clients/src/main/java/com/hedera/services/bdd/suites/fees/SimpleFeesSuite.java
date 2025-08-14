@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.hedera.hapi.node.base.HederaFunctionality.*;
 import static com.hedera.node.app.hapi.simplefees.apis.common.FeeConstants.FILE_FREE_BYTES;
 import static com.hedera.services.bdd.junit.support.validators.block.BlockContentsValidator.bodyFrom;
 import static com.hedera.services.bdd.spec.HapiSpec.hapiTest;
@@ -287,7 +288,7 @@ public class SimpleFeesSuite {
                                 var create_body = txbody.consensusCreateTopicOrThrow();
                                 System.out.println("create topic body is " + create_body);
 
-                                EntityCreate entity = FeesHelper.makeCreateEntity(HederaFunctionality.CONSENSUS_CREATE_TOPIC, "Create a topic", true);
+                                EntityCreate entity = new EntityCreate("Consensus", CONSENSUS_CREATE_TOPIC, "Create a topic", true);
                                 Map<String, Object> params = new HashMap<>();
                                 params.put(Extra.SIGNATURES.name(), 0L);
                                 params.put(Extra.KEYS.name(), 0L);
