@@ -73,7 +73,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateCryptoService() {
-        EntityCreate entity = new EntityCreate("Crypto", "CryptoCreate", "Create an account", false);
+        EntityCreate entity = new EntityCreate("Crypto", CRYPTO_CREATE.name(), "Create an account", false);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 10L);
@@ -84,7 +84,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateCustomFeeCapableTokenServiceNoCustomFee() {
-        EntityCreate entity = new EntityCreate("Token", "TokenCreate", "Create a token type", true);
+        EntityCreate entity = new EntityCreate("Token", TOKEN_CREATE.name(), "Create a token type", true);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 10L);
@@ -96,7 +96,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateCustomFeeCapableTokenServiceWithCustomFee() {
-        EntityCreate entity = new EntityCreate("Token", "TokenCreate", "Create a token type", true);
+        EntityCreate entity = new EntityCreate("Token", TOKEN_CREATE.name(), "Create a token type", true);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 10L);
@@ -108,7 +108,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateCustomFeeCapableTopicServiceNoCustomFee() {
-        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic", true);
+        EntityCreate entity = new EntityCreate("Topic",CONSENSUS_CREATE_TOPIC.name(), "Create a topic", true);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 5L);
@@ -120,7 +120,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateCustomFeeCapableTopicServiceWithCustomFee() {
-        EntityCreate entity = new EntityCreate("Topic", "ConsensusCreateTopic", "Create a topic", true);
+        EntityCreate entity = new EntityCreate("Topic", CONSENSUS_CREATE_TOPIC.name(), "Create a topic", true);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 5L);
@@ -132,7 +132,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateContractService() {
-        EntityCreate entity = new EntityCreate("Smart Contract", "ContractCreate", "Create a smart contract", false);
+        EntityCreate entity = new EntityCreate("Smart Contract", CONTRACT_CREATE.name(),  "Create a smart contract", false);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 10L);
@@ -143,7 +143,7 @@ class EntityCreateTest {
 
     @Test
     void testEntityCreateScheduleService() {
-        EntityCreate entity = new EntityCreate("Miscellaneous", "ScheduleCreate", "Create a schedule", false);
+        EntityCreate entity = new EntityCreate("Miscellaneous", SCHEDULE_CREATE.name(), "Create a schedule", false);
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 5L);
