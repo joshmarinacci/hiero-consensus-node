@@ -21,6 +21,8 @@ import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_UPDATE_TOP
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_APPEND;
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_CREATE;
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_DELETE;
+import static com.hedera.hapi.node.base.HederaFunctionality.FILE_GET_CONTENTS;
+import static com.hedera.hapi.node.base.HederaFunctionality.FILE_GET_INFO;
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_UPDATE;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraDef;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraIncluded;
@@ -66,6 +68,16 @@ public class FileTests {
                                         makeExtraIncluded(Extra.SIGNATURES, 1),
                                         makeExtraIncluded(Extra.KEYS, 1),
                                         makeExtraIncluded(Extra.BYTES, 1024)
+                                ),
+                                makeServiceFee(FILE_GET_CONTENTS,11,
+                                        makeExtraIncluded(Extra.SIGNATURES, 1),
+                                        makeExtraIncluded(Extra.KEYS, 1),
+                                        makeExtraIncluded(Extra.BYTES, 1024)
+                                ),
+                                makeServiceFee(FILE_GET_INFO,11,
+                                        makeExtraIncluded(Extra.SIGNATURES, 1),
+                                        makeExtraIncluded(Extra.KEYS, 1),
+                                        makeExtraIncluded(Extra.BYTES, 1024)
                                 )
                         )
                 )
@@ -81,7 +93,6 @@ public class FileTests {
         params.put(Extra.KEYS.name(), 1L);
         assertTrue(validate(feeSchedule),"Fee schedule failed validation");
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        System.out.println(fee);
         assertEquals(11 + 0 + (1+500-10)*3,fee.total());
     }
     @Test
@@ -92,10 +103,8 @@ public class FileTests {
         params.put(Extra.BYTES.name(), 2000L);
         params.put(Extra.KEYS.name(), 1L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        System.out.println(fee);
         assertEquals(11 + (2000-1024)*1 + (1+2000-10)*3,fee.total());
     }
-
     @Test
     void fileUpdateFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_UPDATE);
@@ -105,10 +114,8 @@ public class FileTests {
         params.put(Extra.KEYS.name(), 1L);
         assertTrue(validate(feeSchedule),"Fee schedule failed validation");
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        System.out.println(fee);
         assertEquals(11 + 0 + (1+500-10)*3,fee.total());
     }
-
     @Test
     void fileDeleteFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_DELETE);
@@ -117,10 +124,8 @@ public class FileTests {
         params.put(Extra.BYTES.name(), 100L);
         params.put(Extra.KEYS.name(), 1L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        System.out.println(fee);
         assertEquals(11 + 0 + (1+100-10)*3,fee.total());
     }
-
     @Test
     void fileAppendFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_APPEND);
@@ -128,18 +133,29 @@ public class FileTests {
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.BYTES.name(), 3000L);
         params.put(Extra.KEYS.name(), 1L);
-        assertTrue(validate(feeSchedule),"Fee schedule failed validation");
+        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        assertEquals(11 + (3000-1024)*1 + (1+3000-10)*3,fee.total());
+    }
+    @Test
+    void fileGetContentsFee() {
+        FeeModel model = FeeModelRegistry.lookupModel(FILE_GET_CONTENTS);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES.name(), 1L);
+        params.put(Extra.BYTES.name(), 3000L);
+        params.put(Extra.KEYS.name(), 1L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
         System.out.println(fee);
         assertEquals(11 + (3000-1024)*1 + (1+3000-10)*3,fee.total());
     }
-
-    @Test
-    void fileGetContentsFee() {
-
-    }
     @Test
     void fileGetInfoFee() {
-
+        FeeModel model = FeeModelRegistry.lookupModel(FILE_GET_INFO);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES.name(), 1L);
+        params.put(Extra.BYTES.name(), 100L);
+        params.put(Extra.KEYS.name(), 1L);
+        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        System.out.println(fee);
+        assertEquals(11 + (1+100-10)*3,fee.total());
     }
 }
