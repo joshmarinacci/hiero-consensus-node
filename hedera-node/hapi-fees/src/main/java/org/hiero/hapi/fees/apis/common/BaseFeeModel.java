@@ -72,7 +72,6 @@ public class BaseFeeModel implements FeeModel {
         result.addNetworkFee("Total Network fee", multiplier, total_node_fee * multiplier);
 
 
-//        System.out.println("final computed fee result is "+result);
         return result;
     }
 
