@@ -10,14 +10,22 @@ import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_CREATE_TOP
 import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_DELETE_TOPIC;
 import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_SUBMIT_MESSAGE;
 import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_UPDATE_TOPIC;
+import static com.hedera.hapi.node.base.HederaFunctionality.FILE_APPEND;
+import static com.hedera.hapi.node.base.HederaFunctionality.FILE_CREATE;
+import static com.hedera.hapi.node.base.HederaFunctionality.FILE_DELETE;
+import static com.hedera.hapi.node.base.HederaFunctionality.FILE_UPDATE;
 
 public class FeeModelRegistry {
     private static final Map<HederaFunctionality, FeeModel> registry = new LinkedHashMap<>();
     static {
         registry.put(CONSENSUS_CREATE_TOPIC, new BaseFeeModel(CONSENSUS_CREATE_TOPIC, "Create a new topic"));
         registry.put(CONSENSUS_UPDATE_TOPIC, new BaseFeeModel(CONSENSUS_UPDATE_TOPIC,"Update topic"));
-        registry.put(CONSENSUS_SUBMIT_MESSAGE, new BaseFeeModel(CONSENSUS_SUBMIT_MESSAGE, "Submit message"));
+        registry.put(CONSENSUS_SUBMIT_MESSAGE, new BaseFeeModel(CONSENSUS_SUBMIT_MESSAGE, "Submit message to topic"));
         registry.put(CONSENSUS_DELETE_TOPIC, new BaseFeeModel(CONSENSUS_DELETE_TOPIC, "Delete topic"));
+        registry.put(FILE_CREATE, new BaseFeeModel(FILE_CREATE, "Create file"));
+        registry.put(FILE_UPDATE, new BaseFeeModel(FILE_UPDATE, "Update file"));
+        registry.put(FILE_APPEND, new BaseFeeModel(FILE_APPEND, "Append to file"));
+        registry.put(FILE_DELETE, new BaseFeeModel(FILE_DELETE, "Delete file"));
     }
 
     public static FeeModel lookupModel(HederaFunctionality service) {
