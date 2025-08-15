@@ -5,6 +5,8 @@ import org.hiero.hapi.fees.FeeModelRegistry;
 import org.hiero.hapi.fees.FeeResult;
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
+import org.hiero.hapi.support.fees.NetworkFee;
+import org.hiero.hapi.support.fees.NodeFee;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +19,9 @@ import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraDef;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraIncluded;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeService;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeServiceFee;
+import static org.hiero.hapi.fees.FeeScheduleUtils.validate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class EntityCreateTest {
     static FeeSchedule feeSchedule;
@@ -25,9 +29,15 @@ class EntityCreateTest {
     static void setup() {
         feeSchedule = FeeSchedule.DEFAULT.copyBuilder()
                 .definedExtras(
+                        makeExtraDef(Extra.BYTES,1),
                         makeExtraDef(Extra.KEYS,2),
                         makeExtraDef(Extra.SIGNATURES,3)
                 )
+                .nodeFee(NodeFee.DEFAULT.copyBuilder().baseFee(1).extras(
+                        makeExtraIncluded(Extra.BYTES,10),
+                        makeExtraIncluded(Extra.SIGNATURES,1)
+                ).build())
+                .networkFeeRatio(NetworkFee.DEFAULT.copyBuilder().multiplier(2).build())
                 .serviceFees(
                         makeService("Consensus",
                                 makeServiceFee(CONSENSUS_CREATE_TOPIC,15,
@@ -43,12 +53,23 @@ class EntityCreateTest {
         Map<String, Object> params = new HashMap<>();
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.KEYS.name(), 5L);
+        params.put(Extra.BYTES.name(), 20L);
 //        params.put(Params.HasCustomFee.name(), YesOrNo.NO);
 
+        assertTrue(validate(feeSchedule),"Fee schedule failed validation");
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        System.out.println(fee);
+        // service base fee= 15
+        // 5 keys - 1 included * key cost of 2 = 4*2 = 8
+        // node base fee = 1
+        // node includes 1 sig and 1 bytes for free
         assertEquals(
-                15 + (1*3)+ (5-1)*2, fee.total(), "Topic Create - no custom fee");
+                15  // service base fee
+                + (5-1)*2 // 5 keys - 1 included * key cost of 2 = 8
+                + (1+10)*3 // node base fee = 1 + (20-10) bytes, x3 to include network
+
+                , fee.total());
+        assertEquals(1+10,fee.node);
+        assertEquals((1+10)*2,fee.network);
     }
 
     @Test

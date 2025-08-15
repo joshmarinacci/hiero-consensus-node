@@ -53,7 +53,7 @@ public class FeeScheduleUtils {
      * @param feeSchedule
      */
     public static boolean validate(FeeSchedule feeSchedule) {
-        System.out.println("validating " + feeSchedule);
+//        System.out.println("validating " + feeSchedule);
         for(ExtraFeeDefinition def : feeSchedule.definedExtras()) {
             // no negative values or greater than MAX long
             if(def.fee() < 0) {
@@ -75,6 +75,13 @@ public class FeeScheduleUtils {
                     }
                 }
             }
+        }
+        for(ExtraFeeReference ref : feeSchedule.nodeFee().extras()) {
+                    try {
+                        lookupExtraFee(feeSchedule, ref);
+                    } catch (Error e) {
+                        return false;
+                    }
         }
         return true;
     }

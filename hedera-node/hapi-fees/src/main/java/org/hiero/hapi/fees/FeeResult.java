@@ -9,9 +9,17 @@ public class FeeResult {
     public long network = 0;
     public Map<String, FeeDetail> details = new LinkedHashMap<>();
 
-    public void addDetail(String label, long value, long cost) {
+    public void addServiceFee(String label, long value, long cost) {
         details.put(label, new FeeDetail(value, cost));
         service += cost;
+    }
+    public void addNodeFee(String label, long value, long cost) {
+        details.put(label, new FeeDetail(value, cost));
+        node += cost;
+    }
+    public void addNetworkFee(String label, long value, long cost) {
+        details.put(label, new FeeDetail(value, cost));
+        network += cost;
     }
 
     public long total() {
