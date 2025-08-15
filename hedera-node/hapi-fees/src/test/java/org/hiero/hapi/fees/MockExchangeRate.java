@@ -1,4 +1,4 @@
-package org.hiero.hapi.fees.apis.common;
+package org.hiero.hapi.fees;
 
 import com.hedera.hapi.node.base.TimestampSeconds;
 import com.hedera.hapi.node.transaction.ExchangeRate;
