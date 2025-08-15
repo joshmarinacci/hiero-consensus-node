@@ -249,7 +249,7 @@ public class TokenServiceFeesSuite {
                         .payingWith(account)
                         .via("airdrop"),
 
-                // Verify that a pending state is created and the correct usd is charged
+                // Verify that a pending state is created and the correct total is charged
                 getTxnRecord("airdrop")
                         .hasPriority(recordWith()
                                 .pendingAirdrops(includingFungiblePendingAirdrop(moving(10, FUNGIBLE_TOKEN)
@@ -295,7 +295,7 @@ public class TokenServiceFeesSuite {
                         .payingWith(account)
                         .via("airdrop"),
 
-                // Verify that a pending state is created and the correct usd is charged
+                // Verify that a pending state is created and the correct total is charged
                 getTxnRecord("airdrop")
                         .hasPriority(recordWith()
                                 .pendingAirdrops(includingNftPendingAirdrop(movingUnique(NON_FUNGIBLE_TOKEN, 1L)
