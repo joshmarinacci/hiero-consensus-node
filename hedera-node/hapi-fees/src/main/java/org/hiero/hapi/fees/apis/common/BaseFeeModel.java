@@ -13,11 +13,11 @@ import java.util.Map;
 import static org.hiero.hapi.fees.FeeScheduleUtils.lookupExtraFee;
 import static org.hiero.hapi.fees.FeeScheduleUtils.lookupServiceFee;
 
-public class EntityCreate implements FeeModel {
+public class BaseFeeModel implements FeeModel {
     private final HederaFunctionality api;
     private final String description;
 
-    public EntityCreate(HederaFunctionality api, String description) {
+    public BaseFeeModel(HederaFunctionality api, String description) {
         this.api = api;
         this.description = description;
     }

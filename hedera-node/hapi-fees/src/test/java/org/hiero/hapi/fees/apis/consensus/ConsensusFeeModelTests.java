@@ -1,8 +1,9 @@
-package org.hiero.hapi.fees.apis.common;
+package org.hiero.hapi.fees.apis.consensus;
 
 import org.hiero.hapi.fees.FeeModel;
 import org.hiero.hapi.fees.FeeModelRegistry;
 import org.hiero.hapi.fees.FeeResult;
+import org.hiero.hapi.fees.MockExchangeRate;
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.NetworkFee;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_CREATE_TOPIC;
+import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_UPDATE_TOPIC;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraDef;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraIncluded;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeService;
@@ -23,7 +25,7 @@ import static org.hiero.hapi.fees.FeeScheduleUtils.validate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class EntityCreateTest {
+class ConsensusFeeModelTests {
     static FeeSchedule feeSchedule;
     @BeforeAll
     static void setup() {
@@ -41,6 +43,9 @@ class EntityCreateTest {
                 .serviceFees(
                         makeService("Consensus",
                                 makeServiceFee(CONSENSUS_CREATE_TOPIC,15,
+                                        makeExtraIncluded(Extra.KEYS, 1)
+                                ),
+                                makeServiceFee(CONSENSUS_UPDATE_TOPIC,22,
                                         makeExtraIncluded(Extra.KEYS, 1)
                                 )
                         )
@@ -73,7 +78,13 @@ class EntityCreateTest {
     }
 
     @Test
-    void createTopicWithCustomFee() {
-
+    void updateTopic() {
+        FeeModel model = FeeModelRegistry.registry.get(CONSENSUS_UPDATE_TOPIC);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES.name(), 1L);
+        params.put(Extra.KEYS.name(), 1L);
+        params.put(Extra.BYTES.name(), 10L);
+        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        assertEquals(22+3,fee.total());
     }
 }
