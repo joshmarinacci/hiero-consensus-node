@@ -14,10 +14,6 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_CREATE_TOPIC;
-import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_DELETE_TOPIC;
-import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_SUBMIT_MESSAGE;
-import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_UPDATE_TOPIC;
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_APPEND;
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_CREATE;
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_DELETE;
