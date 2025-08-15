@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_CREATE_TOPIC;
+import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_SUBMIT_MESSAGE;
 import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_UPDATE_TOPIC;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraDef;
 import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraIncluded;
@@ -33,7 +34,8 @@ class ConsensusFeeModelTests {
                 .definedExtras(
                         makeExtraDef(Extra.BYTES,1),
                         makeExtraDef(Extra.KEYS,2),
-                        makeExtraDef(Extra.SIGNATURES,3)
+                        makeExtraDef(Extra.SIGNATURES,3),
+                        makeExtraDef(Extra.CUSTOM_FEE,500)
                 )
                 .nodeFee(NodeFee.DEFAULT.copyBuilder().baseFee(1).extras(
                         makeExtraIncluded(Extra.BYTES,10),
@@ -47,6 +49,12 @@ class ConsensusFeeModelTests {
                                 ),
                                 makeServiceFee(CONSENSUS_UPDATE_TOPIC,22,
                                         makeExtraIncluded(Extra.KEYS, 1)
+                                ),
+                                makeServiceFee(CONSENSUS_SUBMIT_MESSAGE,33,
+                                        makeExtraIncluded(Extra.SIGNATURES, 1),
+                                        makeExtraIncluded(Extra.KEYS, 1),
+                                        makeExtraIncluded(Extra.BYTES, 100),
+                                        makeExtraIncluded(Extra.CUSTOM_FEE,0)
                                 )
                         )
                 )
@@ -86,5 +94,47 @@ class ConsensusFeeModelTests {
         params.put(Extra.BYTES.name(), 10L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
         assertEquals(22+3,fee.total());
+    }
+
+    @Test
+    void submitMessage() {
+        FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_SUBMIT_MESSAGE);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES.name(), 1L);
+        params.put(Extra.KEYS.name(), 1L);
+        params.put(Extra.BYTES.name(), 100L);
+        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        // base fee for submit = 33
+        // node + network = (90+1)*3
+        assertEquals(33+ 91*3,fee.total());
+    }
+
+    @Test
+    void submitMessageWithExtraBytes() {
+        FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_SUBMIT_MESSAGE);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES.name(), 1L);
+        params.put(Extra.KEYS.name(), 1L);
+        params.put(Extra.BYTES.name(), 500L);
+        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        // base fee for submit = 33
+        // extra bytes = (500-100)*1 = 400
+        // node + network = (490+1)*3
+        assertEquals(33+ 400 + 491*3,fee.total());
+    }
+
+    @Test
+    void submitMessageWithCustomFee() {
+        FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_SUBMIT_MESSAGE);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES.name(), 1L);
+        params.put(Extra.KEYS.name(), 1L);
+        params.put(Extra.BYTES.name(), 10L);
+        params.put(Extra.CUSTOM_FEE.name(), 1L);
+        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        // base fee for submit = 33
+        // custom fee surcharge = 500
+        // node + network = (1)*3
+        assertEquals(33+ 500 + 3 , fee.total());
     }
 }
