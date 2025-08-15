@@ -12,6 +12,9 @@ import org.hiero.hapi.support.fees.ServiceFee;
 
 import java.util.Map;
 
+import static org.hiero.hapi.fees.FeeScheduleUtils.lookupExtraFee;
+import static org.hiero.hapi.fees.FeeScheduleUtils.lookupServiceFee;
+
 public class EntityCreate implements FeeModel {
     private final HederaFunctionality api;
     private final String description;
@@ -55,23 +58,4 @@ public class EntityCreate implements FeeModel {
         return result;
     }
 
-    private ExtraFeeDefinition lookupExtraFee(FeeSchedule feeSchedule, ExtraFeeReference ref) {
-        for(ExtraFeeDefinition def : feeSchedule.definedExtras()) {
-            if(def.name().equals(ref.name())) {
-                return def;
-            }
-        }
-        throw new Error("Extra Fee definition not found for "+ref.name());
-    }
-
-    private ServiceFee lookupServiceFee(FeeSchedule feeSchedule, HederaFunctionality api) {
-        for (Service service : feeSchedule.serviceFees()) {
-            for (ServiceFee trans : service.transactions()) {
-                if (trans.name() == api) {
-                    return trans;
-                }
-            }
-        }
-        throw new Error("Service definition not found for " + api.toString());
-    }
 }
