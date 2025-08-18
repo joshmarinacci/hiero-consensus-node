@@ -2026,7 +2026,7 @@ public class UtilVerbs {
      * Validates that fee charged for a transaction is within the allowedPercentDiff of expected fee (taken
      * from pricing calculator) without the charge for gas.
      * @param txn txn to be validated
-     * @param expectedUsd expected fee in total
+     * @param expectedUsd expected fee in usd
      * @param allowedPercentDiff allowed percentage difference
      * @return
      */
@@ -2048,7 +2048,7 @@ public class UtilVerbs {
     /**
      * Validates that the gas charge for a transaction is within the allowedPercentDiff of expected gas in USD.
      * @param txn txn to be validated
-     * @param expectedUsdForGas expected gas charge in total
+     * @param expectedUsdForGas expected gas charge in usd
      * @param allowedPercentDiff allowed percentage difference
      * @return
      */
@@ -2071,7 +2071,7 @@ public class UtilVerbs {
      * is within the allowedPercentDiff of expected gas in USD.
      *
      * @param txn txn to be validated
-     * @param expectedUsdForGas expected gas charge in total
+     * @param expectedUsdForGas expected gas charge in usd
      * @param allowedPercentDiff allowed percentage difference
      */
     public static CustomSpecAssert validateChargedUsdForGasOnlyForInnerTxn(
