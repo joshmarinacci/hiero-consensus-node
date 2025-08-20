@@ -1,17 +1,17 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.hapi.fees.apis.common;
+
+import static org.hiero.hapi.fees.FeeScheduleUtils.lookupExtraFee;
+import static org.hiero.hapi.fees.FeeScheduleUtils.lookupServiceFee;
 
 import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.transaction.ExchangeRate;
+import java.util.Map;
 import org.hiero.hapi.fees.FeeModel;
 import org.hiero.hapi.fees.FeeResult;
 import org.hiero.hapi.support.fees.ExtraFeeReference;
 import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.ServiceFee;
-
-import java.util.Map;
-
-import static org.hiero.hapi.fees.FeeScheduleUtils.lookupExtraFee;
-import static org.hiero.hapi.fees.FeeScheduleUtils.lookupServiceFee;
 
 public class BaseFeeModel implements FeeModel {
     private final HederaFunctionality api;
@@ -35,9 +35,12 @@ public class BaseFeeModel implements FeeModel {
     @Override
     public FeeResult computeFee(Map<String, Object> params, ExchangeRate exchangeRate, FeeSchedule feeSchedule) {
         var result = new FeeResult();
-        result.addServiceFee("Base Fee for "+this.getApi(), 1, lookupServiceFee(feeSchedule,this.api).baseFee());
+        result.addServiceFee(
+                "Base Fee for " + this.getApi(),
+                1,
+                lookupServiceFee(feeSchedule, this.api).baseFee());
 
-        ServiceFee serviceDef = lookupServiceFee(feeSchedule,this.api);
+        ServiceFee serviceDef = lookupServiceFee(feeSchedule, this.api);
         for (ExtraFeeReference ref : serviceDef.extras()) {
             if (!params.containsKey(ref.name().name())) {
                 throw new Error("input params missing " + ref.name() + " required by method " + this.api);
@@ -47,7 +50,7 @@ public class BaseFeeModel implements FeeModel {
             long extraFee = lookupExtraFee(feeSchedule, ref).fee();
             if (used > included) {
                 final long overage = used - included;
-                result.addServiceFee("Overage of "+ref.name().name(), overage, overage * extraFee);
+                result.addServiceFee("Overage of " + ref.name().name(), overage, overage * extraFee);
             }
         }
 
@@ -63,7 +66,7 @@ public class BaseFeeModel implements FeeModel {
             long extraFee = lookupExtraFee(feeSchedule, ref).fee();
             if (used > included) {
                 final long overage = used - included;
-                result.addNodeFee("Node Overage of "+ref.name().name(), overage, overage * extraFee);
+                result.addNodeFee("Node Overage of " + ref.name().name(), overage, overage * extraFee);
                 total_node_fee += overage * extraFee;
             }
         }
@@ -71,8 +74,6 @@ public class BaseFeeModel implements FeeModel {
         int multiplier = feeSchedule.networkFeeRatio().multiplier();
         result.addNetworkFee("Total Network fee", multiplier, total_node_fee * multiplier);
 
-
         return result;
     }
-
 }

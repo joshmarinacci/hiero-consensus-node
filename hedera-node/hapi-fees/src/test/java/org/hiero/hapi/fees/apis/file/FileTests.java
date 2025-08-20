@@ -1,18 +1,5 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.hapi.fees.apis.file;
-
-import org.hiero.hapi.fees.FeeModel;
-import org.hiero.hapi.fees.FeeModelRegistry;
-import org.hiero.hapi.fees.FeeResult;
-import org.hiero.hapi.fees.MockExchangeRate;
-import org.hiero.hapi.support.fees.Extra;
-import org.hiero.hapi.support.fees.FeeSchedule;
-import org.hiero.hapi.support.fees.NetworkFee;
-import org.hiero.hapi.support.fees.NodeFee;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_APPEND;
 import static com.hedera.hapi.node.base.HederaFunctionality.FILE_CREATE;
@@ -28,55 +15,72 @@ import static org.hiero.hapi.fees.FeeScheduleUtils.validate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.hiero.hapi.fees.FeeModel;
+import org.hiero.hapi.fees.FeeModelRegistry;
+import org.hiero.hapi.fees.FeeResult;
+import org.hiero.hapi.fees.MockExchangeRate;
+import org.hiero.hapi.support.fees.Extra;
+import org.hiero.hapi.support.fees.FeeSchedule;
+import org.hiero.hapi.support.fees.NetworkFee;
+import org.hiero.hapi.support.fees.NodeFee;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 public class FileTests {
     static FeeSchedule feeSchedule;
+
     @BeforeAll
     static void setup() {
-        feeSchedule = FeeSchedule.DEFAULT.copyBuilder()
+        feeSchedule = FeeSchedule.DEFAULT
+                .copyBuilder()
                 .definedExtras(
-                        makeExtraDef(Extra.SIGNATURES,1),
-                        makeExtraDef(Extra.BYTES,1),
-                        makeExtraDef(Extra.KEYS,1)
-                )
-                .nodeFee(NodeFee.DEFAULT.copyBuilder().baseFee(1).extras(
-                        makeExtraIncluded(Extra.BYTES,10),
-                        makeExtraIncluded(Extra.SIGNATURES,1)
-                ).build())
+                        makeExtraDef(Extra.SIGNATURES, 1), makeExtraDef(Extra.BYTES, 1), makeExtraDef(Extra.KEYS, 1))
+                .nodeFee(NodeFee.DEFAULT
+                        .copyBuilder()
+                        .baseFee(1)
+                        .extras(makeExtraIncluded(Extra.BYTES, 10), makeExtraIncluded(Extra.SIGNATURES, 1))
+                        .build())
                 .networkFeeRatio(NetworkFee.DEFAULT.copyBuilder().multiplier(2).build())
-                .serviceFees(
-                        makeService("File",
-                                makeServiceFee(FILE_CREATE,11,
-                                        makeExtraIncluded(Extra.SIGNATURES, 1),
-                                        makeExtraIncluded(Extra.KEYS, 1),
-                                        makeExtraIncluded(Extra.BYTES, 1024)
-                                ),
-                                makeServiceFee(FILE_UPDATE,11,
-                                        makeExtraIncluded(Extra.SIGNATURES, 1),
-                                        makeExtraIncluded(Extra.KEYS, 1),
-                                        makeExtraIncluded(Extra.BYTES, 1024)
-                                ),
-                                makeServiceFee(FILE_APPEND,11,
-                                        makeExtraIncluded(Extra.SIGNATURES, 1),
-                                        makeExtraIncluded(Extra.KEYS, 1),
-                                        makeExtraIncluded(Extra.BYTES, 1024)
-                                ),
-                                makeServiceFee(FILE_DELETE,11,
-                                        makeExtraIncluded(Extra.SIGNATURES, 1),
-                                        makeExtraIncluded(Extra.KEYS, 1),
-                                        makeExtraIncluded(Extra.BYTES, 1024)
-                                ),
-                                makeServiceFee(FILE_GET_CONTENTS,11,
-                                        makeExtraIncluded(Extra.SIGNATURES, 1),
-                                        makeExtraIncluded(Extra.KEYS, 1),
-                                        makeExtraIncluded(Extra.BYTES, 1024)
-                                ),
-                                makeServiceFee(FILE_GET_INFO,11,
-                                        makeExtraIncluded(Extra.SIGNATURES, 1),
-                                        makeExtraIncluded(Extra.KEYS, 1),
-                                        makeExtraIncluded(Extra.BYTES, 1024)
-                                )
-                        )
-                )
+                .serviceFees(makeService(
+                        "File",
+                        makeServiceFee(
+                                FILE_CREATE,
+                                11,
+                                makeExtraIncluded(Extra.SIGNATURES, 1),
+                                makeExtraIncluded(Extra.KEYS, 1),
+                                makeExtraIncluded(Extra.BYTES, 1024)),
+                        makeServiceFee(
+                                FILE_UPDATE,
+                                11,
+                                makeExtraIncluded(Extra.SIGNATURES, 1),
+                                makeExtraIncluded(Extra.KEYS, 1),
+                                makeExtraIncluded(Extra.BYTES, 1024)),
+                        makeServiceFee(
+                                FILE_APPEND,
+                                11,
+                                makeExtraIncluded(Extra.SIGNATURES, 1),
+                                makeExtraIncluded(Extra.KEYS, 1),
+                                makeExtraIncluded(Extra.BYTES, 1024)),
+                        makeServiceFee(
+                                FILE_DELETE,
+                                11,
+                                makeExtraIncluded(Extra.SIGNATURES, 1),
+                                makeExtraIncluded(Extra.KEYS, 1),
+                                makeExtraIncluded(Extra.BYTES, 1024)),
+                        makeServiceFee(
+                                FILE_GET_CONTENTS,
+                                11,
+                                makeExtraIncluded(Extra.SIGNATURES, 1),
+                                makeExtraIncluded(Extra.KEYS, 1),
+                                makeExtraIncluded(Extra.BYTES, 1024)),
+                        makeServiceFee(
+                                FILE_GET_INFO,
+                                11,
+                                makeExtraIncluded(Extra.SIGNATURES, 1),
+                                makeExtraIncluded(Extra.KEYS, 1),
+                                makeExtraIncluded(Extra.BYTES, 1024))))
                 .build();
     }
 
@@ -87,10 +91,11 @@ public class FileTests {
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.BYTES.name(), 500L);
         params.put(Extra.KEYS.name(), 1L);
-        assertTrue(validate(feeSchedule),"Fee schedule failed validation");
+        assertTrue(validate(feeSchedule), "Fee schedule failed validation");
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        assertEquals(11 + 0 + (1+500-10)*3,fee.total());
+        assertEquals(11 + 0 + (1 + 500 - 10) * 3, fee.total());
     }
+
     @Test
     void fileCreateBigFileFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_CREATE);
@@ -99,8 +104,9 @@ public class FileTests {
         params.put(Extra.BYTES.name(), 2000L);
         params.put(Extra.KEYS.name(), 1L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        assertEquals(11 + (2000-1024)*1 + (1+2000-10)*3,fee.total());
+        assertEquals(11 + (2000 - 1024) * 1 + (1 + 2000 - 10) * 3, fee.total());
     }
+
     @Test
     void fileUpdateFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_UPDATE);
@@ -108,10 +114,11 @@ public class FileTests {
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.BYTES.name(), 500L);
         params.put(Extra.KEYS.name(), 1L);
-        assertTrue(validate(feeSchedule),"Fee schedule failed validation");
+        assertTrue(validate(feeSchedule), "Fee schedule failed validation");
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        assertEquals(11 + 0 + (1+500-10)*3,fee.total());
+        assertEquals(11 + 0 + (1 + 500 - 10) * 3, fee.total());
     }
+
     @Test
     void fileDeleteFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_DELETE);
@@ -120,8 +127,9 @@ public class FileTests {
         params.put(Extra.BYTES.name(), 100L);
         params.put(Extra.KEYS.name(), 1L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        assertEquals(11 + 0 + (1+100-10)*3,fee.total());
+        assertEquals(11 + 0 + (1 + 100 - 10) * 3, fee.total());
     }
+
     @Test
     void fileAppendFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_APPEND);
@@ -130,8 +138,9 @@ public class FileTests {
         params.put(Extra.BYTES.name(), 3000L);
         params.put(Extra.KEYS.name(), 1L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
-        assertEquals(11 + (3000-1024)*1 + (1+3000-10)*3,fee.total());
+        assertEquals(11 + (3000 - 1024) * 1 + (1 + 3000 - 10) * 3, fee.total());
     }
+
     @Test
     void fileGetContentsFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_GET_CONTENTS);
@@ -141,8 +150,9 @@ public class FileTests {
         params.put(Extra.KEYS.name(), 1L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
         System.out.println(fee);
-        assertEquals(11 + (3000-1024)*1 + (1+3000-10)*3,fee.total());
+        assertEquals(11 + (3000 - 1024) * 1 + (1 + 3000 - 10) * 3, fee.total());
     }
+
     @Test
     void fileGetInfoFee() {
         FeeModel model = FeeModelRegistry.lookupModel(FILE_GET_INFO);
@@ -152,6 +162,6 @@ public class FileTests {
         params.put(Extra.KEYS.name(), 1L);
         FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
         System.out.println(fee);
-        assertEquals(11 + (1+100-10)*3,fee.total());
+        assertEquals(11 + (1 + 100 - 10) * 3, fee.total());
     }
 }
