@@ -35,7 +35,7 @@ public class FeeModelRegistry {
 
     public static FeeModel lookupModel(HederaFunctionality service) {
         if (!registry.containsKey(service)) {
-            throw new Error("No registered model found for service " + service);
+            throw new IllegalArgumentException("No registered model found for service " + service);
         }
         return registry.get(service);
     }
