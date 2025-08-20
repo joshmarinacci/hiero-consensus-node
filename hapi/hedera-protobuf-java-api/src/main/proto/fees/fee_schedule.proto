@@ -1,3 +1,9 @@
+/**
+ * # Fee Schedule
+ * Defines a schedule of fees for every type of transaction, as specified by
+ * HIP-1261. Fee values are always positive integers and specified
+ * as tinycents (10<sup>-10</sup> of USD).
+ */
 syntax = "proto3";
 
 package org.hiero.hapi.support.fees;
@@ -8,6 +14,12 @@ option java_multiple_files = true;
 
 import "services/basic_types.proto";
 
+/**
+ * Fees are looked up from the schedule. The fee schedule must
+ * contain an entry for every supported Hedera transaction type, as well
+ * as settings for the Node fee, Network Fee, and unreadable
+ * transactions.
+ */
 message FeeSchedule {
   NodeFee node_fee = 1;
   NetworkFee network_fee_ratio = 2;
@@ -36,11 +48,11 @@ enum Extra {
 }
 message ExtraFeeDefinition {
   Extra name = 1;
-  // USD in thousandths of one cent
+  // USD in tinycents (10^-10 USD)
   uint64 fee = 2;
 }
 message NodeFee {
-  // USD in thousandths of one cent
+  // USD in tinycents (10^-10 USD)
   uint64 base_fee = 1;
   repeated ExtraFeeReference extras = 2;
 }
@@ -56,15 +68,17 @@ message Service {
 
 message ServiceFee {
   proto.HederaFunctionality name = 1;
-  // USD in thousandths of one cent
+  // USD in tinycents (10^-10 USD)
   uint64 base_fee = 2;
   repeated ExtraFeeReference extras = 3;
 }
 message ExtraFeeReference {
   Extra name = 1;
+  // must be zero or positive
   uint32 includedCount = 2;
 }
 message UnreadableTransactionFee {
+  // USD in tinycents (10^-10 USD)
   uint64 fee_value = 1;
 }
 
