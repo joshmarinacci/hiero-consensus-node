@@ -19,14 +19,10 @@ import org.junit.jupiter.api.Test;
 public class FeeScheduleTest {
 
     @Test
-    void testLoadingFeeScheduleFromJson() {
-        try {
-            final var fin = FeeScheduleTest.class.getClassLoader().getResourceAsStream("simple-fee-schedule.json");
-            final FeeSchedule buf = FeeSchedule.JSON.parse(new ReadableStreamingData(Objects.requireNonNull(fin)));
-            assertTrue(FeeScheduleUtils.validate(buf), "Fee schedule validation failed");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+    void testLoadingFeeScheduleFromJson() throws ParseException {
+        final var fin = FeeScheduleTest.class.getClassLoader().getResourceAsStream("simple-fee-schedule.json");
+        final FeeSchedule buf = FeeSchedule.JSON.parse(new ReadableStreamingData(Objects.requireNonNull(fin)));
+        assertTrue(FeeScheduleUtils.validate(buf), "Fee schedule validation failed");
     }
 
     // extra definitions must have positive values
