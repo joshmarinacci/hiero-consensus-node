@@ -30,7 +30,7 @@ public class FeeScheduleTest {
     void catchNegativeValue() {
         FeeSchedule badSchedule = FeeSchedule.DEFAULT
                 .copyBuilder()
-                .definedExtras(makeExtraDef(Extra.KEYS, -88))
+                .extras(makeExtraDef(Extra.KEYS, -88))
                 .build();
         assertFalse(FeeScheduleUtils.validate(badSchedule), "Fee schedule validation didn't catch negative value");
     }
@@ -40,8 +40,8 @@ public class FeeScheduleTest {
     void catchMissingExtraDef() {
         FeeSchedule badSchedule = FeeSchedule.DEFAULT
                 .copyBuilder()
-                .definedExtras(makeExtraDef(Extra.KEYS, 1))
-                .serviceFees(makeService(
+                .extras(makeExtraDef(Extra.KEYS, 1))
+                .services(makeService(
                         "Consensus",
                         makeServiceFee(
                                 HederaFunctionality.CONSENSUS_CREATE_TOPIC,

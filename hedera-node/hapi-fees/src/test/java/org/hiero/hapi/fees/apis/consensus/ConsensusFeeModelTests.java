@@ -33,18 +33,18 @@ class ConsensusFeeModelTests {
     static void setup() {
         feeSchedule = FeeSchedule.DEFAULT
                 .copyBuilder()
-                .definedExtras(
+                .extras(
                         makeExtraDef(Extra.BYTES, 1),
                         makeExtraDef(Extra.KEYS, 2),
                         makeExtraDef(Extra.SIGNATURES, 3),
                         makeExtraDef(Extra.CUSTOM_FEE, 500))
-                .nodeFee(NodeFee.DEFAULT
+                .node(NodeFee.DEFAULT
                         .copyBuilder()
                         .baseFee(1)
                         .extras(makeExtraIncluded(Extra.BYTES, 10), makeExtraIncluded(Extra.SIGNATURES, 1))
                         .build())
-                .networkFeeRatio(NetworkFee.DEFAULT.copyBuilder().multiplier(2).build())
-                .serviceFees(makeService(
+                .network(NetworkFee.DEFAULT.copyBuilder().multiplier(2).build())
+                .services(makeService(
                         "Consensus",
                         makeServiceFee(CONSENSUS_CREATE_TOPIC, 15, makeExtraIncluded(Extra.KEYS, 1)),
                         makeServiceFee(CONSENSUS_UPDATE_TOPIC, 22, makeExtraIncluded(Extra.KEYS, 1)),
