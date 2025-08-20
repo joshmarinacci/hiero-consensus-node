@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: Apache-2.0
 package org.hiero.hapi.fees;
 
 import com.hedera.hapi.node.base.TimestampSeconds;
