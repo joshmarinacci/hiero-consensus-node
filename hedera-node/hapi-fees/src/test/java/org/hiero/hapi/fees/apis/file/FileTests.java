@@ -35,15 +35,15 @@ public class FileTests {
     static void setup() {
         feeSchedule = FeeSchedule.DEFAULT
                 .copyBuilder()
-                .definedExtras(
+                .extras(
                         makeExtraDef(Extra.SIGNATURES, 1), makeExtraDef(Extra.BYTES, 1), makeExtraDef(Extra.KEYS, 1))
-                .nodeFee(NodeFee.DEFAULT
+                .node(NodeFee.DEFAULT
                         .copyBuilder()
                         .baseFee(1)
                         .extras(makeExtraIncluded(Extra.BYTES, 10), makeExtraIncluded(Extra.SIGNATURES, 1))
                         .build())
-                .networkFeeRatio(NetworkFee.DEFAULT.copyBuilder().multiplier(2).build())
-                .serviceFees(makeService(
+                .network(NetworkFee.DEFAULT.copyBuilder().multiplier(2).build())
+                .services(makeService(
                         "File",
                         makeServiceFee(
                                 FILE_CREATE,

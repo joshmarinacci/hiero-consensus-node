@@ -1,5 +1,5 @@
 {
-  "nodeFee": {
+  "node": {
     "baseFee": 1,
     "extras": [
       {
@@ -7,14 +7,14 @@
       }
     ]
   },
-  "networkFeeRatio": {
+  "network": {
     "multiplier": 2
   },
-  "unreadableTransactionFee": {
+  "unreadable": {
     "feeValue": 100
   },
 
-  "definedExtras": [
+  "extras": [
     { "name":  "Signatures",    "fee":  1 },
     { "name":  "Bytes",         "fee":  1},
     { "name":  "Keys",          "fee":  1},
@@ -32,7 +32,7 @@
     { "name":  "Allowances",                   "fee": 2000 },
     { "name":  "Airdrops",                     "fee": 8800 }
   ],
-  "serviceFees": [
+  "services": [
     {
       "name": "Crypto",
       "transactions": [

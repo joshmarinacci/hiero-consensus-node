@@ -6,8 +6,10 @@ import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.ExtraFeeDefinition;
 import org.hiero.hapi.support.fees.ExtraFeeReference;
 import org.hiero.hapi.support.fees.FeeSchedule;
-import org.hiero.hapi.support.fees.Service;
-import org.hiero.hapi.support.fees.ServiceFee;
+import org.hiero.hapi.support.fees.ServiceFeeDefinition;
+import org.hiero.hapi.support.fees.ServiceFeeSchedule;
+
+import static java.util.Objects.requireNonNull;
 
 public class FeeScheduleUtils {
     public static ExtraFeeDefinition makeExtraDef(Extra extra, long fee) {
@@ -22,8 +24,8 @@ public class FeeScheduleUtils {
                 .build();
     }
 
-    public static ServiceFee makeServiceFee(HederaFunctionality name, long baseFee, ExtraFeeReference... reference) {
-        return ServiceFee.DEFAULT
+    public static ServiceFeeDefinition makeServiceFee(HederaFunctionality name, long baseFee, ExtraFeeReference... reference) {
+        return ServiceFeeDefinition.DEFAULT
                 .copyBuilder()
                 .name(name)
                 .baseFee(baseFee)
@@ -31,12 +33,12 @@ public class FeeScheduleUtils {
                 .build();
     }
 
-    public static Service makeService(String name, ServiceFee... services) {
-        return Service.DEFAULT.copyBuilder().name(name).transactions(services).build();
+    public static ServiceFeeSchedule makeService(String name, ServiceFeeDefinition... services) {
+        return ServiceFeeSchedule.DEFAULT.copyBuilder().name(name).schedule(services).build();
     }
 
     public static ExtraFeeDefinition lookupExtraFee(FeeSchedule feeSchedule, ExtraFeeReference ref) {
-        for (ExtraFeeDefinition def : feeSchedule.definedExtras()) {
+        for (ExtraFeeDefinition def : feeSchedule.extras()) {
             if (def.name().equals(ref.name())) {
                 return def;
             }
@@ -44,11 +46,11 @@ public class FeeScheduleUtils {
         throw new Error("Extra Fee definition not found for " + ref.name());
     }
 
-    public static ServiceFee lookupServiceFee(FeeSchedule feeSchedule, HederaFunctionality api) {
-        for (Service service : feeSchedule.serviceFees()) {
-            for (ServiceFee trans : service.transactions()) {
-                if (trans.name() == api) {
-                    return trans;
+    public static ServiceFeeDefinition lookupServiceFee(FeeSchedule feeSchedule, HederaFunctionality api) {
+        for (ServiceFeeSchedule service : feeSchedule.services()) {
+            for (ServiceFeeDefinition def : service.schedule()) {
+                if (def.name() == api) {
+                    return def;
                 }
             }
         }
@@ -61,8 +63,9 @@ public class FeeScheduleUtils {
      * @param feeSchedule
      */
     public static boolean validate(FeeSchedule feeSchedule) {
-        //        System.out.println("validating " + feeSchedule);
-        for (ExtraFeeDefinition def : feeSchedule.definedExtras()) {
+        requireNonNull(feeSchedule);
+//        System.out.println("validating " + feeSchedule);
+        for (ExtraFeeDefinition def : feeSchedule.extras()) {
             // no negative values or greater than MAX long
             if (def.fee() < 0) {
                 return false;
@@ -73,9 +76,9 @@ public class FeeScheduleUtils {
         }
 
         // all referenced extras are defined
-        for (Service service : feeSchedule.serviceFees()) {
-            for (ServiceFee trans : service.transactions()) {
-                for (ExtraFeeReference ref : trans.extras()) {
+        for (ServiceFeeSchedule service : feeSchedule.services()) {
+            for (ServiceFeeDefinition def : service.schedule()) {
+                for (ExtraFeeReference ref : def.extras()) {
                     try {
                         lookupExtraFee(feeSchedule, ref);
                     } catch (Error e) {
@@ -84,12 +87,19 @@ public class FeeScheduleUtils {
                 }
             }
         }
-        for (ExtraFeeReference ref : feeSchedule.nodeFee().extras()) {
+        // check that the node is valid
+        requireNonNull(feeSchedule.node());
+        for (ExtraFeeReference ref : feeSchedule.node().extras()) {
             try {
                 lookupExtraFee(feeSchedule, ref);
             } catch (Error e) {
                 return false;
             }
+        }
+
+        // check that the services are defined
+        if(feeSchedule.services().size() <= 0) {
+            return false;
         }
         return true;
     }

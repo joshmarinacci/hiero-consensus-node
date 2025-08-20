@@ -11,7 +11,7 @@ import org.hiero.hapi.fees.FeeModel;
 import org.hiero.hapi.fees.FeeResult;
 import org.hiero.hapi.support.fees.ExtraFeeReference;
 import org.hiero.hapi.support.fees.FeeSchedule;
-import org.hiero.hapi.support.fees.ServiceFee;
+import org.hiero.hapi.support.fees.ServiceFeeDefinition;
 
 public class BaseFeeModel implements FeeModel {
     private final HederaFunctionality api;
@@ -40,7 +40,7 @@ public class BaseFeeModel implements FeeModel {
                 1,
                 lookupServiceFee(feeSchedule, this.api).baseFee());
 
-        ServiceFee serviceDef = lookupServiceFee(feeSchedule, this.api);
+        ServiceFeeDefinition serviceDef = lookupServiceFee(feeSchedule, this.api);
         for (ExtraFeeReference ref : serviceDef.extras()) {
             if (!params.containsKey(ref.name().name())) {
                 throw new Error("input params missing " + ref.name() + " required by method " + this.api);
@@ -54,7 +54,7 @@ public class BaseFeeModel implements FeeModel {
             }
         }
 
-        final var nodeFee = feeSchedule.nodeFee();
+        final var nodeFee = feeSchedule.node();
         result.addNodeFee("Node base fee", 1, nodeFee.baseFee());
         long total_node_fee = 0 + nodeFee.baseFee();
         for (ExtraFeeReference ref : nodeFee.extras()) {
@@ -71,7 +71,7 @@ public class BaseFeeModel implements FeeModel {
             }
         }
 
-        int multiplier = feeSchedule.networkFeeRatio().multiplier();
+        int multiplier = feeSchedule.network().multiplier();
         result.addNetworkFee("Total Network fee", multiplier, total_node_fee * multiplier);
 
         return result;
