@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.hapi.fees;
 
+import static java.util.Objects.requireNonNull;
+
 import com.hedera.hapi.node.base.HederaFunctionality;
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.ExtraFeeDefinition;
@@ -8,8 +10,6 @@ import org.hiero.hapi.support.fees.ExtraFeeReference;
 import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.ServiceFeeDefinition;
 import org.hiero.hapi.support.fees.ServiceFeeSchedule;
-
-import static java.util.Objects.requireNonNull;
 
 public class FeeScheduleUtils {
     public static ExtraFeeDefinition makeExtraDef(Extra extra, long fee) {
@@ -24,7 +24,8 @@ public class FeeScheduleUtils {
                 .build();
     }
 
-    public static ServiceFeeDefinition makeServiceFee(HederaFunctionality name, long baseFee, ExtraFeeReference... reference) {
+    public static ServiceFeeDefinition makeServiceFee(
+            HederaFunctionality name, long baseFee, ExtraFeeReference... reference) {
         return ServiceFeeDefinition.DEFAULT
                 .copyBuilder()
                 .name(name)
@@ -34,7 +35,11 @@ public class FeeScheduleUtils {
     }
 
     public static ServiceFeeSchedule makeService(String name, ServiceFeeDefinition... services) {
-        return ServiceFeeSchedule.DEFAULT.copyBuilder().name(name).schedule(services).build();
+        return ServiceFeeSchedule.DEFAULT
+                .copyBuilder()
+                .name(name)
+                .schedule(services)
+                .build();
     }
 
     public static ExtraFeeDefinition lookupExtraFee(FeeSchedule feeSchedule, ExtraFeeReference ref) {
@@ -64,7 +69,7 @@ public class FeeScheduleUtils {
      */
     public static boolean validate(FeeSchedule feeSchedule) {
         requireNonNull(feeSchedule);
-//        System.out.println("validating " + feeSchedule);
+        //        System.out.println("validating " + feeSchedule);
         for (ExtraFeeDefinition def : feeSchedule.extras()) {
             // no negative values or greater than MAX long
             if (def.fee() < 0) {
@@ -98,7 +103,7 @@ public class FeeScheduleUtils {
         }
 
         // check that the services are defined
-        if(feeSchedule.services().size() <= 0) {
+        if (feeSchedule.services().size() <= 0) {
             return false;
         }
         return true;

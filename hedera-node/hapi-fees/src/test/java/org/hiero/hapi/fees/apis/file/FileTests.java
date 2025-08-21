@@ -35,8 +35,7 @@ public class FileTests {
     static void setup() {
         feeSchedule = FeeSchedule.DEFAULT
                 .copyBuilder()
-                .extras(
-                        makeExtraDef(Extra.SIGNATURES, 1), makeExtraDef(Extra.BYTES, 1), makeExtraDef(Extra.KEYS, 1))
+                .extras(makeExtraDef(Extra.SIGNATURES, 1), makeExtraDef(Extra.BYTES, 1), makeExtraDef(Extra.KEYS, 1))
                 .node(NodeFee.DEFAULT
                         .copyBuilder()
                         .baseFee(1)
