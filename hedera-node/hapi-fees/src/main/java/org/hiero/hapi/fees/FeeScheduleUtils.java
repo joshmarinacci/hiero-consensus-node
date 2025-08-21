@@ -48,7 +48,7 @@ public class FeeScheduleUtils {
                 return def;
             }
         }
-        throw new Error("Extra Fee definition not found for " + ref.name());
+        return null;
     }
 
     public static ServiceFeeDefinition lookupServiceFee(FeeSchedule feeSchedule, HederaFunctionality api) {
@@ -59,7 +59,7 @@ public class FeeScheduleUtils {
                 }
             }
         }
-        throw new Error("Service definition not found for " + api.toString());
+        return null;
     }
 
     /**
@@ -84,22 +84,16 @@ public class FeeScheduleUtils {
         for (ServiceFeeSchedule service : feeSchedule.services()) {
             for (ServiceFeeDefinition def : service.schedule()) {
                 for (ExtraFeeReference ref : def.extras()) {
-                    try {
-                        lookupExtraFee(feeSchedule, ref);
-                    } catch (Error e) {
-                        return false;
-                    }
+                    lookupExtraFee(feeSchedule, ref);
                 }
             }
         }
         // check that the node is valid
-        requireNonNull(feeSchedule.node());
+        if (feeSchedule.node() == null) {
+            return false;
+        }
         for (ExtraFeeReference ref : feeSchedule.node().extras()) {
-            try {
-                lookupExtraFee(feeSchedule, ref);
-            } catch (Error e) {
-                return false;
-            }
+            lookupExtraFee(feeSchedule, ref);
         }
 
         // check that the services are defined
