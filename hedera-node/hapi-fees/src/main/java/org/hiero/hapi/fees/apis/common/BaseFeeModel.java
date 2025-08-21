@@ -6,6 +6,7 @@ import static org.hiero.hapi.fees.FeeScheduleUtils.lookupServiceFee;
 
 import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.transaction.ExchangeRate;
+import java.security.InvalidParameterException;
 import java.util.Map;
 import org.hiero.hapi.fees.FeeModel;
 import org.hiero.hapi.fees.FeeResult;
@@ -43,7 +44,8 @@ public class BaseFeeModel implements FeeModel {
         ServiceFeeDefinition serviceDef = lookupServiceFee(feeSchedule, this.api);
         for (ExtraFeeReference ref : serviceDef.extras()) {
             if (!params.containsKey(ref.name().name())) {
-                throw new Error("input params missing " + ref.name() + " required by method " + this.api);
+                throw new InvalidParameterException(
+                        "input params missing " + ref.name() + " required by method " + this.api);
             }
             int included = ref.includedCount();
             long used = (long) params.get(ref.name().name());
@@ -59,7 +61,7 @@ public class BaseFeeModel implements FeeModel {
         long total_node_fee = 0 + nodeFee.baseFee();
         for (ExtraFeeReference ref : nodeFee.extras()) {
             if (!params.containsKey(ref.name().name())) {
-                throw new Error("input params missing " + ref.name() + " required by node fee ");
+                throw new InvalidParameterException("input params missing " + ref.name() + " required by node fee ");
             }
             int included = ref.includedCount();
             long used = (long) params.get(ref.name().name());
