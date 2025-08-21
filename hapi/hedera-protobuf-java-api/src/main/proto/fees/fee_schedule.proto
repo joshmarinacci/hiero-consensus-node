@@ -204,7 +204,7 @@ message ExtraFeeReference {
    * may be included for free. Each byte above 256 would be charged the fee defined
    * on the "Bytes" extra.
    */
-  uint32 includedCount = 2;
+  uint32 included_count = 2;
 }
 
 /**
