@@ -14,6 +14,7 @@ import com.hedera.pbj.runtime.io.stream.ReadableStreamingData;
 import java.util.Objects;
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
+import org.hiero.hapi.support.fees.NodeFee;
 import org.junit.jupiter.api.Test;
 
 public class FeeScheduleTest {
@@ -74,4 +75,42 @@ public class FeeScheduleTest {
                 FeeScheduleUtils.validate(badSchedule),
                 "Fee schedule validation failed to find the missing extras def");
     }
+
+    @Test
+    void catchMissingNodeNetworkFees() {
+        FeeSchedule missingNode = FeeSchedule.DEFAULT
+                .copyBuilder()
+                .build();
+        assertFalse(FeeScheduleUtils.validateNodeFee(missingNode));
+
+        FeeSchedule missingMultiplier = FeeSchedule.DEFAULT
+                .copyBuilder()
+                .node(NodeFee.DEFAULT.copyBuilder().baseFee(55).build())
+                .build();
+        assertFalse(FeeScheduleUtils.validateNodeFee(missingMultiplier));
+    }
+
+    @Test
+    void catchDuplicateServices() {
+        FeeSchedule nonDuplicateServices = FeeSchedule.DEFAULT.copyBuilder()
+                .services(
+                        makeService("foo",makeServiceFee(HederaFunctionality.CONSENSUS_CREATE_TOPIC,22)),
+                        makeService("bar",makeServiceFee(HederaFunctionality.CONSENSUS_DELETE_TOPIC,22))
+                ).build();
+        assertTrue(FeeScheduleUtils.validateServiceNames(nonDuplicateServices));
+        FeeSchedule duplicateServices = FeeSchedule.DEFAULT.copyBuilder()
+                .services(
+                        makeService("foo",makeServiceFee(HederaFunctionality.CONSENSUS_CREATE_TOPIC,22)),
+                        makeService("foo",makeServiceFee(HederaFunctionality.CONSENSUS_DELETE_TOPIC,22))
+                ).build();
+        assertFalse(FeeScheduleUtils.validateServiceNames(duplicateServices));
+
+        FeeSchedule duplicateServiceNames = FeeSchedule.DEFAULT.copyBuilder()
+                .services(
+                        makeService("foo",makeServiceFee(HederaFunctionality.CONSENSUS_CREATE_TOPIC,22)),
+                        makeService("bar",makeServiceFee(HederaFunctionality.CONSENSUS_CREATE_TOPIC,22))
+                ).build();
+        assertFalse(FeeScheduleUtils.validateServiceNames(duplicateServiceNames));
+    }
+
 }

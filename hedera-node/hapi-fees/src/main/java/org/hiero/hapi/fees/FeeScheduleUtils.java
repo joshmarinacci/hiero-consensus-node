@@ -11,6 +11,9 @@ import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.ServiceFeeDefinition;
 import org.hiero.hapi.support.fees.ServiceFeeSchedule;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class FeeScheduleUtils {
     public static ExtraFeeDefinition makeExtraDef(Extra extra, long fee) {
         return ExtraFeeDefinition.newBuilder().name(extra).fee(fee).build();
@@ -115,6 +118,43 @@ public class FeeScheduleUtils {
             } else {
                 System.err.println("FeeSchedule extra  " + extra.name() + " not defined");
                 return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean validateNodeFee(FeeSchedule fees) {
+        System.out.println("checking " + fees);
+        if(!fees.hasNode()) {
+            System.err.println("FeeSchedule missing node definition");
+            return false;
+        }
+        if(!fees.hasNetwork()) {
+            System.err.println("FeeSchedule missing network definition");
+            return false;
+        }
+        if(fees.network().multiplier() <= 0) {
+            System.err.println("FeeSchedule missing has non-positive multiplier " + fees.network().multiplier());
+            return false;
+        }
+        return false;
+    }
+
+    public static boolean validateServiceNames(FeeSchedule fees) {
+        Set<String> serviceNames = new HashSet<>();
+        Set<HederaFunctionality> scheduleNames = new HashSet<>();
+        for(var service : fees.services()) {
+            if(serviceNames.contains(service.name())) {
+                System.err.println("FeeSchedule has duplicate service name " + service.name());
+                return false;
+            }
+            serviceNames.add(service.name());
+            for(var sch : service.schedule()) {
+                if(scheduleNames.contains(sch.name())) {
+                    System.err.println("FeeSchedule has duplicate schedule name " + sch.name());
+                    return false;
+                }
+                scheduleNames.add(sch.name());
             }
         }
         return true;
