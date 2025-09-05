@@ -16,6 +16,7 @@ import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.NodeFee;
 import org.hiero.hapi.support.fees.ServiceFeeDefinition;
+import org.hiero.hapi.support.fees.UnreadableTransactionFee;
 import org.junit.jupiter.api.Test;
 
 public class FeeScheduleTest {
@@ -140,6 +141,16 @@ public class FeeScheduleTest {
                                         .free(false).build())
                 ).build();
         assertTrue(FeeScheduleUtils.validateServiceScheduleFees(withOneExtra));
+    }
+
+    @Test
+    void checkMissingUnreadable() {
+        FeeSchedule hasUnreadable = FeeSchedule.DEFAULT.copyBuilder()
+                .unreadable(UnreadableTransactionFee.DEFAULT.copyBuilder().fee(10).build()).build();
+        assertTrue(FeeScheduleUtils.validateUnreadableFees(hasUnreadable));
+        FeeSchedule missingUnreadable = FeeSchedule.DEFAULT.copyBuilder()
+                .build();
+        assertFalse(FeeScheduleUtils.validateUnreadableFees(missingUnreadable));
     }
 
 }

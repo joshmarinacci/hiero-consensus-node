@@ -174,4 +174,16 @@ public class FeeScheduleUtils {
         }
         return true;
     }
+
+    public static boolean validateUnreadableFees(FeeSchedule fees) {
+        if (!fees.hasUnreadable()) {
+            System.err.println("FeeSchedule missing unreadable fee ");
+            return false;
+        }
+        if(fees.unreadable().fee() <= 0) {
+            System.err.println("FeeSchedule unreadable fee must be positive" + fees.unreadable().fee());
+            return false;
+        }
+        return true;
+    }
 }
