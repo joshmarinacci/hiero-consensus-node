@@ -15,6 +15,7 @@ import java.util.Objects;
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.NodeFee;
+import org.hiero.hapi.support.fees.ServiceFeeDefinition;
 import org.junit.jupiter.api.Test;
 
 public class FeeScheduleTest {
@@ -111,6 +112,34 @@ public class FeeScheduleTest {
                         makeService("bar",makeServiceFee(HederaFunctionality.CONSENSUS_CREATE_TOPIC,22))
                 ).build();
         assertFalse(FeeScheduleUtils.validateServiceNames(duplicateServiceNames));
+    }
+
+    @Test
+    void checkInvalidServiceDef() {
+        FeeSchedule noFees = FeeSchedule.DEFAULT.copyBuilder()
+                .services(
+                        makeService("foo",
+                                ServiceFeeDefinition.DEFAULT
+                                        .copyBuilder()
+                                        .name(HederaFunctionality.CONSENSUS_CREATE_TOPIC)
+                                        .baseFee(0)
+                                        .extras()
+                                        .free(false).build())
+                ).build();
+        assertFalse(FeeScheduleUtils.validateServiceScheduleFees(noFees));
+        FeeSchedule withOneExtra = FeeSchedule.DEFAULT.copyBuilder()
+                .services(
+                        makeService("foo",
+                                ServiceFeeDefinition.DEFAULT
+                                        .copyBuilder()
+                                        .name(HederaFunctionality.CONSENSUS_CREATE_TOPIC)
+                                        .baseFee(0)
+                                        .extras(
+                                            makeExtraIncluded(Extra.KEYS, 1)
+                                        )
+                                        .free(false).build())
+                ).build();
+        assertTrue(FeeScheduleUtils.validateServiceScheduleFees(withOneExtra));
     }
 
 }

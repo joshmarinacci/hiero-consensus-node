@@ -159,4 +159,19 @@ public class FeeScheduleUtils {
         }
         return true;
     }
+
+    public static boolean validateServiceScheduleFees(FeeSchedule fees) {
+        for(var service : fees.services()) {
+            for(var sch : service.schedule()) {
+                boolean base_fee_zero = sch.baseFee() <= 0;
+                boolean zero_extras = sch.extras().size() <= 0;
+                boolean not_free = sch.free() != true;
+                if (base_fee_zero && zero_extras && not_free) {
+                    System.err.print("FeeSchedule must have either a non-zero base fee, at least one extra, or be marked free");
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
