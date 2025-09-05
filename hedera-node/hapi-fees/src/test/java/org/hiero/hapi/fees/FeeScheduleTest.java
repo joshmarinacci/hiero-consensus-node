@@ -35,6 +35,27 @@ public class FeeScheduleTest {
         assertFalse(FeeScheduleUtils.validate(badSchedule), "Fee schedule validation didn't catch negative value");
     }
 
+    @Test
+    void checkAllExtrasDefined() {
+        // should fail because only one of the extras in the Enum is defined
+        FeeSchedule missingExtras = FeeSchedule.DEFAULT
+                .copyBuilder()
+                .extras(
+                        makeExtraDef(Extra.SIGNATURES, 1)
+                        ,makeExtraDef(Extra.KEYS, 1)
+                )
+                .build();
+        assertFalse(FeeScheduleUtils.validateAllExtrasDefined(missingExtras), "Fee schedule validation failed");
+
+        FeeSchedule zeroFee = FeeSchedule.DEFAULT
+                .copyBuilder()
+                .extras(
+                        makeExtraDef(Extra.SIGNATURES, 0)
+                )
+                .build();
+        assertFalse(FeeScheduleUtils.validateAllExtrasDefined(zeroFee), "Fee schedule validation failed");
+    }
+
     // all referenced extras must exist in the defined extras
     @Test
     void catchMissingExtraDef() {

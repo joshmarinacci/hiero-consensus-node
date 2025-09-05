@@ -102,4 +102,21 @@ public class FeeScheduleUtils {
         }
         return true;
     }
+
+    public static boolean validateAllExtrasDefined(FeeSchedule fees) {
+        for(var extra :Extra.values()) {
+            var opt = fees.extras().stream().filter(e -> e.name().equals(extra)).findFirst();
+            if (opt.isPresent()) {
+                ExtraFeeDefinition ext = opt.get();
+                if (ext.fee() <= 0) {
+                    System.err.println("extra  " + extra.name() + " must have a non-zero fee: " + ext.fee());
+                    return false;
+                }
+            } else {
+                System.err.println("FeeSchedule extra  " + extra.name() + " not defined");
+                return false;
+            }
+        }
+        return true;
+    }
 }
