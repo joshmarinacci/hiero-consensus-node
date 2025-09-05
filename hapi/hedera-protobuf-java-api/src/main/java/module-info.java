@@ -16,7 +16,6 @@ module com.hedera.protobuf.java.api {
     exports com.hedera.services.stream.proto;
     exports com.hederahashgraph.api.proto.java;
     exports com.hederahashgraph.service.proto.java;
-    exports org.hiero.hapi.support.fees;
 
     requires transitive com.google.common;
     requires transitive com.google.protobuf;
