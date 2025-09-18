@@ -91,7 +91,7 @@ public class FileTests {
         params.put(Extra.BYTES.name(), 500L);
         params.put(Extra.KEYS.name(), 1L);
         assertTrue(validate(feeSchedule), "Fee schedule failed validation");
-        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        FeeResult fee = model.computeFee(params, feeSchedule);
         assertEquals(11 + 0 + (1 + 500 - 10) * 3, fee.total());
     }
 
@@ -102,7 +102,7 @@ public class FileTests {
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.BYTES.name(), 2000L);
         params.put(Extra.KEYS.name(), 1L);
-        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        FeeResult fee = model.computeFee(params, feeSchedule);
         assertEquals(11 + (2000 - 1024) * 1 + (1 + 2000 - 10) * 3, fee.total());
     }
 
@@ -114,7 +114,7 @@ public class FileTests {
         params.put(Extra.BYTES.name(), 500L);
         params.put(Extra.KEYS.name(), 1L);
         assertTrue(validate(feeSchedule), "Fee schedule failed validation");
-        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        FeeResult fee = model.computeFee(params, feeSchedule);
         assertEquals(11 + 0 + (1 + 500 - 10) * 3, fee.total());
     }
 
@@ -125,7 +125,7 @@ public class FileTests {
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.BYTES.name(), 100L);
         params.put(Extra.KEYS.name(), 1L);
-        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        FeeResult fee = model.computeFee(params, feeSchedule);
         assertEquals(11 + 0 + (1 + 100 - 10) * 3, fee.total());
     }
 
@@ -136,7 +136,7 @@ public class FileTests {
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.BYTES.name(), 3000L);
         params.put(Extra.KEYS.name(), 1L);
-        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        FeeResult fee = model.computeFee(params, feeSchedule);
         assertEquals(11 + (3000 - 1024) * 1 + (1 + 3000 - 10) * 3, fee.total());
     }
 
@@ -147,7 +147,7 @@ public class FileTests {
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.BYTES.name(), 3000L);
         params.put(Extra.KEYS.name(), 1L);
-        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        FeeResult fee = model.computeFee(params, feeSchedule);
         System.out.println(fee);
         assertEquals(11 + (3000 - 1024) * 1 + (1 + 3000 - 10) * 3, fee.total());
     }
@@ -159,7 +159,7 @@ public class FileTests {
         params.put(Extra.SIGNATURES.name(), 1L);
         params.put(Extra.BYTES.name(), 100L);
         params.put(Extra.KEYS.name(), 1L);
-        FeeResult fee = model.computeFee(params, new MockExchangeRate().activeRate(), feeSchedule);
+        FeeResult fee = model.computeFee(params, feeSchedule);
         System.out.println(fee);
         assertEquals(11 + (1 + 100 - 10) * 3, fee.total());
     }
