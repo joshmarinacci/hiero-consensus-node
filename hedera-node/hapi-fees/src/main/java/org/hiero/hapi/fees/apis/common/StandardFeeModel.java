@@ -19,7 +19,6 @@ public class StandardFeeModel extends AbstractBaseFeeModel {
         super(api, description);
     }
 
-
     @Override
     public FeeResult computeFee(Map<Extra, Object> params, FeeSchedule feeSchedule) {
         var result = this.computeNodeAndNetworkFees(params, feeSchedule);

@@ -3,7 +3,6 @@ package org.hiero.hapi.fees;
 
 import com.hedera.hapi.node.base.HederaFunctionality;
 import java.util.Map;
-
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
 

@@ -82,5 +82,4 @@ public class FeeResult {
             return a > 0 ? Long.MAX_VALUE : Long.MIN_VALUE;
         }
     }
-
 }
