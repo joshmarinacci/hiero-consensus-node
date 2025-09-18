@@ -62,11 +62,11 @@ class ConsensusFeeModelTests {
     @Test
     void createTopicWithExtraKeys() {
         FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_CREATE_TOPIC);
-        Map<String, Object> params = new HashMap<>();
-        params.put(Extra.SIGNATURES.name(), 1L);
-        params.put(Extra.KEYS.name(), 5L);
-        params.put(Extra.BYTES.name(), 20L);
-        //        params.put(Params.HasCustomFee.name(), YesOrNo.NO);
+        Map<Extra, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES, 1L);
+        params.put(Extra.KEYS, 5L);
+        params.put(Extra.BYTES, 20L);
+        //        params.put(Params.HasCustomFee, YesOrNo.NO);
 
         assertTrue(validate(feeSchedule), "Fee schedule failed validation");
         FeeResult fee = model.computeFee(params, feeSchedule);
@@ -87,10 +87,10 @@ class ConsensusFeeModelTests {
     @Test
     void updateTopic() {
         FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_UPDATE_TOPIC);
-        Map<String, Object> params = new HashMap<>();
-        params.put(Extra.SIGNATURES.name(), 1L);
-        params.put(Extra.KEYS.name(), 1L);
-        params.put(Extra.BYTES.name(), 10L);
+        Map<Extra, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES, 1L);
+        params.put(Extra.KEYS, 1L);
+        params.put(Extra.BYTES, 10L);
         FeeResult fee = model.computeFee(params, feeSchedule);
         assertEquals(22 + 3, fee.total());
     }
@@ -98,11 +98,11 @@ class ConsensusFeeModelTests {
     @Test
     void submitMessage() {
         FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_SUBMIT_MESSAGE);
-        Map<String, Object> params = new HashMap<>();
-        params.put(Extra.SIGNATURES.name(), 1L);
-        params.put(Extra.KEYS.name(), 1L);
-        params.put(Extra.BYTES.name(), 100L);
-        params.put(Extra.CUSTOM_FEE.name(), 0L);
+        Map<Extra, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES, 1L);
+        params.put(Extra.KEYS, 1L);
+        params.put(Extra.BYTES, 100L);
+        params.put(Extra.CUSTOM_FEE, 0L);
         FeeResult fee = model.computeFee(params, feeSchedule);
         // base fee for submit = 33
         // node + network = (90+1)*3
@@ -112,11 +112,11 @@ class ConsensusFeeModelTests {
     @Test
     void submitMessageWithExtraBytes() {
         FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_SUBMIT_MESSAGE);
-        Map<String, Object> params = new HashMap<>();
-        params.put(Extra.SIGNATURES.name(), 1L);
-        params.put(Extra.KEYS.name(), 1L);
-        params.put(Extra.BYTES.name(), 500L);
-        params.put(Extra.CUSTOM_FEE.name(), 0L);
+        Map<Extra, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES, 1L);
+        params.put(Extra.KEYS, 1L);
+        params.put(Extra.BYTES, 500L);
+        params.put(Extra.CUSTOM_FEE, 0L);
         FeeResult fee = model.computeFee(params, feeSchedule);
         // base fee for submit = 33
         // extra bytes = (500-100)*1 = 400
@@ -127,11 +127,11 @@ class ConsensusFeeModelTests {
     @Test
     void submitMessageWithCustomFee() {
         FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_SUBMIT_MESSAGE);
-        Map<String, Object> params = new HashMap<>();
-        params.put(Extra.SIGNATURES.name(), 1L);
-        params.put(Extra.KEYS.name(), 1L);
-        params.put(Extra.BYTES.name(), 10L);
-        params.put(Extra.CUSTOM_FEE.name(), 1L);
+        Map<Extra, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES, 1L);
+        params.put(Extra.KEYS, 1L);
+        params.put(Extra.BYTES, 10L);
+        params.put(Extra.CUSTOM_FEE, 1L);
         FeeResult fee = model.computeFee(params, feeSchedule);
         // base fee for submit = 33
         // custom fee surcharge = 500
@@ -142,10 +142,10 @@ class ConsensusFeeModelTests {
     @Test
     void deleteTopic() {
         FeeModel model = FeeModelRegistry.lookupModel(CONSENSUS_DELETE_TOPIC);
-        Map<String, Object> params = new HashMap<>();
-        params.put(Extra.SIGNATURES.name(), 1L);
-        params.put(Extra.KEYS.name(), 1L);
-        params.put(Extra.BYTES.name(), 1L);
+        Map<Extra, Object> params = new HashMap<>();
+        params.put(Extra.SIGNATURES, 1L);
+        params.put(Extra.KEYS, 1L);
+        params.put(Extra.BYTES, 1L);
         FeeResult fee = model.computeFee(params, feeSchedule);
         // base fee for submit = 10
         // node + network = (1)*3

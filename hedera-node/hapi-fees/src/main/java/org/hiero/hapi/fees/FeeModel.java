@@ -2,8 +2,9 @@
 package org.hiero.hapi.fees;
 
 import com.hedera.hapi.node.base.HederaFunctionality;
-import com.hedera.hapi.node.transaction.ExchangeRate;
 import java.util.Map;
+
+import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
 
 /**
@@ -20,5 +21,5 @@ public interface FeeModel {
     String getDescription();
 
     /** Compute the fee for a specific transaction. */
-    FeeResult computeFee(Map<String, Object> params, FeeSchedule feeSchedule);
+    FeeResult computeFee(Map<Extra, Object> params, FeeSchedule feeSchedule);
 }
