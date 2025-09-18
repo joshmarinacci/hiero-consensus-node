@@ -8,6 +8,7 @@ import java.security.InvalidParameterException;
 import java.util.Map;
 import org.hiero.hapi.fees.FeeModel;
 import org.hiero.hapi.fees.FeeResult;
+import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.ExtraFeeReference;
 import org.hiero.hapi.support.fees.FeeSchedule;
 
@@ -31,16 +32,16 @@ public abstract class AbstractBaseFeeModel implements FeeModel {
     }
 
 
-    protected  FeeResult computeNodeAndNetworkFees(Map<String, Object> params, FeeSchedule feeSchedule) {
+    protected  FeeResult computeNodeAndNetworkFees(Map<Extra, Object> params, FeeSchedule feeSchedule) {
         var result = new FeeResult();
         final var nodeFee = feeSchedule.node();
         result.addNodeFee("Node base fee", 1, nodeFee.baseFee());
         for (ExtraFeeReference ref : nodeFee.extras()) {
-            if (!params.containsKey(ref.name().name())) {
+            if (!params.containsKey(ref.name())) {
                 throw new InvalidParameterException("input params missing " + ref.name() + " required by node fee ");
             }
             int included = ref.includedCount();
-            long used = (long) params.get(ref.name().name());
+            long used = (long) params.get(ref.name());
             long extraFee = lookupExtraFee(feeSchedule, ref).fee();
             if (used > included) {
                 final long overage = used - included;
