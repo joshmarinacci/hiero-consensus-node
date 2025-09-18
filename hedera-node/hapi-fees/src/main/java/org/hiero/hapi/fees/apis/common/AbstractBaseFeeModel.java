@@ -35,7 +35,6 @@ public abstract class AbstractBaseFeeModel implements FeeModel {
         var result = new FeeResult();
         final var nodeFee = feeSchedule.node();
         result.addNodeFee("Node base fee", 1, nodeFee.baseFee());
-        long total_node_fee = 0 + nodeFee.baseFee();
         for (ExtraFeeReference ref : nodeFee.extras()) {
             if (!params.containsKey(ref.name().name())) {
                 throw new InvalidParameterException("input params missing " + ref.name() + " required by node fee ");
@@ -46,12 +45,11 @@ public abstract class AbstractBaseFeeModel implements FeeModel {
             if (used > included) {
                 final long overage = used - included;
                 result.addNodeFee("Node Overage of " + ref.name().name(), overage, overage * extraFee);
-                total_node_fee += overage * extraFee;
             }
         }
 
         int multiplier = feeSchedule.network().multiplier();
-        result.addNetworkFee("Total Network fee", multiplier, total_node_fee * multiplier);
+        result.addNetworkFee("Total Network fee", multiplier, result.node * multiplier);
         return result;
     }
 }
