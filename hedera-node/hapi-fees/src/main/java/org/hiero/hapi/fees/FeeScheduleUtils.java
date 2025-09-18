@@ -11,11 +11,17 @@ import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.ServiceFeeDefinition;
 import org.hiero.hapi.support.fees.ServiceFeeSchedule;
 
+/**
+ * Static utility functions to make it easier to create and access
+ * the Fee Schedule protobuf objects.
+ */
 public class FeeScheduleUtils {
+    /** Create an Extra definition. */
     public static ExtraFeeDefinition makeExtraDef(Extra extra, long fee) {
         return ExtraFeeDefinition.newBuilder().name(extra).fee(fee).build();
     }
 
+    /** Create an Extra Included definition for a service */
     public static ExtraFeeReference makeExtraIncluded(Extra extra, int included) {
         return ExtraFeeReference.DEFAULT
                 .copyBuilder()
@@ -24,6 +30,7 @@ public class FeeScheduleUtils {
                 .build();
     }
 
+    /** Create a service fee for a specific Hedera service */
     public static ServiceFeeDefinition makeServiceFee(
             HederaFunctionality name, long baseFee, ExtraFeeReference... reference) {
         return ServiceFeeDefinition.DEFAULT
@@ -34,6 +41,7 @@ public class FeeScheduleUtils {
                 .build();
     }
 
+    /** create a Service definition composed of Service Fees */
     public static ServiceFeeSchedule makeService(String name, ServiceFeeDefinition... services) {
         return ServiceFeeSchedule.DEFAULT
                 .copyBuilder()
@@ -42,6 +50,7 @@ public class FeeScheduleUtils {
                 .build();
     }
 
+    /** Look up the extra fee definition from a fee schedule */
     public static ExtraFeeDefinition lookupExtraFee(FeeSchedule feeSchedule, ExtraFeeReference ref) {
         for (ExtraFeeDefinition def : feeSchedule.extras()) {
             if (def.name().equals(ref.name())) {
@@ -51,6 +60,7 @@ public class FeeScheduleUtils {
         return null;
     }
 
+    /** Lookup a service fee */
     public static ServiceFeeDefinition lookupServiceFee(FeeSchedule feeSchedule, HederaFunctionality api) {
         for (ServiceFeeSchedule service : feeSchedule.services()) {
             for (ServiceFeeDefinition def : service.schedule()) {
@@ -63,8 +73,10 @@ public class FeeScheduleUtils {
     }
 
     /**
-     * Validate the fee schedule. There must be
-     * no
+     * Validate the fee schedule. There must be negative fees and no fees
+     * bigger than Long.MAX_VALUE. All extras used by a service must
+     * be defined. The Node fee must be defined. There must be at least
+     * one service defined.
      * @param feeSchedule
      */
     public static boolean validate(FeeSchedule feeSchedule) {
