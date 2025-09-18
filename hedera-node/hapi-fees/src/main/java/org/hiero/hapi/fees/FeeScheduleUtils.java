@@ -81,7 +81,6 @@ public class FeeScheduleUtils {
      */
     public static boolean validate(FeeSchedule feeSchedule) {
         requireNonNull(feeSchedule);
-        //        System.out.println("validating " + feeSchedule);
         for (ExtraFeeDefinition def : feeSchedule.extras()) {
             // no negative values or greater than MAX long
             if (def.fee() < 0) {
