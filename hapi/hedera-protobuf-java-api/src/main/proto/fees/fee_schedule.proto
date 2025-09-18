@@ -23,7 +23,7 @@ message FeeSchedule {
   /**
     * Defines how to compute the <i>node fee component</i>.
     *
-    * <p>The node **fee component describes the fee to be paid to the node that
+    * <p>The node fee component describes the fee to be paid to the node that
     * submitted the transaction to the network. This fee exists to compensate
     * the node for the work it performed to pre-check the transaction before
     * submitting it, and incentivizes the node to open ports to the world to
