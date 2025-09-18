@@ -20,7 +20,6 @@ import java.util.Map;
 import org.hiero.hapi.fees.FeeModel;
 import org.hiero.hapi.fees.FeeModelRegistry;
 import org.hiero.hapi.fees.FeeResult;
-import org.hiero.hapi.fees.MockExchangeRate;
 import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.NetworkFee;
