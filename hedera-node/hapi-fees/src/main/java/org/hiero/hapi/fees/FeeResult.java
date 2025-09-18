@@ -26,7 +26,7 @@ public class FeeResult {
      * */
     public void addServiceFee(String label, long count, long cost) {
         details.put(label, new FeeDetail(count, cost));
-        service += cost;
+        service = clampedAdd(service, cost);
     }
 
     /** Add a node fee with details.
@@ -36,7 +36,7 @@ public class FeeResult {
      * */
     public void addNodeFee(String label, long count, long cost) {
         details.put(label, new FeeDetail(count, cost));
-        node += cost;
+        node = clampedAdd(node, cost);
     }
 
     /** Add a network fee with details.
@@ -46,12 +46,12 @@ public class FeeResult {
      * */
     public void addNetworkFee(String label, long count, long cost) {
         details.put(label, new FeeDetail(count, cost));
-        network += cost;
+        network = clampedAdd(network, cost);
     }
 
     /** the total fee in tinycents. */
     public long total() {
-        return this.node + this.network + this.service;
+        return clampedAdd(clampedAdd(this.node, this.network), this.service);
     }
 
     /** Utility class representing the details of a particular fee component. */
@@ -74,4 +74,13 @@ public class FeeResult {
     public String toString() {
         return "FeeResult{" + "fee=" + service + ", details=" + details + '}';
     }
+
+    private static long clampedAdd(final long a, final long b) {
+        try {
+            return Math.addExact(a, b);
+        } catch (final ArithmeticException ae) {
+            return a > 0 ? Long.MAX_VALUE : Long.MIN_VALUE;
+        }
+    }
+
 }
