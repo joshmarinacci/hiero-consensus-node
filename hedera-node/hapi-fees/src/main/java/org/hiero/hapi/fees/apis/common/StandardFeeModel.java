@@ -8,6 +8,7 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import java.security.InvalidParameterException;
 import java.util.Map;
 import org.hiero.hapi.fees.FeeResult;
+import org.hiero.hapi.support.fees.Extra;
 import org.hiero.hapi.support.fees.ExtraFeeReference;
 import org.hiero.hapi.support.fees.FeeSchedule;
 import org.hiero.hapi.support.fees.ServiceFeeDefinition;
@@ -20,7 +21,7 @@ public class StandardFeeModel extends AbstractBaseFeeModel {
 
 
     @Override
-    public FeeResult computeFee(Map<String, Object> params, FeeSchedule feeSchedule) {
+    public FeeResult computeFee(Map<Extra, Object> params, FeeSchedule feeSchedule) {
         var result = this.computeNodeAndNetworkFees(params, feeSchedule);
         result.addServiceFee(
                 "Base Fee for " + this.getApi(),
@@ -29,12 +30,12 @@ public class StandardFeeModel extends AbstractBaseFeeModel {
 
         ServiceFeeDefinition serviceDef = lookupServiceFee(feeSchedule, this.getApi());
         for (ExtraFeeReference ref : serviceDef.extras()) {
-            if (!params.containsKey(ref.name().name())) {
+            if (!params.containsKey(ref.name())) {
                 throw new InvalidParameterException(
                         "input params missing " + ref.name() + " required by method " + this.getApi());
             }
             int included = ref.includedCount();
-            long used = (long) params.get(ref.name().name());
+            long used = (long) params.get(ref.name());
             long extraFee = lookupExtraFee(feeSchedule, ref).fee();
             if (used > included) {
                 final long overage = used - included;
