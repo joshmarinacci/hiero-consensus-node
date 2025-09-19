@@ -42,12 +42,18 @@ import com.hedera.node.app.spi.workflows.PreCheckException;
 import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.TopicsConfig;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.fees.FeeModelRegistry;
+import org.hiero.hapi.support.fees.Extra;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class contains all workflow-related functionality regarding {@link HederaFunctionality#CONSENSUS_CREATE_TOPIC}.
@@ -221,6 +227,19 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
         final var hasCustomFees =
                 !body.consensusCreateTopicOrThrow().customFees().isEmpty();
         final var subType = hasCustomFees ? SubType.TOPIC_CREATE_WITH_CUSTOM_FEES : SubType.DEFAULT;
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            final var entity = FeeModelRegistry.lookupModel(HederaFunctionality.CONSENSUS_CREATE_TOPIC);
+            Map<Extra, Object> params = new HashMap<>();
+            params.put(Extra.BYTES, (long)feeContext.body().protobufSize() );
+            params.put(Extra.SIGNATURES, (long) feeContext.numTxnSignatures());
+            params.put(Extra.KEYS, 0L);
+            params.put(Extra.CUSTOM_FEE, false);
+            if(hasCustomFees){
+                params.put(Extra.CUSTOM_FEE, true);
+            }
+            final var feeResult = entity.computeFee(params, feeContext.feeCalculatorFactory().feeCalculator(subType).getSimpleFeesSchedule());
+            return new Fees(feeResult.node, feeResult.network, feeResult.service);
+        }
 
         return feeContext
                 .feeCalculatorFactory()

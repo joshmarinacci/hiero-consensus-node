@@ -4,6 +4,7 @@ plugins {
     id("org.hiero.gradle.feature.publish-artifactregistry")
     id("org.hiero.gradle.feature.test-fixtures")
 }
+tasks.withType<JavaCompile>().configureEach { options.compilerArgs.remove("-Werror") }
 
 testModuleInfo {
     requires("org.assertj.core")

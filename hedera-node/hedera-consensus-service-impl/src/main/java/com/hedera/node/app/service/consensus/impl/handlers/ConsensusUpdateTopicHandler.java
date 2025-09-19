@@ -54,6 +54,7 @@ import com.hedera.node.app.spi.workflows.PreCheckException;
 import com.hedera.node.app.spi.workflows.PreHandleContext;
 import com.hedera.node.app.spi.workflows.PureChecksContext;
 import com.hedera.node.app.spi.workflows.TransactionHandler;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.TopicsConfig;
 import com.hederahashgraph.api.proto.java.FeeData;
 import com.hederahashgraph.api.proto.java.Timestamp;
@@ -63,6 +64,11 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hiero.hapi.fees.FeeModelRegistry;
+import org.hiero.hapi.support.fees.Extra;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class contains all workflow-related functionality regarding {@link HederaFunctionality#CONSENSUS_UPDATE_TOPIC}.
@@ -192,6 +198,16 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
         requireNonNull(feeContext);
+        if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
+            final var entity = FeeModelRegistry.lookupModel(HederaFunctionality.CONSENSUS_UPDATE_TOPIC);
+            Map<Extra, Object> params = new HashMap<>();
+            params.put(Extra.BYTES, (long)feeContext.body().protobufSize() );
+            params.put(Extra.SIGNATURES, (long) feeContext.numTxnSignatures());
+            params.put(Extra.KEYS,0L);
+            final var feeResult = entity.computeFee(params, feeContext.feeCalculatorFactory().feeCalculator(SubType.DEFAULT).getSimpleFeesSchedule());
+            return new Fees(feeResult.node, feeResult.network, feeResult.service);
+        }
+
         final var op = feeContext.body();
         final var topicUpdate = op.consensusUpdateTopicOrElse(ConsensusUpdateTopicTransactionBody.DEFAULT);
         final var topicId = topicUpdate.topicIDOrElse(TopicID.DEFAULT);
