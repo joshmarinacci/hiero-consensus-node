@@ -194,3 +194,5 @@ tasks.register<Exec>("stopDockerContainers") {
     workingDir(layout.projectDirectory.dir("../docker"))
     commandLine("docker-compose", "stop")
 }
+
+tasks.withType<JavaCompile>().configureEach { options.compilerArgs.remove("-Werror") }

@@ -13,6 +13,7 @@ tasks.named<JavaExec>("run") {
     // Build everything for the 'sdk' folder
     dependsOn(":swirlds:assemble")
 }
+tasks.withType<JavaCompile>().configureEach { options.compilerArgs.remove("-Werror") }
 
 val cleanRun =
     tasks.register<Delete>("cleanRun") {

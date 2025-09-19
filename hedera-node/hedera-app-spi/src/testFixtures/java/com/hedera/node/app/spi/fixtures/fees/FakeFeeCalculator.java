@@ -6,6 +6,8 @@ import com.hedera.node.app.spi.fees.FeeCalculator;
 import com.hedera.node.app.spi.fees.Fees;
 import com.hederahashgraph.api.proto.java.FeeData;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.hiero.hapi.support.fees.FeeSchedule;
+
 import java.util.function.Function;
 
 public class FakeFeeCalculator implements FeeCalculator {
@@ -64,5 +66,10 @@ public class FakeFeeCalculator implements FeeCalculator {
     @NonNull
     public FakeFeeCalculator resetUsage() {
         return this;
+    }
+
+    @Override
+    public @NonNull FeeSchedule getSimpleFeesSchedule() {
+        return null;
     }
 }

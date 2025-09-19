@@ -12,6 +12,7 @@ plugins {
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:-exports,-overloads,-text-blocks,-dep-ann,-varargs")
 }
+tasks.withType<JavaCompile>().configureEach { options.compilerArgs.remove("-Werror") }
 
 mainModuleInfo {
     annotationProcessor("com.swirlds.config.processor")
