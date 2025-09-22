@@ -73,24 +73,26 @@ public class FeeCalculatorImpl implements FeeCalculator {
     private final ReadableStoreFactory storeFactory;
 
     private final TransactionInfo txInfo;
+    private final FeeSchedule simpleFeesSchedule;
 
     /**
      * Create a new instance. One is created per transaction.
      *
-     * @param txBody           The transaction body. Pricing includes the number of bytes
-     *                         included in the transaction body memo, as well as the protobuf-encoded number of
-     *                         bytes that form the signature map. We also do a little skullduggery by inspecting
-     *                         the transaction type to see if it is a crypto transfer, and extracting the number of
-     *                         transfers the user sent to use. We need this, because the {@link BaseTransactionMeta}
-     *                         needs it.
-     * @param payerKey         The key of the payer. Used to compute the number of cryptographic keys that the payer
-     *                         has on this key, so we can charge for each of those.
-     * @param numVerifications The number of cryptographic signatures that were verified for this transaction. We only
-     *                         know this answer after pre-handle has run.
-     * @param signatureMapSize The number of bytes in the signature map.
-     * @param feeData          The fee data associated with this transaction and its subtype.
-     * @param currentRate      The current HBAR-to-USD exchange rate.
+     * @param txBody             The transaction body. Pricing includes the number of bytes
+     *                           included in the transaction body memo, as well as the protobuf-encoded number of
+     *                           bytes that form the signature map. We also do a little skullduggery by inspecting
+     *                           the transaction type to see if it is a crypto transfer, and extracting the number of
+     *                           transfers the user sent to use. We need this, because the {@link BaseTransactionMeta}
+     *                           needs it.
+     * @param payerKey           The key of the payer. Used to compute the number of cryptographic keys that the payer
+     *                           has on this key, so we can charge for each of those.
+     * @param numVerifications   The number of cryptographic signatures that were verified for this transaction. We only
+     *                           know this answer after pre-handle has run.
+     * @param signatureMapSize   The number of bytes in the signature map.
+     * @param feeData            The fee data associated with this transaction and its subtype.
+     * @param currentRate        The current HBAR-to-USD exchange rate.
      * @param isInternalDispatch Whether this is an internal child dispatch transaction
+     * @param simpleFeesSchedule
      */
     public FeeCalculatorImpl(
             @NonNull TransactionBody txBody,
@@ -101,11 +103,13 @@ public class FeeCalculatorImpl implements FeeCalculator {
             @NonNull final ExchangeRate currentRate,
             final boolean isInternalDispatch,
             final CongestionMultipliers congestionMultipliers,
-            final ReadableStoreFactory storeFactory) {
+            final ReadableStoreFactory storeFactory,
+            @NonNull final FeeSchedule simpleFeesSchedule) {
         //  Perform basic validations, and convert the PBJ objects to Google protobuf objects for `hapi-fees`.
         requireNonNull(txBody);
         requireNonNull(payerKey);
         this.feeData = fromPbj(feeData);
+        this.simpleFeesSchedule = simpleFeesSchedule;
         this.currentRate = fromPbj(currentRate);
         if (numVerifications < 0) {
             throw new IllegalArgumentException("numVerifications must be >= 0");
@@ -150,7 +154,8 @@ public class FeeCalculatorImpl implements FeeCalculator {
             @NonNull final ExchangeRate currentRate,
             final CongestionMultipliers congestionMultipliers,
             final ReadableStoreFactory storeFactory,
-            final HederaFunctionality functionality) {
+            final HederaFunctionality functionality,
+            FeeSchedule simpleFeesSchedule) {
         if (feeData == null) {
             this.feeData = null;
             this.usage = null;
@@ -161,6 +166,7 @@ public class FeeCalculatorImpl implements FeeCalculator {
             usage.addBpt(BASIC_QUERY_HEADER + BASIC_TX_ID_SIZE);
             usage.addBpr(BASIC_QUERY_RES_HEADER);
         }
+        this.simpleFeesSchedule = simpleFeesSchedule;
         this.currentRate = fromPbj(currentRate);
         this.sigUsage = new SigUsage(0, 0, 0);
 
@@ -267,31 +273,6 @@ public class FeeCalculatorImpl implements FeeCalculator {
     @Override
     @NonNull
     public FeeSchedule getSimpleFeesSchedule() {
-        return FeeSchedule.DEFAULT
-                .copyBuilder()
-                .extras(
-                        makeExtraDef(Extra.BYTES, 1),
-                        makeExtraDef(Extra.KEYS, 2),
-                        makeExtraDef(Extra.SIGNATURES, 3),
-                        makeExtraDef(Extra.CUSTOM_FEE, 500))
-                .node(NodeFee.DEFAULT
-                        .copyBuilder()
-                        .baseFee(1)
-                        .extras(makeExtraIncluded(Extra.BYTES, 1024), makeExtraIncluded(Extra.SIGNATURES, 1))
-                        .build())
-                .network(NetworkFee.DEFAULT.copyBuilder().multiplier(2).build())
-                .services(makeService(
-                        "Consensus",
-                        makeServiceFee(CONSENSUS_CREATE_TOPIC, 11, makeExtraIncluded(Extra.KEYS, 1)),
-                        makeServiceFee(CONSENSUS_UPDATE_TOPIC, 12, makeExtraIncluded(Extra.KEYS, 1)),
-                        makeServiceFee(CONSENSUS_DELETE_TOPIC, 13, makeExtraIncluded(Extra.KEYS, 1)),
-                        makeServiceFee(
-                                CONSENSUS_SUBMIT_MESSAGE,
-                                14,
-                                makeExtraIncluded(Extra.SIGNATURES, 1),
-                                makeExtraIncluded(Extra.KEYS, 1),
-                                makeExtraIncluded(Extra.BYTES, 1024),
-                                makeExtraIncluded(Extra.CUSTOM_FEE, 0))))
-                .build();
+        return this.simpleFeesSchedule;
     }
 }
