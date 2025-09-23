@@ -41,7 +41,6 @@ public class StandardFeeModel extends AbstractBaseFeeModel {
                 result.addServiceFee("Overage of " + ref.name().name(), overage, overage * extraFee);
             }
         }
-        System.out.println("compute fee for " + this.getApi().name() + ": " + result.toString());
         return result;
     }
 }
