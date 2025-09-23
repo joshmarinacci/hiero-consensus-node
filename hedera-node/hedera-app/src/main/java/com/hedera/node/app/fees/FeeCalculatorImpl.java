@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 package com.hedera.node.app.fees;
 
+import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_CREATE_TOPIC;
+import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_DELETE_TOPIC;
+import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_SUBMIT_MESSAGE;
+import static com.hedera.hapi.node.base.HederaFunctionality.CONSENSUS_UPDATE_TOPIC;
 import static com.hedera.hapi.util.HapiUtils.countOfCryptographicKeys;
 import static com.hedera.hapi.util.HapiUtils.functionOf;
 import static com.hedera.node.app.hapi.utils.CommonPbjConverters.fromPbj;
@@ -8,6 +12,10 @@ import static com.hedera.node.app.hapi.utils.fee.FeeBuilder.BASIC_QUERY_HEADER;
 import static com.hedera.node.app.hapi.utils.fee.FeeBuilder.BASIC_QUERY_RES_HEADER;
 import static com.hedera.node.app.hapi.utils.fee.FeeBuilder.BASIC_TX_ID_SIZE;
 import static java.util.Objects.requireNonNull;
+import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraDef;
+import static org.hiero.hapi.fees.FeeScheduleUtils.makeExtraIncluded;
+import static org.hiero.hapi.fees.FeeScheduleUtils.makeService;
+import static org.hiero.hapi.fees.FeeScheduleUtils.makeServiceFee;
 
 import com.hedera.hapi.node.base.AccountID;
 import com.hedera.hapi.node.base.FeeData;
@@ -35,6 +43,11 @@ import com.hedera.node.app.workflows.TransactionInfo;
 import com.hedera.pbj.runtime.io.buffer.Bytes;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.Nullable;
+import org.hiero.hapi.support.fees.Extra;
+import org.hiero.hapi.support.fees.FeeSchedule;
+import org.hiero.hapi.support.fees.NetworkFee;
+import org.hiero.hapi.support.fees.NodeFee;
+
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
@@ -60,24 +73,26 @@ public class FeeCalculatorImpl implements FeeCalculator {
     private final ReadableStoreFactory storeFactory;
 
     private final TransactionInfo txInfo;
+    private final FeeSchedule simpleFeesSchedule;
 
     /**
      * Create a new instance. One is created per transaction.
      *
-     * @param txBody           The transaction body. Pricing includes the number of bytes
-     *                         included in the transaction body memo, as well as the protobuf-encoded number of
-     *                         bytes that form the signature map. We also do a little skullduggery by inspecting
-     *                         the transaction type to see if it is a crypto transfer, and extracting the number of
-     *                         transfers the user sent to use. We need this, because the {@link BaseTransactionMeta}
-     *                         needs it.
-     * @param payerKey         The key of the payer. Used to compute the number of cryptographic keys that the payer
-     *                         has on this key, so we can charge for each of those.
-     * @param numVerifications The number of cryptographic signatures that were verified for this transaction. We only
-     *                         know this answer after pre-handle has run.
-     * @param signatureMapSize The number of bytes in the signature map.
-     * @param feeData          The fee data associated with this transaction and its subtype.
-     * @param currentRate      The current HBAR-to-USD exchange rate.
+     * @param txBody             The transaction body. Pricing includes the number of bytes
+     *                           included in the transaction body memo, as well as the protobuf-encoded number of
+     *                           bytes that form the signature map. We also do a little skullduggery by inspecting
+     *                           the transaction type to see if it is a crypto transfer, and extracting the number of
+     *                           transfers the user sent to use. We need this, because the {@link BaseTransactionMeta}
+     *                           needs it.
+     * @param payerKey           The key of the payer. Used to compute the number of cryptographic keys that the payer
+     *                           has on this key, so we can charge for each of those.
+     * @param numVerifications   The number of cryptographic signatures that were verified for this transaction. We only
+     *                           know this answer after pre-handle has run.
+     * @param signatureMapSize   The number of bytes in the signature map.
+     * @param feeData            The fee data associated with this transaction and its subtype.
+     * @param currentRate        The current HBAR-to-USD exchange rate.
      * @param isInternalDispatch Whether this is an internal child dispatch transaction
+     * @param simpleFeesSchedule
      */
     public FeeCalculatorImpl(
             @NonNull TransactionBody txBody,
@@ -88,11 +103,13 @@ public class FeeCalculatorImpl implements FeeCalculator {
             @NonNull final ExchangeRate currentRate,
             final boolean isInternalDispatch,
             final CongestionMultipliers congestionMultipliers,
-            final ReadableStoreFactory storeFactory) {
+            final ReadableStoreFactory storeFactory,
+            @NonNull final FeeSchedule simpleFeesSchedule) {
         //  Perform basic validations, and convert the PBJ objects to Google protobuf objects for `hapi-fees`.
         requireNonNull(txBody);
         requireNonNull(payerKey);
         this.feeData = fromPbj(feeData);
+        this.simpleFeesSchedule = simpleFeesSchedule;
         this.currentRate = fromPbj(currentRate);
         if (numVerifications < 0) {
             throw new IllegalArgumentException("numVerifications must be >= 0");
@@ -137,7 +154,8 @@ public class FeeCalculatorImpl implements FeeCalculator {
             @NonNull final ExchangeRate currentRate,
             final CongestionMultipliers congestionMultipliers,
             final ReadableStoreFactory storeFactory,
-            final HederaFunctionality functionality) {
+            final HederaFunctionality functionality,
+            FeeSchedule simpleFeesSchedule) {
         if (feeData == null) {
             this.feeData = null;
             this.usage = null;
@@ -148,6 +166,7 @@ public class FeeCalculatorImpl implements FeeCalculator {
             usage.addBpt(BASIC_QUERY_HEADER + BASIC_TX_ID_SIZE);
             usage.addBpr(BASIC_QUERY_RES_HEADER);
         }
+        this.simpleFeesSchedule = simpleFeesSchedule;
         this.currentRate = fromPbj(currentRate);
         this.sigUsage = new SigUsage(0, 0, 0);
 
@@ -249,5 +268,11 @@ public class FeeCalculatorImpl implements FeeCalculator {
         if (usage == null) {
             throw new UnsupportedOperationException("Only legacy calculation supported");
         }
+    }
+
+    @Override
+    @NonNull
+    public FeeSchedule getSimpleFeesSchedule() {
+        return this.simpleFeesSchedule;
     }
 }

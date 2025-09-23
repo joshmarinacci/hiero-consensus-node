@@ -113,4 +113,15 @@ public class FeeScheduleUtils {
         }
         return true;
     }
+
+    public static int getScheduleCount(FeeSchedule schedule) {
+        var count = 0;
+        for (var svc : schedule.services()) {
+            for (var foo:svc.schedule()) {
+                System.out.println("schedule " + foo.name());
+                count +=1;
+            }
+        }
+        return count;
+    }
 }

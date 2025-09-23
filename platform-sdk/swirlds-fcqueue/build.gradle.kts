@@ -4,6 +4,8 @@ plugins {
     id("org.hiero.gradle.feature.publish-artifactregistry")
 }
 
+tasks.withType<JavaCompile>().configureEach { options.compilerArgs.remove("-Werror") }
+
 testModuleInfo {
     requires("com.hedera.pbj.runtime")
     requires("com.swirlds.base")

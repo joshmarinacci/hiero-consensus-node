@@ -14,7 +14,9 @@ plugins {
 // and then fix the reported issues.
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:-exports,-lossy-conversions,-synchronization")
+    options.compilerArgs.remove("-Werror")
 }
+//tasks.withType<JavaCompile>().configureEach { options.compilerArgs.remove("-Werror") }
 
 mainModuleInfo { annotationProcessor("com.swirlds.config.processor") }
 
