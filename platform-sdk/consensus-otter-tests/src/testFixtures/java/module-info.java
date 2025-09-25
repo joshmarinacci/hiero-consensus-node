@@ -30,6 +30,7 @@ module org.hiero.otter.fixtures {
     requires com.swirlds.config.extensions;
     requires com.swirlds.platform.core.test.fixtures;
     requires org.hiero.consensus.utility;
+    requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.dataformat.yaml;
@@ -56,4 +57,5 @@ module org.hiero.otter.fixtures {
     exports org.hiero.otter.fixtures.util;
     exports org.hiero.otter.fixtures.container.utils to
             org.hiero.consensus.otter.docker.app;
+    exports org.hiero.otter.fixtures.network.utils;
 }
