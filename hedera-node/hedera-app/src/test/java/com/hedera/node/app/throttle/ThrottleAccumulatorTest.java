@@ -45,7 +45,6 @@ import com.hedera.hapi.node.base.AccountID;
 import com.hedera.hapi.node.base.Key;
 import com.hedera.hapi.node.base.ResponseCodeEnum;
 import com.hedera.hapi.node.base.ScheduleID;
-import com.hedera.hapi.node.base.SemanticVersion;
 import com.hedera.hapi.node.base.SignatureMap;
 import com.hedera.hapi.node.base.TokenID;
 import com.hedera.hapi.node.base.TokenTransferList;
@@ -203,7 +202,6 @@ class ThrottleAccumulatorTest {
     @Mock
     private TransactionInfo transactionInfo;
 
-    private SemanticVersion softwareVersionFactory = SemanticVersion.DEFAULT;
     private final HederaConfig hederaConfig =
             HederaTestConfigBuilder.create().getOrCreateConfig().getConfigData(HederaConfig.class);
 
