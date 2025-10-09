@@ -271,6 +271,7 @@ public abstract class AbstractNetwork implements Network {
 
         log.debug("Waiting for nodes to become active...");
         timeManager().waitForCondition(() -> allNodesInStatus(ACTIVE), timeout);
+        log.info("Network started.");
     }
 
     private RosterEntry createRosterEntry(final Node node, final long weight) {
@@ -446,6 +447,8 @@ public abstract class AbstractNetwork implements Network {
                         "Timeout while waiting for all nodes to freeze.");
 
         transactionGenerator().stop();
+
+        log.info("Network frozen.");
     }
 
     /**
@@ -584,6 +587,8 @@ public abstract class AbstractNetwork implements Network {
         lifecycle = Lifecycle.SHUTDOWN;
 
         transactionGenerator().stop();
+
+        log.info("Nodes have been killed.");
     }
 
     /**
