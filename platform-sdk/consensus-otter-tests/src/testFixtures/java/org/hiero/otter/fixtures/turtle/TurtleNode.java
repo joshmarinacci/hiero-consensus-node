@@ -14,7 +14,6 @@ import static org.hiero.otter.fixtures.internal.AbstractNode.LifeCycle.SHUTDOWN;
 import static org.hiero.otter.fixtures.result.SubscriberAction.CONTINUE;
 import static org.hiero.otter.fixtures.result.SubscriberAction.UNSUBSCRIBE;
 
-import com.swirlds.base.time.Time;
 import com.swirlds.common.context.PlatformContext;
 import com.swirlds.common.io.filesystem.FileSystemManager;
 import com.swirlds.common.io.utility.RecycleBin;
@@ -50,6 +49,7 @@ import org.hiero.consensus.roster.RosterHistory;
 import org.hiero.consensus.roster.RosterUtils;
 import org.hiero.otter.fixtures.Node;
 import org.hiero.otter.fixtures.NodeConfiguration;
+import org.hiero.otter.fixtures.TimeManager;
 import org.hiero.otter.fixtures.app.OtterApp;
 import org.hiero.otter.fixtures.app.OtterAppState;
 import org.hiero.otter.fixtures.app.OtterExecutionLayer;
@@ -80,7 +80,7 @@ import org.hiero.otter.fixtures.util.SecureRandomBuilder;
 public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.TimeTickReceiver {
 
     private final Randotron randotron;
-    private final Time time;
+    private final TurtleTimeManager timeManager;
     private final SimulatedNetwork network;
     private final TurtleLogging logging;
     private final TurtleNodeConfiguration nodeConfiguration;
@@ -110,7 +110,7 @@ public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.
      * Constructor of {@link TurtleNode}.
      *
      * @param randotron the random number generator
-     * @param time the time provider
+     * @param timeManager the time manager for this test
      * @param selfId the node ID of the node
      * @param keysAndCerts the keys and certificates of the node
      * @param network the simulated network
@@ -119,7 +119,7 @@ public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.
      */
     public TurtleNode(
             @NonNull final Randotron randotron,
-            @NonNull final Time time,
+            @NonNull final TurtleTimeManager timeManager,
             @NonNull final NodeId selfId,
             @NonNull final KeysAndCerts keysAndCerts,
             @NonNull final SimulatedNetwork network,
@@ -130,7 +130,7 @@ public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.
             logging.addNodeLogging(selfId, outputDirectory);
 
             this.randotron = requireNonNull(randotron);
-            this.time = requireNonNull(time);
+            this.timeManager = requireNonNull(timeManager);
             this.network = requireNonNull(network);
             this.logging = requireNonNull(logging);
             this.nodeConfiguration = new TurtleNodeConfiguration(() -> lifeCycle, outputDirectory);
@@ -145,8 +145,8 @@ public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.
     @Override
     protected void doStart(@NonNull final Duration timeout) {
         try (final LoggingContextScope ignored = installNodeContext()) {
-            throwIfIn(RUNNING, "Node has already been started.");
-            throwIfIn(DESTROYED, "Node has already been destroyed.");
+            throwIfInLifecycle(RUNNING, "Node has already been started.");
+            throwIfInLifecycle(DESTROYED, "Node has already been destroyed.");
 
             // Start node from current state
             final Configuration currentConfiguration = nodeConfiguration.current();
@@ -163,17 +163,22 @@ public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.
             final Metrics metrics = getMetricsProvider().createPlatformMetrics(selfId);
             final FileSystemManager fileSystemManager = FileSystemManager.create(currentConfiguration);
             final RecycleBin recycleBin = RecycleBin.create(
-                    metrics, currentConfiguration, getStaticThreadManager(), time, fileSystemManager, selfId);
+                    metrics,
+                    currentConfiguration,
+                    getStaticThreadManager(),
+                    timeManager.time(),
+                    fileSystemManager,
+                    selfId);
 
             platformContext = TestPlatformContextBuilder.create()
-                    .withTime(time)
+                    .withTime(timeManager.time())
                     .withConfiguration(currentConfiguration)
                     .withFileSystemManager(fileSystemManager)
                     .withMetrics(metrics)
                     .withRecycleBin(recycleBin)
                     .build();
 
-            model = WiringModelBuilder.create(platformContext.getMetrics(), time)
+            model = WiringModelBuilder.create(platformContext.getMetrics(), timeManager.time())
                     .withDeterministicModeEnabled(true)
                     .withUncaughtExceptionHandler((t, e) -> fail("Unexpected exception in wiring framework", e))
                     .build();
@@ -198,8 +203,8 @@ public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.
             final RosterHistory rosterHistory = RosterUtils.createRosterHistory(state);
             final String eventStreamLoc = selfId.toString();
 
-            this.executionLayer =
-                    new OtterExecutionLayer(new Random(randotron.nextLong()), platformContext.getMetrics(), time);
+            this.executionLayer = new OtterExecutionLayer(
+                    new Random(randotron.nextLong()), platformContext.getMetrics(), timeManager.time());
 
             final PlatformBuilder platformBuilder = PlatformBuilder.create(
                             OtterApp.APP_NAME,
@@ -315,9 +320,11 @@ public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.
     @Override
     public void submitTransaction(@NonNull final OtterTransaction transaction) {
         try (final LoggingContextScope ignored = installNodeContext()) {
-            throwIfIn(INIT, "Node has not been started yet.");
-            throwIfIn(SHUTDOWN, "Node has been shut down.");
-            throwIfIn(DESTROYED, "Node has been destroyed.");
+            throwIfInLifecycle(INIT, "Node has not been started yet.");
+            throwIfInLifecycle(SHUTDOWN, "Node has been shut down.");
+            throwIfInLifecycle(DESTROYED, "Node has been destroyed.");
+            assert platform != null; // platform must be initialized if lifeCycle is STARTED
+            assert executionLayer != null; // executionLayer must be initialized
 
             if (quiescenceCommand == QuiescenceCommand.QUIESCE) {
                 // When quiescing, ignore new transactions
@@ -392,6 +399,24 @@ public class TurtleNode extends AbstractNode implements Node, TurtleTimeManager.
     @NonNull
     public SingleNodeMarkerFileResult newMarkerFileResult() {
         return new SingleNodeMarkerFileResultImpl(resultsCollector);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @NonNull
+    protected Random random() {
+        return randotron;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @NonNull
+    protected TimeManager timeManager() {
+        return timeManager;
     }
 
     /**
