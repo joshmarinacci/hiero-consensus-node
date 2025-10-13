@@ -68,7 +68,7 @@
       "schedule": [
         {
           "name": "ConsensusCreateTopic",
-          "baseFee": 700000,
+          "baseFee": 1010000,
           "extras": [
             { "name": "SIGNATURES", "includedCount": 1 }
           ]

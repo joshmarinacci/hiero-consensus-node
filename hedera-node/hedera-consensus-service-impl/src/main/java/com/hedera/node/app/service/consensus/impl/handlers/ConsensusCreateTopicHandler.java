@@ -23,6 +23,7 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.consensus.ConsensusCreateTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
+import com.hedera.hapi.node.transaction.ExchangeRate;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.SigValueObj;
 import com.hedera.node.app.service.consensus.ReadableTopicStore;
@@ -219,8 +220,8 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
         handleContext.attributeValidator().validateMemo(op.memo());
     }
 
-    private long tinyCentsToTinyBar(long tinyCents) {
-        return tinyCents * 12;
+    private long tinyCentsToTinyBar(long tinyCents, ExchangeRate rate) {
+        return tinyCents * rate.hbarEquiv() / rate.centEquiv() * 100;
     }
 
     @NonNull
@@ -241,10 +242,11 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
             if(hasCustomFees){
                 params.put(Extra.CUSTOM_FEE, true);
             }
+            final ExchangeRate rate = feeContext.activeRate();
             final var feeResult = entity.computeFee(params, feeContext.feeCalculatorFactory().feeCalculator(subType).getSimpleFeesSchedule());
-            return new Fees(tinyCentsToTinyBar(feeResult.node),
-                    tinyCentsToTinyBar(feeResult.network),
-                    tinyCentsToTinyBar(feeResult.service)
+            return new Fees(tinyCentsToTinyBar(feeResult.node,rate),
+                    tinyCentsToTinyBar(feeResult.network,rate),
+                    tinyCentsToTinyBar(feeResult.service,rate)
             );
         }
 
