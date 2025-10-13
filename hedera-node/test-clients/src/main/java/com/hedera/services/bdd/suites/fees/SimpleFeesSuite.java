@@ -55,21 +55,22 @@ public class SimpleFeesSuite {
     class BeforeAfterTests {
         @LeakyHapiTest(overrides = {"fees.simpleFeesEnabled"})
         final Stream<DynamicTest> createTopicBeforeAfter() {
+            // 0.01 is one cent or 10^8th tiny cents 100_000_000
             return hapiTest(
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
 
                     overriding("fees.simpleFeesEnabled", "false"),
 
-                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
                     validateChargedUsd("create-topic-txn",0.0100),
 
                     overriding("fees.simpleFeesEnabled", "true"),
 
-                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedFee("create-topic-txn", 22)
+                    validateChargedUsd("create-topic-txn",0.0100),
+                    validateChargedFee("create-topic-txn", 8_400_036)
             );
         }
     }

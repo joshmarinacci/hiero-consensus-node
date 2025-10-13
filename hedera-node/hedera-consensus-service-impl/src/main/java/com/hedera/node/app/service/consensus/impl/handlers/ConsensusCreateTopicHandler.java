@@ -219,6 +219,10 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
         handleContext.attributeValidator().validateMemo(op.memo());
     }
 
+    private long tinyCentsToTinyBar(long tinyCents) {
+        return tinyCents * 12;
+    }
+
     @NonNull
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
@@ -238,7 +242,10 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
                 params.put(Extra.CUSTOM_FEE, true);
             }
             final var feeResult = entity.computeFee(params, feeContext.feeCalculatorFactory().feeCalculator(subType).getSimpleFeesSchedule());
-            return new Fees(feeResult.node, feeResult.network, feeResult.service);
+            return new Fees(tinyCentsToTinyBar(feeResult.node),
+                    tinyCentsToTinyBar(feeResult.network),
+                    tinyCentsToTinyBar(feeResult.service)
+            );
         }
 
         return feeContext
