@@ -3,6 +3,7 @@ package com.hedera.services.bdd.suites.fees;
 
 import com.hedera.services.bdd.junit.HapiTest;
 import com.hedera.services.bdd.junit.HapiTestLifecycle;
+import com.hedera.services.bdd.junit.LeakyHapiTest;
 import com.hedera.services.bdd.junit.support.TestLifecycle;
 import edu.umd.cs.findbugs.annotations.NonNull;
 import org.hiero.hapi.support.fees.Extra;
@@ -26,6 +27,7 @@ import static com.hedera.services.bdd.spec.transactions.TxnVerbs.submitMessageTo
 import static com.hedera.services.bdd.spec.transactions.TxnVerbs.updateTopic;
 import static com.hedera.services.bdd.spec.transactions.token.CustomFeeSpecs.fixedConsensusHbarFee;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.newKeyNamed;
+import static com.hedera.services.bdd.spec.utilops.UtilVerbs.overriding;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedFee;
 import static com.hedera.services.bdd.spec.utilops.UtilVerbs.validateChargedUsd;
 import static com.hedera.services.bdd.suites.HapiSuite.GENESIS;
@@ -47,6 +49,29 @@ public class SimpleFeesSuite {
                 .extras(makeExtraDef(Extra.KEYS, 1))
                 .build();
 
+    }
+
+    @Nested
+    class BeforeAfterTests {
+        @LeakyHapiTest(overrides = {"fees.simpleFeesEnabled"})
+        final Stream<DynamicTest> createTopicBeforeAfter() {
+            return hapiTest(
+
+                    overriding("fees.simpleFeesEnabled", "false"),
+
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                    createTopic("testTopic").blankMemo().payingWith(PAYER)
+                            .fee(ONE_HBAR).via("create-topic-txn"),
+                    validateChargedUsd("create-topic-txn",0.0100),
+
+                    overriding("fees.simpleFeesEnabled", "true"),
+
+                    cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
+                    createTopic("testTopic").blankMemo().payingWith(PAYER)
+                            .fee(ONE_HBAR).via("create-topic-txn"),
+                    validateChargedFee("create-topic-txn", 22)
+            );
+        }
     }
 
     @Nested
