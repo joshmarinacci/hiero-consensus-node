@@ -62,7 +62,7 @@ public class SimpleFeesSuite {
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
                     validateChargedFee("create-topic-txn",
-                            11 // base fee for create topic
+                            19 // base fee for create topic
                             + 0 // 1024 bytes are included for free
                             + 1 // node fee
                             + 2 // network fee
@@ -99,18 +99,20 @@ public class SimpleFeesSuite {
                             .fee(ONE_HUNDRED_HBARS).via("create-topic-txn"),
                     // create topic should be base:19 + key:(2-1), node:(base:1, sig:1) * 3 to include network
                     validateChargedFee("create-topic-txn",
-                            11 // base fee for create topic
+                            19 // base fee for create topic
                             + 0 // 1024 bytes are included for free
-                            + (1 + 1*3)*3 // extra sig in node fee, x3 to include network fee
+                            + 1 // one extra sig
+                            + (1 +1)*3 // extra sig in node fee, x3 to include network fee
                              ),
                     // update topic, provide up to 100 hbar to pay for it
                     // update topic is base:19 + key(1-1), node:(base:1,sig:1)*3 to include network
                     updateTopic("testTopic").adminKey(ADMIN).payingWith(PAYER)
                             .fee(ONE_HUNDRED_HBARS).via("update-topic-txn"),
                     validateChargedFee("update-topic-txn",
-                            12 // base fee for create topic
+                            19 // base fee for update topic
                             + 0 // 1024 bytes are included for free
-                            + (1 + 1*3)*3 // 1 extra sig (3) for node fee, x3 to include network fee
+                            + 1 // one extra sig
+                            + (1 + 1)*3 // 1 extra sig (3) for node fee, x3 to include network fee
                     )
             );
         }
