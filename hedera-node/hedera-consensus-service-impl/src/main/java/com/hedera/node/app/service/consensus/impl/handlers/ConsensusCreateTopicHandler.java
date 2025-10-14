@@ -11,6 +11,7 @@ import static com.hedera.hapi.node.base.ResponseCodeEnum.INVALID_EXPIRATION_TIME
 import static com.hedera.hapi.node.base.ResponseCodeEnum.INVALID_KEY_IN_FEE_EXEMPT_KEY_LIST;
 import static com.hedera.hapi.node.base.ResponseCodeEnum.MAX_ENTITIES_IN_PRICE_REGIME_HAVE_BEEN_CREATED;
 import static com.hedera.hapi.node.base.ResponseCodeEnum.MAX_ENTRIES_FOR_FEE_EXEMPT_KEY_LIST_EXCEEDED;
+import static com.hedera.node.app.hapi.utils.CommonPbjConverters.fromPbj;
 import static com.hedera.node.app.hapi.utils.fee.ConsensusServiceFeeBuilder.getConsensusCreateTopicFee;
 import static com.hedera.node.app.service.consensus.impl.ConsensusServiceImpl.RUNNING_HASH_BYTE_ARRAY_SIZE;
 import static com.hedera.node.app.spi.validation.AttributeValidator.isImmutableKey;
@@ -23,7 +24,7 @@ import com.hedera.hapi.node.base.HederaFunctionality;
 import com.hedera.hapi.node.base.SubType;
 import com.hedera.hapi.node.consensus.ConsensusCreateTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
-import com.hedera.hapi.node.transaction.ExchangeRate;
+import com.hedera.node.app.hapi.fees.calc.OverflowCheckingCalc;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.SigValueObj;
 import com.hedera.node.app.service.consensus.ReadableTopicStore;
@@ -220,10 +221,6 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
         handleContext.attributeValidator().validateMemo(op.memo());
     }
 
-    private long tinyCentsToTinyBar(long tinyCents, ExchangeRate rate) {
-        return tinyCents * rate.hbarEquiv() / rate.centEquiv() * 100;
-    }
-
     @NonNull
     @Override
     public Fees calculateFees(@NonNull final FeeContext feeContext) {
@@ -242,11 +239,11 @@ public class ConsensusCreateTopicHandler implements TransactionHandler {
             if(hasCustomFees){
                 params.put(Extra.CUSTOM_FEE, true);
             }
-            final ExchangeRate rate = feeContext.activeRate();
+            final var rate  = fromPbj(feeContext.activeRate());
             final var feeResult = entity.computeFee(params, feeContext.feeCalculatorFactory().feeCalculator(subType).getSimpleFeesSchedule());
-            return new Fees(tinyCentsToTinyBar(feeResult.node,rate),
-                    tinyCentsToTinyBar(feeResult.network,rate),
-                    tinyCentsToTinyBar(feeResult.service,rate)
+            return new Fees(OverflowCheckingCalc.tinycentsToTinybars(feeResult.node,rate),
+                    OverflowCheckingCalc.tinycentsToTinybars(feeResult.network,rate),
+                    OverflowCheckingCalc.tinycentsToTinybars(feeResult.service,rate)
             );
         }
 

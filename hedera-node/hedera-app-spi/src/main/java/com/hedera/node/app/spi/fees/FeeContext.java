@@ -78,5 +78,9 @@ public interface FeeContext {
     Fees dispatchComputeFees(@NonNull TransactionBody txBody, @NonNull AccountID syntheticPayerId);
 
 
+    /**
+     * Returns the active Exchange Rate.
+     * @return the active exchange rate
+     */
     ExchangeRate activeRate();
 }
