@@ -14,6 +14,7 @@ import static com.hedera.hapi.node.base.ResponseCodeEnum.INVALID_RENEWAL_PERIOD;
 import static com.hedera.hapi.node.base.ResponseCodeEnum.INVALID_TOPIC_ID;
 import static com.hedera.hapi.node.base.ResponseCodeEnum.MAX_ENTRIES_FOR_FEE_EXEMPT_KEY_LIST_EXCEEDED;
 import static com.hedera.hapi.node.base.ResponseCodeEnum.UNAUTHORIZED;
+import static com.hedera.node.app.hapi.utils.CommonPbjConverters.fromPbj;
 import static com.hedera.node.app.hapi.utils.fee.ConsensusServiceFeeBuilder.getConsensusUpdateTopicFee;
 import static com.hedera.node.app.hapi.utils.fee.ConsensusServiceFeeBuilder.getUpdateTopicRbsIncrease;
 import static com.hedera.node.app.hapi.utils.keys.KeyUtils.isEmpty;
@@ -35,6 +36,7 @@ import com.hedera.hapi.node.base.TopicID;
 import com.hedera.hapi.node.consensus.ConsensusUpdateTopicTransactionBody;
 import com.hedera.hapi.node.state.consensus.Topic;
 import com.hedera.hapi.node.transaction.TransactionBody;
+import com.hedera.node.app.hapi.fees.calc.OverflowCheckingCalc;
 import com.hedera.node.app.hapi.utils.CommonPbjConverters;
 import com.hedera.node.app.hapi.utils.fee.SigValueObj;
 import com.hedera.node.app.service.consensus.ReadableTopicStore;
@@ -200,12 +202,16 @@ public class ConsensusUpdateTopicHandler implements TransactionHandler {
         requireNonNull(feeContext);
         if(feeContext.configuration().getConfigData(FeesConfig.class).simpleFeesEnabled()) {
             final var entity = FeeModelRegistry.lookupModel(HederaFunctionality.CONSENSUS_UPDATE_TOPIC);
-            Map<Extra, Object> params = new HashMap<>();
+            Map<Extra, Long> params = new HashMap<>();
             params.put(Extra.BYTES, (long)feeContext.body().protobufSize() );
             params.put(Extra.SIGNATURES, (long) feeContext.numTxnSignatures());
             params.put(Extra.KEYS,0L);
+            final var rate  = fromPbj(feeContext.activeRate());
             final var feeResult = entity.computeFee(params, feeContext.feeCalculatorFactory().feeCalculator(SubType.DEFAULT).getSimpleFeesSchedule());
-            return new Fees(feeResult.node, feeResult.network, feeResult.service);
+            return new Fees(OverflowCheckingCalc.tinycentsToTinybars(feeResult.node,rate),
+                    OverflowCheckingCalc.tinycentsToTinybars(feeResult.network,rate),
+                    OverflowCheckingCalc.tinycentsToTinybars(feeResult.service,rate)
+            );
         }
 
         final var op = feeContext.body();

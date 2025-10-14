@@ -70,9 +70,12 @@ public class SimpleFeesSuite {
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
                     validateChargedUsd("create-topic-txn",0.0100)
-//                    validateChargedFee("create-topic-txn", 8_416_600)
             );
         }
+    }
+
+    static double cents_to_USD(long amount) {
+        return amount / 100.0;
     }
 
     @Nested
@@ -87,12 +90,12 @@ public class SimpleFeesSuite {
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedFee("create-topic-txn",
-                            19 // base fee for create topic
-                            + 0 // 1024 bytes are included for free
-                            + 1 // node fee
-                            + 2 // network fee
-                            )
+                    validateChargedUsd("create-topic-txn", cents_to_USD(
+                                    1 // base fee for create topic
+                                    + 0 // 1024 bytes are included for free
+                                    + 1 // node fee
+                                    + 2 // network fee
+                                    ))
             );
         }
 
@@ -108,7 +111,12 @@ public class SimpleFeesSuite {
                             .payingWith(PAYER)
                             .fee(ONE_HUNDRED_HBARS)
                             .via("create-topic-txn"),
-                    validateChargedFee("create-topic-txn", 25 + 1 + 2)
+                    validateChargedUsd("create-topic-txn", cents_to_USD(
+                            1 // base fee for create topic
+                                    + 1 // custom fee
+                                    + 1 // node fee
+                                    + 2 // network fee
+                    ))
             );
         }
 
@@ -124,22 +132,22 @@ public class SimpleFeesSuite {
                             .adminKeyName(ADMIN)
                             .fee(ONE_HUNDRED_HBARS).via("create-topic-txn"),
                     // create topic should be base:19 + key:(2-1), node:(base:1, sig:1) * 3 to include network
-                    validateChargedFee("create-topic-txn",
-                            19 // base fee for create topic
+                    validateChargedUsd("create-topic-txn", cents_to_USD(
+                            1 // base fee for create topic
                             + 0 // 1024 bytes are included for free
                             + 1 // one extra sig
                             + (1 +1)*3 // extra sig in node fee, x3 to include network fee
-                             ),
+                             )),
                     // update topic, provide up to 100 hbar to pay for it
                     // update topic is base:19 + key(1-1), node:(base:1,sig:1)*3 to include network
                     updateTopic("testTopic").adminKey(ADMIN).payingWith(PAYER)
                             .fee(ONE_HUNDRED_HBARS).via("update-topic-txn"),
-                    validateChargedFee("update-topic-txn",
-                            19 // base fee for update topic
+                    validateChargedUsd("update-topic-txn", cents_to_USD(
+                            1 // base fee for update topic
                             + 0 // 1024 bytes are included for free
                             + 1 // one extra sig
                             + (1 + 1)*3 // 1 extra sig (3) for node fee, x3 to include network fee
-                    )
+                            ))
             );
         }
 
@@ -152,12 +160,11 @@ public class SimpleFeesSuite {
                     // create topic. provide up to 1 hbar to pay for it
                     createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedFee("create-topic-txn", 19 + (1)*3),
+                    validateChargedUsd("create-topic-txn", cents_to_USD( 1 + 3)),
                     // get topic info, provide up to 1 hbar to pay for it
                     getTopicInfo("testTopic").payingWith(PAYER)
                             .fee(ONE_HBAR).via("get-topic-txn").logged(),
-                    // TODO: query is getting zeroed out
-                    validateChargedFee("get-topic-txn", 4)
+                    validateChargedUsd("get-topic-txn", 0.0001)
             );
         }
 
@@ -174,20 +181,23 @@ public class SimpleFeesSuite {
                     // create topic, provide up to 1 hbar to pay for it
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedFee("create-topic-txn", 19 + 1 + 2),
+                    validateChargedUsd("create-topic-txn", cents_to_USD(1 + 1 + 2)),
                     // submit message, provide up to 1 hbar to pay for it
                     submitMessageTo("testTopic").blankMemo().payingWith(PAYER).message(new String(messageBytes))
                             .fee(ONE_HBAR)
                             .via("submit-message-txn"),
-                    validateChargedFee("submit-message-txn", 19 + 1 + 2)
+                    validateChargedUsd("submit-message-txn", cents_to_USD(
+                            1 // base fee
+                            + 1 + 2 // node + network fee
+                            ))
             );
         }
 
         @HapiTest
         @DisplayName("Simple fee for submitting a large message")
         final Stream<DynamicTest> submitBiggerMessageFee() {
-            // 600 is more than the included byte size, so we must calculate the excess
-            final var byte_size = 800;
+            // 256 included + an extra 500
+            final var byte_size = 500+256;
             final byte[] messageBytes = new byte[byte_size]; // up to 1k
             Arrays.fill(messageBytes, (byte) 0b1);
             return hapiTest(
@@ -196,27 +206,37 @@ public class SimpleFeesSuite {
                     // create topic, provide up to 1 hbar to pay for it
                     createTopic("testTopic").blankMemo().payingWith(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedFee("create-topic-txn", 19 + 1 + 2),
+                    validateChargedUsd("create-topic-txn", cents_to_USD(1 + 1 + 2)),
                     // submit message, provide up to 1 hbar to pay for it
                     submitMessageTo("testTopic").blankMemo().payingWith(PAYER).message(new String(messageBytes))
                             .fee(ONE_HBAR)
                             .via("submit-message-txn"),
-                    validateChargedFee("submit-message-txn", (800-256) + 19 + 1 + 2)
+                    validateChargedUsd("submit-message-txn", cents_to_USD(
+                            1 // base fee for submit message
+                            + 5 // for the extra 500 bytes
+                            + 1 + 2 // node + network fee
+                    ))
             );
         }
 
         // delete topic
         @HapiTest()
+        @DisplayName("Simple fee for deleting a topic")
         final Stream<DynamicTest> deleteTopicFee() {
             return hapiTest(
-//                    overriding("fees.simpleFeesEnabled", "true"),
                     cryptoCreate(PAYER).balance(ONE_HUNDRED_HBARS),
                     createTopic("testTopic").blankMemo().payingWith(PAYER).adminKeyName(PAYER)
                             .fee(ONE_HBAR).via("create-topic-txn"),
-                    validateChargedFee("create-topic-txn", 19 + 1 + 2),
+                    validateChargedUsd("create-topic-txn", cents_to_USD(
+                            1 // base fee for create topic
+                            + 1 +2 // node + network fee
+                            )),
                     deleteTopic("testTopic").payingWith(PAYER)
                             .fee(ONE_HBAR).via("delete-topic-txn"),
-                    validateChargedFee("delete-topic-txn", 5 + 1 + 2)
+                    validateChargedUsd("delete-topic-txn", cents_to_USD(
+                            1 // base fee for delete topic
+                            + 1 + 2 // node + network fee
+                    ))
             );
         }
     }
