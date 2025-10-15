@@ -119,7 +119,7 @@ public abstract class AbstractNetwork implements Network {
     private final Topology topology;
 
     protected Lifecycle lifecycle = Lifecycle.INIT;
-    protected WeightGenerator weightGenerator = WeightGenerators.GAUSSIAN;
+    protected WeightGenerator weightGenerator = WeightGenerators.REAL_NETWORK_GAUSSIAN;
 
     @Nullable
     private PartitionImpl remainingNetworkPartition;
@@ -348,6 +348,7 @@ public abstract class AbstractNetwork implements Network {
     @Override
     @NonNull
     public Partition createNetworkPartition(@NonNull final Collection<Node> partitionNodes) {
+        log.info("Creating network partition...");
         if (partitionNodes.isEmpty()) {
             throw new IllegalArgumentException("Cannot create a partition with no nodes.");
         }
@@ -372,6 +373,7 @@ public abstract class AbstractNetwork implements Network {
             }
         }
         updateConnections();
+        log.info("Network partition created.");
         return partition;
     }
 
@@ -380,6 +382,7 @@ public abstract class AbstractNetwork implements Network {
      */
     @Override
     public void removePartition(@NonNull final Partition partition) {
+        log.info("Removing network partition...");
         final Set<Partition> allPartitions = networkPartitions();
         if (!allPartitions.contains(partition)) {
             throw new IllegalArgumentException("Partition does not exist in the network: " + partition);
@@ -396,6 +399,7 @@ public abstract class AbstractNetwork implements Network {
             }
         }
         updateConnections();
+        log.info("Network partition removed.");
     }
 
     /**
