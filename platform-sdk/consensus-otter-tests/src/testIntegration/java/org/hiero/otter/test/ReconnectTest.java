@@ -28,7 +28,6 @@ import org.hiero.otter.fixtures.TestEnvironment;
 import org.hiero.otter.fixtures.TimeManager;
 import org.hiero.otter.fixtures.result.MultipleNodePlatformStatusResults;
 import org.hiero.otter.fixtures.result.SingleNodePlatformStatusResult;
-import org.junit.jupiter.api.Disabled;
 
 /**
  * Tests the reconnect functionality of a node that has fallen behind in the consensus rounds. The test ensures that the
@@ -138,7 +137,6 @@ public class ReconnectTest {
      *
      * @param env the test environment
      */
-    @Disabled("This test is flaky and needs to be investigated further")
     @OtterTest(requires = Capability.BACK_PRESSURE)
     void testSyntheticBottleneckReconnect(final TestEnvironment env) {
         final int numReconnectCycles = 2;
@@ -193,10 +191,10 @@ public class ReconnectTest {
             enableSyntheticBottleneck(Duration.ofMinutes(10), node0, node1, node2);
 
             timeManager.waitForCondition(
-                    () -> network.nodesAreBehindByNodeCount(node0, node1, node2),
+                    () -> unstableNodes.stream().allMatch(Node::isBehind),
                     Duration.ofSeconds(120L),
                     String.format(
-                            "Node did not enter CHECKING status within the expected time "
+                            "Node did not fall behind within the expected time "
                                     + "frame after synthetic bottleneck was enabled on iteration %d.",
                             i));
 
