@@ -81,6 +81,7 @@ import com.hedera.node.config.data.AccountsConfig;
 import com.hedera.node.config.data.BlockStreamConfig;
 import com.hedera.node.config.data.BootstrapConfig;
 import com.hedera.node.config.data.ConsensusConfig;
+import com.hedera.node.config.data.FeesConfig;
 import com.hedera.node.config.data.FilesConfig;
 import com.hedera.node.config.data.HederaConfig;
 import com.hedera.node.config.data.LedgerConfig;
@@ -385,11 +386,6 @@ public class SystemTransactions {
                         SystemTransactions::parseFeeSchedules),
                 new AutoEntityUpdate<>(
                         (ctx, bytes) -> dispatchSynthFileUpdate(
-                                ctx, createFileID(filesConfig.simpleFeesSchedules(), config), bytes),
-                        adminConfig.upgradeSimpleFeeSchedulesFile(),
-                        SystemTransactions::parseSimpleFeesSchedules),
-                new AutoEntityUpdate<>(
-                        (ctx, bytes) -> dispatchSynthFileUpdate(
                                 ctx, createFileID(filesConfig.throttleDefinitions(), config), bytes),
                         adminConfig.upgradeThrottlesFile(),
                         SystemTransactions::parseThrottles),
@@ -403,6 +399,15 @@ public class SystemTransactions {
                                 ctx, createFileID(filesConfig.hapiPermissions(), config), bytes),
                         adminConfig.upgradePermissionOverridesFile(),
                         in -> parseConfig("override HAPI permissions", in)));
+        final var feesConfig = config.getConfigData(FeesConfig.class);
+        if (feesConfig.simpleFeesEnabled()) {
+            autoSysFileUpdates.add(new AutoEntityUpdate<>(
+                    (ctx, bytes) -> dispatchSynthFileUpdate(
+                            ctx, createFileID(filesConfig.simpleFeesSchedules(), config), bytes),
+                    adminConfig.upgradeSimpleFeeSchedulesFile(),
+                    SystemTransactions::parseSimpleFeesSchedules));
+        }
+
         autoSysFileUpdates.forEach(update -> update.tryIfPresent(adminConfig.upgradeSysFilesLoc(), systemContext));
         final var autoNodeAdminKeyUpdates = new AutoEntityUpdate<Map<Long, Key>>(
                 (ctx, nodeAdminKeys) -> nodeAdminKeys.forEach(
