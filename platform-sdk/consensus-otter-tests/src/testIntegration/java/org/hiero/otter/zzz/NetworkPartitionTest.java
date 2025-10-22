@@ -21,7 +21,6 @@ import org.hiero.otter.fixtures.container.ContainerTestEnvironment;
 import org.hiero.otter.fixtures.network.Partition;
 import org.hiero.otter.fixtures.result.MultipleNodeLogResults;
 import org.hiero.otter.fixtures.turtle.TurtleTestEnvironment;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -52,7 +51,6 @@ class NetworkPartitionTest {
      */
     @ParameterizedTest
     @MethodSource("environments")
-    @Disabled
     void testCreateAndRemovePartition(@NonNull final TestEnvironment env) {
         try {
             final Network network = env.network();
