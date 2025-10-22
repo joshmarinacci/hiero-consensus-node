@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.hiero.otter.test;
 
-import static com.swirlds.common.test.fixtures.WeightGenerators.TOTAL_WEIGHTS;
+import static com.swirlds.common.test.fixtures.WeightGenerators.TOTAL_NETWORK_WEIGHT;
 import static org.assertj.core.api.Assertions.within;
 import static org.hiero.consensus.model.status.PlatformStatus.ACTIVE;
 import static org.hiero.consensus.model.status.PlatformStatus.CHECKING;
@@ -69,7 +69,7 @@ public class PartitionTest {
         final TimeManager timeManager = env.timeManager();
 
         for (final Double weightFraction : weightFractions) {
-            network.addNode().weight(Math.round(TOTAL_WEIGHTS * weightFraction));
+            network.addNode().weight(Math.round(TOTAL_NETWORK_WEIGHT * weightFraction));
         }
 
         // Setup continuous assertions
