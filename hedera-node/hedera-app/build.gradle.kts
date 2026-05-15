@@ -77,12 +77,19 @@ jmhModuleInfo {
     requires("org.hiero.base.crypto")
 }
 
+val entryPoint = "com.hedera.node.app.ServicesMain"
+
+tasks.compileJava {
+    // bake the default main class into 'module-info.class' to start the application with --module
+    options.javaModuleMainClass = entryPoint
+}
+
 // Add all the libs dependencies into the jar manifest!
 tasks.jar {
     inputs.files(configurations.runtimeClasspath)
     manifest {
         attributes(
-            "Main-Class" to "com.hedera.node.app.ServicesMain",
+            "Main-Class" to entryPoint,
             // Declares JNI usage (netty's NativeLibraryUtil) so the JDK does not print a
             // restricted-method warning for callers in the unnamed module of this JAR
             // when launched via `java -jar`.
@@ -164,8 +171,10 @@ tasks.register<JavaExec>("run") {
     dependsOn(tasks.assemble)
     dependsOn(generateNodeKeys)
     workingDir = nodeWorkingDir.get().asFile
-    jvmArgs = listOf("-cp", "data/lib/*:data/apps/*")
-    mainClass.set("com.hedera.node.app.ServicesMain")
+    classpath =
+        nodeWorkingDir.get().dir("data/apps").asFileTree +
+            nodeWorkingDir.get().dir("data/lib").asFileTree
+    mainModule = "com.hedera.node.app"
 
     // Add arguments for the application to run a local node
     args = listOf("-local", "0")
